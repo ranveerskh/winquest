@@ -1,59 +1,427 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Astro Admin</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#141b34;
+      --card:rgba(255,255,255,0.08);
+      --border:rgba(255,255,255,0.14);
+      --text:#ffffff;
+      --muted:#cbd5e1;
+      --pink:#ec4899;
+      --purple:#8b5cf6;
+      --blue:#3b82f6;
+      --green:#10b981;
+      --red:#ef4444;
+      --yellow:#f59e0b;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(139,92,246,0.22), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(236,72,153,0.18), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      padding:20px;
+    }
+
+    .wrap{
+      max-width:1000px;
+      margin:0 auto;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:22px;
+      backdrop-filter:blur(12px);
+      box-shadow:0 18px 45px rgba(0,0,0,0.28);
+      margin-bottom:18px;
+    }
+
+    h1{
+      font-size:clamp(28px,4vw,42px);
+      margin-bottom:8px;
+    }
+
+    .sub{
+      color:var(--muted);
+      line-height:1.6;
+      margin-bottom:18px;
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    input{
+      flex:1 1 260px;
+      min-width:0;
+      padding:16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.09);
+      color:#fff;
+      font-size:16px;
+      outline:none;
+    }
+
+    input::placeholder{
+      color:#dbeafe;
+    }
+
+    button, a.btn{
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
+      color:#fff;
+      padding:14px 18px;
+      border-radius:16px;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform .15s ease;
+    }
+
+    button:hover, a.btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .btn-main{ background:linear-gradient(135deg,var(--purple),var(--pink)); }
+    .btn-blue{ background:linear-gradient(135deg,#2563eb,#3b82f6); }
+    .btn-green{ background:linear-gradient(135deg,#059669,#10b981); }
+    .btn-red{ background:linear-gradient(135deg,#dc2626,#ef4444); }
+    .btn-yellow{ background:linear-gradient(135deg,#d97706,#f59e0b); }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+    }
+
+    .num{
+      font-size:28px;
+      font-weight:800;
+      margin-bottom:6px;
+    }
+
+    .label{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .current{
+      margin-top:18px;
+      padding:18px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1);
+      line-height:1.7;
+    }
+
+    .current strong{
+      color:#f9a8d4;
+    }
+
+    .status{
+      margin-top:12px;
+      color:#dbeafe;
+      font-size:14px;
+      min-height:22px;
+    }
+
+    @media (max-width:760px){
+      .stats{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+
+    @media (max-width:480px){
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      .row > *{
+        width:100%;
+      }
+    }
+  </style>
 </head>
-<body style="font-family: Arial; padding:20px">
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>🔮 Astro Admin</h1>
+      <div class="sub">
+        Type a name from live comments and send it to the display page. If no new name is sent, the display page will automatically show a random result after 30 seconds.
+      </div>
 
-<h2>Astrology Admin</h2>
+      <div class="row">
+        <input type="text" id="nameInput" placeholder="Enter name..." />
+        <button class="btn-main" id="showBtn">Show Name</button>
+        <button class="btn-blue" id="randomBtn">Random Now</button>
+      </div>
 
-<input id="name" placeholder="Enter Name" style="padding:10px; width:200px">
-<button onclick="send()">Show</button>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn-yellow" id="extendBtn">Reset 30s Timer</button>
+        <button class="btn-red" id="clearBtn">Clear Current</button>
+        <a class="btn btn-green" href="astrodisplay.html" target="_blank">Open Display</a>
+      </div>
 
-<script type="module">
-import { db } from "./firebase-config.js";
-import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+      <div class="stats">
+        <div class="stat">
+          <div class="num" id="manualCount">0</div>
+          <div class="label">Manual Shows</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="autoCount">0</div>
+          <div class="label">Auto Shows</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="secondsLeft">30</div>
+          <div class="label">Seconds Left</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="modeText">WAIT</div>
+          <div class="label">Mode</div>
+        </div>
+      </div>
 
-async function send() {
-  const name = document.getElementById("name").value.trim();
-  if (!name) return alert("Enter name");
+      <div class="current" id="currentBox">No live result yet.</div>
+      <div class="status" id="statusText"></div>
+    </div>
+  </div>
 
-  const data = generateResult(name);
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import { doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  await setDoc(doc(db, "astro_live", "current"), {
-    ...data,
-    updatedAt: Date.now(),
-    mode: "manual"
-  });
-}
+    const liveRef = doc(db, "astro_live", "current");
 
-// random generator
-function generateResult(name){
-  const messages = [
-    "Today brings positive energy.",
-    "A surprise is waiting for you.",
-    "Stay calm, things will improve.",
-    "Today is your lucky day.",
-    "Avoid overthinking today."
-  ];
+    const fallbackNames = [
+      "Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha",
+      "Jaspreet","Gurleen","Manpreet","Navdeep","Tanya","Kabir","Aarti","Riya",
+      "Sandeep","Komal","Anmol","Mahi"
+    ];
 
-  const moods = ["Happy","Focused","Confident","Lucky","Calm"];
-  const luck = ["Low","Medium","High","Very High"];
+    const messages = [
+      "Today a positive change may come from an unexpected side.",
+      "Today your energy is helping you move ahead with confidence.",
+      "Today a delayed matter may finally start moving in your favor.",
+      "Today is good for trusting your instinct over outside noise.",
+      "Today someone may notice your value more clearly than before.",
+      "Today your patience can protect you from a wrong decision.",
+      "Today a small step can create a bigger result than expected.",
+      "Today your mood improves as clarity starts coming back.",
+      "Today is a strong day for confidence and fresh beginnings.",
+      "Today your effort has a high chance of being noticed.",
+      "Today you may receive good news through a message or call.",
+      "Today your heart feels lighter if you stop overthinking.",
+      "Today luck supports smart moves, not rushed ones.",
+      "Today you may feel stronger about a decision you were delaying.",
+      "Today your personal energy attracts helpful people.",
+      "Today is better for action than waiting.",
+      "Today one calm choice may save you from extra stress.",
+      "Today your vibe is stronger than you think.",
+      "Today the right timing may work in your favor.",
+      "Today a hidden opportunity can appear through normal conversation.",
+      "Today your focus can turn confusion into progress.",
+      "Today you may feel emotionally clearer than recent days.",
+      "Today your name may rise in a place you were not expecting.",
+      "Today confidence brings better results than fear.",
+      "Today is a good day to say yes to progress."
+    ];
 
-  return {
-    name,
-    message: messages[Math.floor(Math.random()*messages.length)],
-    number: Math.floor(Math.random()*9)+1,
-    color: ["Red","Blue","Green","Yellow"][Math.floor(Math.random()*4)],
-    love: Math.floor(Math.random()*60)+40,
-    mood: moods[Math.floor(Math.random()*moods.length)],
-    money: luck[Math.floor(Math.random()*luck.length)],
-    energy: luck[Math.floor(Math.random()*luck.length)]
-  };
-}
+    const colors = ["Blue","Red","Green","Pink","Purple","Gold","White","Black","Yellow","Silver","Orange","Sky Blue","Rose Gold","Lavender"];
+    const moods = ["Confident","Happy","Focused","Peaceful","Emotional","Lucky","Calm","Powerful","Positive","Hopeful","Bold","Stable"];
+    const moneyLuck = ["Low","Medium","Good","High","Very High","Rising","Strong"];
+    const energies = ["Low","Balanced","Rising","Strong","Very Strong","Powerful","Fresh"];
+    const careers = ["Growth Ahead","Good News","Strong Progress","New Chance","Success Ahead","Recognition Coming","Stable Day"];
+    const healths = ["Feeling Good","Stable","Take Rest","Fresh Energy","Balanced","Positive Vibe","Recharge Needed"];
 
-window.send = send;
-</script>
+    function rand(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
+    function luckyNumber() {
+      return Math.floor(Math.random() * 9) + 1;
+    }
+
+    function loveScore() {
+      return Math.floor(Math.random() * 61) + 40;
+    }
+
+    function makeResult(name, source = "manual") {
+      const now = Date.now();
+      return {
+        name,
+        message: rand(messages),
+        luckyColor: rand(colors),
+        luckyNumber: luckyNumber(),
+        loveScore: loveScore(),
+        mood: rand(moods),
+        moneyLuck: rand(moneyLuck),
+        energy: rand(energies),
+        career: rand(careers),
+        health: rand(healths),
+        source,
+        updatedAt: now,
+        nextAutoAt: now + 30000
+      };
+    }
+
+    async function pushName() {
+      const input = document.getElementById("nameInput");
+      const name = input.value.trim().replace(/\s+/g, " ");
+      if (!name) {
+        setStatus("Please enter a name.");
+        return;
+      }
+
+      const data = makeResult(name, "manual");
+      await setDoc(liveRef, data);
+      input.value = "";
+      setStatus("Name sent to display.");
+    }
+
+    async function pushRandomNow() {
+      const data = makeResult(rand(fallbackNames), "auto");
+      await setDoc(liveRef, data);
+      setStatus("Random result sent.");
+    }
+
+    async function resetTimerOnly() {
+      currentData.nextAutoAt = Date.now() + 30000;
+      await setDoc(liveRef, currentData);
+      setStatus("30-second timer reset.");
+    }
+
+    async function clearCurrent() {
+      const now = Date.now();
+      await setDoc(liveRef, {
+        name: "Waiting...",
+        message: "Next live result will appear soon.",
+        luckyColor: "--",
+        luckyNumber: "--",
+        loveScore: "--",
+        mood: "--",
+        moneyLuck: "--",
+        energy: "--",
+        career: "--",
+        health: "--",
+        source: "waiting",
+        updatedAt: now,
+        nextAutoAt: now + 30000
+      });
+      setStatus("Current result cleared.");
+    }
+
+    let currentData = {
+      source: "waiting",
+      nextAutoAt: Date.now() + 30000,
+      manualCount: 0,
+      autoCount: 0
+    };
+
+    function setStatus(text) {
+      document.getElementById("statusText").textContent = text;
+      clearTimeout(setStatus._t);
+      setStatus._t = setTimeout(() => {
+        document.getElementById("statusText").textContent = "";
+      }, 2500);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function render(data) {
+      currentData = data;
+
+      const box = document.getElementById("currentBox");
+      box.innerHTML = `
+        <div><strong>Name:</strong> ${escapeHtml(data.name ?? "Waiting...")}</div>
+        <div><strong>Message:</strong> ${escapeHtml(data.message ?? "")}</div>
+        <div><strong>Lucky Color:</strong> ${escapeHtml(data.luckyColor ?? "--")}</div>
+        <div><strong>Lucky Number:</strong> ${escapeHtml(data.luckyNumber ?? "--")}</div>
+        <div><strong>Love Score:</strong> ${escapeHtml(data.loveScore ?? "--")}${typeof data.loveScore === "number" ? "%" : ""}</div>
+        <div><strong>Mood:</strong> ${escapeHtml(data.mood ?? "--")}</div>
+        <div><strong>Money Luck:</strong> ${escapeHtml(data.moneyLuck ?? "--")}</div>
+        <div><strong>Energy:</strong> ${escapeHtml(data.energy ?? "--")}</div>
+        <div><strong>Career:</strong> ${escapeHtml(data.career ?? "--")}</div>
+        <div><strong>Health:</strong> ${escapeHtml(data.health ?? "--")}</div>
+        <div><strong>Source:</strong> ${escapeHtml((data.source ?? "waiting").toUpperCase())}</div>
+      `;
+
+      document.getElementById("modeText").textContent = (data.source ?? "waiting").toUpperCase();
+    }
+
+    function updateCountdown() {
+      const next = currentData?.nextAutoAt || (Date.now() + 30000);
+      const left = Math.max(0, Math.ceil((next - Date.now()) / 1000));
+      document.getElementById("secondsLeft").textContent = left;
+    }
+
+    let manualShows = 0;
+    let autoShows = 0;
+    let seenUpdatedAt = null;
+
+    onSnapshot(liveRef, (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+
+      if (seenUpdatedAt !== data.updatedAt) {
+        if (data.source === "manual") manualShows++;
+        if (data.source === "auto") autoShows++;
+        seenUpdatedAt = data.updatedAt;
+      }
+
+      document.getElementById("manualCount").textContent = manualShows;
+      document.getElementById("autoCount").textContent = autoShows;
+
+      render(data);
+      updateCountdown();
+    });
+
+    document.getElementById("showBtn").addEventListener("click", pushName);
+    document.getElementById("randomBtn").addEventListener("click", pushRandomNow);
+    document.getElementById("extendBtn").addEventListener("click", resetTimerOnly);
+    document.getElementById("clearBtn").addEventListener("click", clearCurrent);
+
+    document.getElementById("nameInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") pushName();
+    });
+
+    setInterval(updateCountdown, 1000);
+  </script>
 </body>
 </html>
