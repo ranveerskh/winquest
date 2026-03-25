@@ -3,39 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Astro Live Display</title>
+  <title>WinQuest Astro Display</title>
   <style>
+    * { box-sizing: border-box; }
+
     :root{
+      --bg1:#12051f;
+      --bg2:#1a1034;
+      --bg3:#120826;
       --gold:#ffd27a;
       --gold2:#ffb74d;
       --text:#fff9f0;
       --soft:#f9e7c8;
-      --panel:rgba(20,12,35,0.48);
       --border:rgba(255,215,140,0.28);
+      --panel:rgba(20,12,35,0.48);
       --shadow:0 15px 45px rgba(0,0,0,0.45);
     }
 
-    *{
-      box-sizing:border-box;
+    body{
       margin:0;
-      padding:0;
-      font-family:Georgia, "Times New Roman", serif;
-    }
-
-    html, body{
       width:100%;
       height:100%;
       overflow:hidden;
-    }
-
-    body{
+      font-family:Arial, Helvetica, sans-serif;
       color:var(--text);
       background:
         radial-gradient(circle at 20% 20%, rgba(255,180,80,0.15), transparent 20%),
         radial-gradient(circle at 80% 30%, rgba(180,100,255,0.15), transparent 20%),
         radial-gradient(circle at 50% 100%, rgba(255,220,120,0.12), transparent 25%),
-        linear-gradient(180deg, #12051f 0%, #1a1034 38%, #120826 100%);
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 38%, var(--bg3) 100%);
       position:relative;
+    }
+
+    body.theme-purple{
+      --bg1:#0a1020; --bg2:#151d3f; --bg3:#101730; --gold:#d6c3ff;
+    }
+    body.theme-blue{
+      --bg1:#08121e; --bg2:#12314c; --bg3:#0c1c2c; --gold:#bfe7ff;
+    }
+    body.theme-green{
+      --bg1:#08170f; --bg2:#153824; --bg3:#0d2116; --gold:#c7ffd8;
+    }
+    body.theme-red{
+      --bg1:#1b0a12; --bg2:#401425; --bg3:#240b14; --gold:#ffd1d9;
+    }
+    body.theme-gold{
+      --bg1:#12051f; --bg2:#1a1034; --bg3:#120826; --gold:#ffd27a;
     }
 
     .stars,
@@ -69,75 +82,73 @@
       to{ transform:translateY(0px); }
     }
 
-    .wrap{
+    .screen{
       position:relative;
       z-index:2;
       width:100%;
-      height:100%;
+      min-height:100vh;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:18px;
+      padding:14px;
     }
 
-    .screen{
-      width:min(100%, 980px);
-      height:min(100%, 1700px);
-      max-height:100%;
-      border:1px solid var(--border);
-      border-radius:30px;
-      background:linear-gradient(180deg, rgba(37,20,63,0.48), rgba(16,10,29,0.56));
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(6px);
-      padding:18px 18px 14px;
+    .container{
+      width:min(1280px, 100%);
+      height:min(94vh, 900px);
       display:grid;
       grid-template-rows:auto auto 1fr auto auto;
       gap:12px;
-      overflow:hidden;
     }
 
-    .topTitle{
+    .glass{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .head{
+      padding:14px 18px;
       text-align:center;
       color:var(--gold);
-      font-weight:700;
-      letter-spacing:1px;
       font-size:clamp(20px, 2.8vw, 34px);
-      text-shadow:0 0 14px rgba(255,194,92,.25);
+      font-weight:900;
+      letter-spacing:1px;
     }
 
     .nameBox{
+      padding:8px 16px 2px;
       text-align:center;
-      padding:6px 10px 2px;
     }
 
     .name{
       font-size:clamp(44px, 8vw, 96px);
+      font-weight:900;
       line-height:1;
-      font-weight:800;
       color:#fff6df;
       text-transform:uppercase;
       letter-spacing:1px;
-      text-shadow:0 0 18px rgba(255,223,130,.18);
       word-break:break-word;
+      text-shadow:0 0 18px rgba(255,223,130,.18);
     }
 
     .messageCard{
-      border:1px solid var(--border);
-      border-radius:24px;
-      background:rgba(255,240,210,0.08);
+      padding:16px 18px;
+      min-height:110px;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      padding:16px 18px;
-      min-height:110px;
     }
 
     .message{
       font-size:clamp(22px, 3.1vw, 36px);
       line-height:1.35;
       color:#fff8ed;
-      font-weight:700;
+      font-weight:800;
     }
 
     .grid{
@@ -161,7 +172,7 @@
     }
 
     .label{
-      color:#ffd89b;
+      color:var(--gold);
       font-size:clamp(13px, 1.5vw, 17px);
       margin-bottom:5px;
       font-weight:700;
@@ -180,9 +191,8 @@
       text-align:center;
       color:#ffe2aa;
       font-size:clamp(20px, 2.6vw, 32px);
-      font-weight:800;
+      font-weight:900;
       padding-top:4px;
-      text-shadow:0 0 12px rgba(255,196,92,.2);
     }
 
     .bottom{
@@ -195,7 +205,7 @@
     .timerText{
       color:#f9ddb4;
       font-size:clamp(15px, 1.8vw, 22px);
-      font-weight:700;
+      font-weight:800;
     }
 
     .barWrap{
@@ -224,35 +234,29 @@
       to{ opacity:1; transform:translateY(0); }
     }
 
-    @media (max-width:700px){
-      .screen{
-        padding:14px 14px 12px;
-        gap:10px;
+    @media (max-width: 900px){
+      .screen{ padding:10px; }
+      .container{
+        height:auto;
+        min-height:94vh;
       }
-
-      .messageCard{
-        min-height:96px;
-      }
-
-      .item{
-        min-height:72px;
-      }
+      .item{ min-height:72px; }
     }
   </style>
 </head>
-<body>
+<body class="theme-gold">
   <div class="stars"></div>
   <div class="stars2"></div>
 
-  <div class="wrap">
-    <div class="screen">
-      <div class="topTitle">LIVE ASTROLOGY • TODAY</div>
+  <div class="screen">
+    <div class="container">
+      <div class="glass head" id="headingEl">LIVE ASTROLOGY • TODAY</div>
 
       <div class="nameBox">
         <div class="name fade" id="nameEl">WAITING...</div>
       </div>
 
-      <div class="messageCard">
+      <div class="glass messageCard">
         <div class="message fade" id="messageEl">Next live result will appear soon.</div>
       </div>
 
@@ -291,7 +295,7 @@
         </div>
       </div>
 
-      <div class="cta">Comment your name to get results</div>
+      <div class="cta" id="ctaEl">Comment your name to get results</div>
 
       <div class="bottom">
         <div class="timerText" id="timerText">Next result in 30 seconds</div>
@@ -304,43 +308,50 @@
 
   <script type="module">
     import { db } from "./firebase-config.js";
-    import { doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      doc,
+      getDoc,
+      setDoc,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-    const liveRef = doc(db, "astro_live", "current");
+    const astroRef = doc(db, "astroLive", "current");
 
-    const fallbackNames = [
-      "Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha",
-      "Jaspreet","Gurleen","Manpreet","Navdeep","Tanya","Kabir","Aarti","Riya",
-      "Sandeep","Komal","Anmol","Mahi"
-    ];
+    const defaultState = {
+      heading: "LIVE ASTROLOGY • TODAY",
+      ctaText: "Comment your name to get results",
+      theme: "gold",
+      autoDelay: 30,
+      current: {
+        name: "WAITING...",
+        message: "Next live result will appear soon.",
+        luckyColor: "--",
+        luckyNumber: "--",
+        loveScore: "--",
+        mood: "--",
+        moneyLuck: "--",
+        energy: "--",
+        career: "--",
+        health: "--",
+        source: "waiting",
+        shownAt: null
+      },
+      fallbackNames: [
+        "Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha"
+      ],
+      messages: [
+        "Today a positive change may come from an unexpected side.",
+        "Today your energy is helping you move ahead with confidence.",
+        "Today a delayed matter may finally start moving in your favor."
+      ],
+      manualCount: 0,
+      autoCount: 0,
+      updatedAt: null,
+      nextAutoAt: null
+    };
 
-    const messages = [
-      "Today a positive change may come from an unexpected side.",
-      "Today your energy is helping you move ahead with confidence.",
-      "Today a delayed matter may finally start moving in your favor.",
-      "Today is good for trusting your instinct over outside noise.",
-      "Today someone may notice your value more clearly than before.",
-      "Today your patience can protect you from a wrong decision.",
-      "Today a small step can create a bigger result than expected.",
-      "Today your mood improves as clarity starts coming back.",
-      "Today is a strong day for confidence and fresh beginnings.",
-      "Today your effort has a high chance of being noticed.",
-      "Today you may receive good news through a message or call.",
-      "Today your heart feels lighter if you stop overthinking.",
-      "Today luck supports smart moves, not rushed ones.",
-      "Today you may feel stronger about a decision you were delaying.",
-      "Today your personal energy attracts helpful people.",
-      "Today is better for action than waiting.",
-      "Today one calm choice may save you from extra stress.",
-      "Today your vibe is stronger than you think.",
-      "Today the right timing may work in your favor.",
-      "Today a hidden opportunity can appear through normal conversation.",
-      "Today your focus can turn confusion into progress.",
-      "Today you may feel emotionally clearer than recent days.",
-      "Today your name may rise in a place you were not expecting.",
-      "Today confidence brings better results than fear.",
-      "Today is a good day to say yes to progress."
-    ];
+    let state = structuredClone(defaultState);
 
     const colors = ["Blue","Red","Green","Pink","Purple","Gold","White","Black","Yellow","Silver","Orange","Sky Blue","Rose Gold","Lavender"];
     const moods = ["Confident","Happy","Focused","Peaceful","Emotional","Lucky","Calm","Powerful","Positive","Hopeful","Bold","Stable"];
@@ -361,10 +372,24 @@
       return Math.floor(Math.random() * 61) + 40;
     }
 
+    function normalizeState(data) {
+      const safe = { ...structuredClone(defaultState), ...(data || {}) };
+      safe.current = { ...defaultState.current, ...(safe.current || {}) };
+      safe.autoDelay = Number.isFinite(Number(safe.autoDelay)) ? Number(safe.autoDelay) : 30;
+      safe.heading = safe.heading || defaultState.heading;
+      safe.ctaText = safe.ctaText || defaultState.ctaText;
+      safe.theme = safe.theme || "gold";
+      safe.fallbackNames = Array.isArray(safe.fallbackNames) ? safe.fallbackNames : defaultState.fallbackNames;
+      safe.messages = Array.isArray(safe.messages) ? safe.messages : defaultState.messages;
+      return safe;
+    }
+
     function makeAutoResult() {
-      const now = Date.now();
+      const names = state.fallbackNames.length ? state.fallbackNames : defaultState.fallbackNames;
+      const messages = state.messages.length ? state.messages : defaultState.messages;
+
       return {
-        name: rand(fallbackNames),
+        name: rand(names),
         message: rand(messages),
         luckyColor: rand(colors),
         luckyNumber: luckyNumber(),
@@ -375,42 +400,61 @@
         career: rand(careers),
         health: rand(healths),
         source: "auto",
-        updatedAt: now,
-        nextAutoAt: now + 30000
+        shownAt: Date.now()
       };
     }
 
-    let currentData = {
-      name: "WAITING...",
-      message: "Next live result will appear soon.",
-      luckyColor: "--",
-      luckyNumber: "--",
-      loveScore: "--",
-      mood: "--",
-      moneyLuck: "--",
-      energy: "--",
-      career: "--",
-      health: "--",
-      source: "waiting",
-      updatedAt: Date.now(),
-      nextAutoAt: Date.now() + 30000
-    };
+    async function ensureDocExists() {
+      const snap = await getDoc(astroRef);
+      if (!snap.exists()) {
+        const now = Date.now();
+        await setDoc(astroRef, {
+          ...defaultState,
+          nextAutoAt: now + (defaultState.autoDelay * 1000),
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
 
-    function render(data) {
-      currentData = data;
+    async function triggerAutoIfNeeded() {
+      const now = Date.now();
+      const nextAutoAt = state.nextAutoAt || (now + (state.autoDelay * 1000));
 
-      document.getElementById("nameEl").textContent = data.name ?? "WAITING...";
-      document.getElementById("messageEl").textContent = data.message ?? "Next live result will appear soon.";
-      document.getElementById("colorEl").textContent = data.luckyColor ?? "--";
-      document.getElementById("numberEl").textContent = data.luckyNumber ?? "--";
-      document.getElementById("loveEl").textContent = typeof data.loveScore === "number" ? `${data.loveScore}%` : (data.loveScore ?? "--");
-      document.getElementById("moodEl").textContent = data.mood ?? "--";
-      document.getElementById("moneyEl").textContent = data.moneyLuck ?? "--";
-      document.getElementById("energyEl").textContent = data.energy ?? "--";
-      document.getElementById("careerEl").textContent = data.career ?? "--";
-      document.getElementById("healthEl").textContent = data.health ?? "--";
+      if (now < nextAutoAt) return;
+
+      state.current = makeAutoResult();
+      state.autoCount = (state.autoCount || 0) + 1;
+      state.nextAutoAt = now + (state.autoDelay * 1000);
+
+      await setDoc(astroRef, {
+        current: state.current,
+        autoCount: state.autoCount,
+        nextAutoAt: state.nextAutoAt,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    function render() {
+      document.body.className = "theme-" + (state.theme || "gold");
+
+      document.getElementById("headingEl").textContent = state.heading;
+      document.getElementById("ctaEl").textContent = state.ctaText;
+
+      const c = state.current || defaultState.current;
+
+      document.getElementById("nameEl").textContent = c.name || "WAITING...";
+      document.getElementById("messageEl").textContent = c.message || "Next live result will appear soon.";
+      document.getElementById("colorEl").textContent = c.luckyColor || "--";
+      document.getElementById("numberEl").textContent = c.luckyNumber || "--";
+      document.getElementById("loveEl").textContent = typeof c.loveScore === "number" ? `${c.loveScore}%` : (c.loveScore || "--");
+      document.getElementById("moodEl").textContent = c.mood || "--";
+      document.getElementById("moneyEl").textContent = c.moneyLuck || "--";
+      document.getElementById("energyEl").textContent = c.energy || "--";
+      document.getElementById("careerEl").textContent = c.career || "--";
+      document.getElementById("healthEl").textContent = c.health || "--";
 
       flash();
+      updateTimer();
     }
 
     function flash() {
@@ -422,55 +466,29 @@
       });
     }
 
-    async function maybeGenerateAuto() {
-      const snap = await getDoc(liveRef);
-      const now = Date.now();
-
-      if (!snap.exists()) {
-        const waiting = {
-          name: "WAITING...",
-          message: "Next live result will appear soon.",
-          luckyColor: "--",
-          luckyNumber: "--",
-          loveScore: "--",
-          mood: "--",
-          moneyLuck: "--",
-          energy: "--",
-          career: "--",
-          health: "--",
-          source: "waiting",
-          updatedAt: now,
-          nextAutoAt: now + 30000
-        };
-        await setDoc(liveRef, waiting);
-        return;
-      }
-
-      const data = snap.data();
-      const nextAutoAt = data.nextAutoAt || (data.updatedAt + 30000);
-
-      if (now >= nextAutoAt) {
-        await setDoc(liveRef, makeAutoResult());
-      }
-    }
-
     function updateTimer() {
-      const next = currentData?.nextAutoAt || (Date.now() + 30000);
+      const delay = state.autoDelay || 30;
+      const next = state.nextAutoAt || (Date.now() + delay * 1000);
       const left = Math.max(0, Math.ceil((next - Date.now()) / 1000));
 
       document.getElementById("timerText").textContent = `Next result in ${left} seconds`;
-      document.getElementById("progressBar").style.width = `${(left / 30) * 100}%`;
+      document.getElementById("progressBar").style.width = `${(left / delay) * 100}%`;
     }
 
-    onSnapshot(liveRef, (snap) => {
+    await ensureDocExists();
+
+    onSnapshot(astroRef, (snap) => {
       if (!snap.exists()) return;
-      render(snap.data());
-      updateTimer();
+      state = normalizeState(snap.data());
+      render();
+    }, (error) => {
+      console.error("Astro display snapshot error:", error);
     });
 
-    maybeGenerateAuto();
     setInterval(updateTimer, 1000);
-    setInterval(maybeGenerateAuto, 1000);
+    setInterval(() => {
+      triggerAutoIfNeeded().catch(err => console.error("Auto trigger error:", err));
+    }, 1000);
   </script>
 </body>
 </html>
