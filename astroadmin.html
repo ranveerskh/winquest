@@ -3,258 +3,356 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Astro Admin</title>
+  <title>WinQuest Astro Admin</title>
   <style>
-    :root{
-      --bg1:#0b1020;
-      --bg2:#141b34;
-      --card:rgba(255,255,255,0.08);
-      --border:rgba(255,255,255,0.14);
-      --text:#ffffff;
-      --muted:#cbd5e1;
-      --pink:#ec4899;
-      --purple:#8b5cf6;
-      --blue:#3b82f6;
-      --green:#10b981;
-      --red:#ef4444;
-      --yellow:#f59e0b;
-    }
+    * { box-sizing: border-box; }
 
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      font-family:Arial, sans-serif;
+    :root{
+      --bg:#0a1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --line:#26345d;
+      --text:#eef3ff;
+      --muted:#aeb9df;
+      --accent:#7c5cff;
+      --accent2:#32c5ff;
+      --ok:#2dd381;
+      --warn:#ffc857;
+      --danger:#ff667f;
     }
 
     body{
-      min-height:100vh;
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(160deg,#09101f,#111936 55%,#0a1020);
       color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(139,92,246,0.22), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(236,72,153,0.18), transparent 30%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      padding:20px;
+      padding:18px;
     }
 
     .wrap{
-      max-width:1000px;
-      margin:0 auto;
+      max-width:1300px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
     }
 
     .panel{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:22px;
-      backdrop-filter:blur(12px);
-      box-shadow:0 18px 45px rgba(0,0,0,0.28);
-      margin-bottom:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
     }
 
-    h1{
-      font-size:clamp(28px,4vw,42px);
-      margin-bottom:8px;
-    }
+    h1,h2{ margin:0 0 12px; }
+    h1{ font-size:30px; }
+    h2{ font-size:20px; }
 
-    .sub{
-      color:var(--muted);
-      line-height:1.6;
-      margin-bottom:18px;
-    }
+    .row{ margin-bottom:14px; }
 
-    .row{
-      display:flex;
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
       gap:12px;
-      flex-wrap:wrap;
     }
 
-    input{
-      flex:1 1 260px;
-      min-width:0;
-      padding:16px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.14);
-      background:rgba(255,255,255,0.09);
-      color:#fff;
-      font-size:16px;
+    .grid3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:6px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    input, textarea, select{
+      width:100%;
+      border:none;
       outline:none;
+      background:var(--card2);
+      color:var(--text);
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      font-size:15px;
     }
 
-    input::placeholder{
-      color:#dbeafe;
+    textarea{
+      min-height:150px;
+      resize:vertical;
+      line-height:1.55;
     }
 
     button, a.btn{
       border:none;
+      border-radius:14px;
+      padding:13px 16px;
       cursor:pointer;
-      text-decoration:none;
       color:#fff;
-      padding:14px 18px;
-      border-radius:16px;
-      font-weight:700;
+      font-weight:800;
+      font-size:14px;
+      text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      transition:transform .15s ease;
     }
 
-    button:hover, a.btn:hover{
-      transform:translateY(-1px);
-    }
+    .primary{ background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+    .ok{ background:linear-gradient(135deg,#16a34a,var(--ok)); }
+    .warn{ background:linear-gradient(135deg,#ff9f1c,var(--warn)); color:#1d1600; }
+    .danger{ background:linear-gradient(135deg,#ef476f,var(--danger)); }
+    .ghost{ background:#182243; border:1px solid var(--line); }
 
-    .btn-main{ background:linear-gradient(135deg,var(--purple),var(--pink)); }
-    .btn-blue{ background:linear-gradient(135deg,#2563eb,#3b82f6); }
-    .btn-green{ background:linear-gradient(135deg,#059669,#10b981); }
-    .btn-red{ background:linear-gradient(135deg,#dc2626,#ef4444); }
-    .btn-yellow{ background:linear-gradient(135deg,#d97706,#f59e0b); }
-
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
-      margin-top:18px;
-    }
-
-    .stat{
-      background:rgba(255,255,255,0.07);
-      border:1px solid rgba(255,255,255,0.1);
-      border-radius:18px;
-      padding:16px;
-      text-align:center;
-    }
-
-    .num{
-      font-size:28px;
-      font-weight:800;
-      margin-bottom:6px;
-    }
-
-    .label{
+    .hint{
       color:var(--muted);
       font-size:13px;
+      line-height:1.5;
+      margin-top:8px;
     }
 
-    .current{
-      margin-top:18px;
-      padding:18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.1);
-      line-height:1.7;
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:8px;
     }
 
-    .current strong{
-      color:#f9a8d4;
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:420px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .item{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .item strong{
+      display:block;
+      margin-bottom:6px;
+      line-height:1.35;
+      font-size:18px;
+    }
+
+    .meta{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
     }
 
     .status{
-      margin-top:12px;
-      color:#dbeafe;
+      background:#0f1730;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      line-height:1.7;
+      color:var(--muted);
       font-size:14px;
-      min-height:22px;
+      white-space:pre-wrap;
     }
 
-    @media (max-width:760px){
-      .stats{
-        grid-template-columns:repeat(2,1fr);
-      }
+    .status b{ color:var(--text); }
+
+    .debug{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      background:#091327;
+      border:1px solid #20345f;
+      color:#9fc1ff;
+      font-size:13px;
+      white-space:pre-wrap;
     }
 
-    @media (max-width:480px){
-      .stats{
-        grid-template-columns:1fr;
-      }
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns:1fr; }
+    }
 
-      .row > *{
-        width:100%;
-      }
+    @media (max-width: 700px){
+      .grid, .grid3{ grid-template-columns:1fr; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <h1>🔮 Astro Admin</h1>
-      <div class="sub">
-        Type a name from live comments and send it to the display page. If no new name is sent, the display page will automatically show a random result after 30 seconds.
+      <h1>WinQuest Astro Admin</h1>
+      <div class="hint">
+        This works like your quiz admin. Send a name manually, or let display auto-generate the next result after 30 seconds.
       </div>
 
-      <div class="row">
-        <input type="text" id="nameInput" placeholder="Enter name..." />
-        <button class="btn-main" id="showBtn">Show Name</button>
-        <button class="btn-blue" id="randomBtn">Random Now</button>
-      </div>
-
-      <div class="row" style="margin-top:12px;">
-        <button class="btn-yellow" id="extendBtn">Reset 30s Timer</button>
-        <button class="btn-red" id="clearBtn">Clear Current</button>
-        <a class="btn btn-green" href="astrodisplay.html" target="_blank">Open Display</a>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="num" id="manualCount">0</div>
-          <div class="label">Manual Shows</div>
+      <div class="grid row" style="margin-top:16px;">
+        <div>
+          <label>Top Heading</label>
+          <input id="heading" value="LIVE ASTROLOGY • TODAY" />
         </div>
-        <div class="stat">
-          <div class="num" id="autoCount">0</div>
-          <div class="label">Auto Shows</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="secondsLeft">30</div>
-          <div class="label">Seconds Left</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="modeText">WAIT</div>
-          <div class="label">Mode</div>
+        <div>
+          <label>Bottom CTA</label>
+          <input id="ctaText" value="Comment your name to get results" />
         </div>
       </div>
 
-      <div class="current" id="currentBox">No live result yet.</div>
-      <div class="status" id="statusText"></div>
+      <div class="grid3 row">
+        <div>
+          <label>Auto Result Delay (seconds)</label>
+          <input id="autoDelay" type="number" min="5" max="120" value="30" />
+        </div>
+        <div>
+          <label>Theme</label>
+          <select id="theme">
+            <option value="gold">Gold Premium</option>
+            <option value="purple">Purple Glow</option>
+            <option value="blue">Blue Glass</option>
+            <option value="red">Red Energy</option>
+            <option value="green">Green Pulse</option>
+          </select>
+        </div>
+        <div>
+          <label>Manual Name</label>
+          <input id="manualName" placeholder="Enter name from comments..." />
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="primary" onclick="showManualName()">Show Name</button>
+        <button class="ok" onclick="showRandomNow()">Show Random Now</button>
+        <button class="warn" onclick="resetTimerOnly()">Reset 30s Timer</button>
+        <button class="danger" onclick="clearCurrent()">Clear Current</button>
+        <a class="btn ghost" href="astrodisplay.html" target="_blank">Open Display</a>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Fallback Names</h2>
+        <div class="row">
+          <label>One name per line</label>
+          <textarea id="fallbackNames">Aman
+Simran
+Karan
+Mehak
+Rahul
+Priya
+Arjun
+Neha
+Jaspreet
+Gurleen
+Manpreet
+Navdeep
+Tanya
+Kabir
+Aarti
+Riya
+Sandeep
+Komal
+Anmol
+Mahi</textarea>
+        </div>
+        <button class="primary" onclick="saveSettingsOnly()">Save Settings</button>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Messages</h2>
+        <div class="row">
+          <label>One daily message per line</label>
+          <textarea id="messages">Today a positive change may come from an unexpected side.
+Today your energy is helping you move ahead with confidence.
+Today a delayed matter may finally start moving in your favor.
+Today is good for trusting your instinct over outside noise.
+Today someone may notice your value more clearly than before.
+Today your patience can protect you from a wrong decision.
+Today a small step can create a bigger result than expected.
+Today your mood improves as clarity starts coming back.
+Today is a strong day for confidence and fresh beginnings.
+Today your effort has a high chance of being noticed.
+Today you may receive good news through a message or call.
+Today your heart feels lighter if you stop overthinking.
+Today luck supports smart moves, not rushed ones.
+Today you may feel stronger about a decision you were delaying.
+Today your personal energy attracts helpful people.
+Today is better for action than waiting.
+Today one calm choice may save you from extra stress.
+Today your vibe is stronger than you think.
+Today the right timing may work in your favor.
+Today a hidden opportunity can appear through normal conversation.
+Today your focus can turn confusion into progress.
+Today you may feel emotionally clearer than recent days.
+Today your name may rise in a place you were not expecting.
+Today confidence brings better results than fear.
+Today is a good day to say yes to progress.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Current Live Result</h2>
+      <div id="currentPreview" class="list"></div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Status</h2>
+        <div class="status" id="statusBox"></div>
+        <div class="debug" id="debugBox">Loading...</div>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { db } from "./firebase-config.js";
-    import { doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      doc,
+      getDoc,
+      setDoc,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-    const liveRef = doc(db, "astro_live", "current");
+    const astroRef = doc(db, "astroLive", "current");
 
-    const fallbackNames = [
-      "Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha",
-      "Jaspreet","Gurleen","Manpreet","Navdeep","Tanya","Kabir","Aarti","Riya",
-      "Sandeep","Komal","Anmol","Mahi"
-    ];
+    const defaultState = {
+      heading: "LIVE ASTROLOGY • TODAY",
+      ctaText: "Comment your name to get results",
+      theme: "gold",
+      autoDelay: 30,
+      current: {
+        name: "WAITING...",
+        message: "Next live result will appear soon.",
+        luckyColor: "--",
+        luckyNumber: "--",
+        loveScore: "--",
+        mood: "--",
+        moneyLuck: "--",
+        energy: "--",
+        career: "--",
+        health: "--",
+        source: "waiting",
+        shownAt: null
+      },
+      fallbackNames: [
+        "Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha",
+        "Jaspreet","Gurleen","Manpreet","Navdeep","Tanya","Kabir","Aarti","Riya",
+        "Sandeep","Komal","Anmol","Mahi"
+      ],
+      messages: [
+        "Today a positive change may come from an unexpected side.",
+        "Today your energy is helping you move ahead with confidence.",
+        "Today a delayed matter may finally start moving in your favor."
+      ],
+      manualCount: 0,
+      autoCount: 0,
+      updatedAt: null,
+      nextAutoAt: null
+    };
 
-    const messages = [
-      "Today a positive change may come from an unexpected side.",
-      "Today your energy is helping you move ahead with confidence.",
-      "Today a delayed matter may finally start moving in your favor.",
-      "Today is good for trusting your instinct over outside noise.",
-      "Today someone may notice your value more clearly than before.",
-      "Today your patience can protect you from a wrong decision.",
-      "Today a small step can create a bigger result than expected.",
-      "Today your mood improves as clarity starts coming back.",
-      "Today is a strong day for confidence and fresh beginnings.",
-      "Today your effort has a high chance of being noticed.",
-      "Today you may receive good news through a message or call.",
-      "Today your heart feels lighter if you stop overthinking.",
-      "Today luck supports smart moves, not rushed ones.",
-      "Today you may feel stronger about a decision you were delaying.",
-      "Today your personal energy attracts helpful people.",
-      "Today is better for action than waiting.",
-      "Today one calm choice may save you from extra stress.",
-      "Today your vibe is stronger than you think.",
-      "Today the right timing may work in your favor.",
-      "Today a hidden opportunity can appear through normal conversation.",
-      "Today your focus can turn confusion into progress.",
-      "Today you may feel emotionally clearer than recent days.",
-      "Today your name may rise in a place you were not expecting.",
-      "Today confidence brings better results than fear.",
-      "Today is a good day to say yes to progress."
-    ];
+    let state = structuredClone(defaultState);
 
     const colors = ["Blue","Red","Green","Pink","Purple","Gold","White","Black","Yellow","Silver","Orange","Sky Blue","Rose Gold","Lavender"];
     const moods = ["Confident","Happy","Focused","Peaceful","Emotional","Lucky","Calm","Powerful","Positive","Hopeful","Bold","Stable"];
@@ -262,6 +360,27 @@
     const energies = ["Low","Balanced","Rising","Strong","Very Strong","Powerful","Fresh"];
     const careers = ["Growth Ahead","Good News","Strong Progress","New Chance","Success Ahead","Recognition Coming","Stable Day"];
     const healths = ["Feeling Good","Stable","Take Rest","Fresh Energy","Balanced","Positive Vibe","Recharge Needed"];
+
+    function logDebug(msg) {
+      console.log(msg);
+      const box = document.getElementById("debugBox");
+      box.textContent = typeof msg === "string" ? msg : JSON.stringify(msg, null, 2);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function clampNum(value, min, max, fallback) {
+      let n = parseInt(value, 10);
+      if (Number.isNaN(n)) n = fallback;
+      return Math.max(min, Math.min(max, n));
+    }
 
     function rand(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
@@ -275,11 +394,31 @@
       return Math.floor(Math.random() * 61) + 40;
     }
 
+    function normalizeState(data) {
+      const safe = { ...structuredClone(defaultState), ...(data || {}) };
+      safe.autoDelay = clampNum(safe.autoDelay, 5, 120, 30);
+      safe.theme = safe.theme || "gold";
+      safe.heading = safe.heading || defaultState.heading;
+      safe.ctaText = safe.ctaText || defaultState.ctaText;
+      safe.fallbackNames = Array.isArray(safe.fallbackNames) ? safe.fallbackNames : defaultState.fallbackNames;
+      safe.messages = Array.isArray(safe.messages) ? safe.messages : defaultState.messages;
+      safe.manualCount = Number.isFinite(Number(safe.manualCount)) ? Number(safe.manualCount) : 0;
+      safe.autoCount = Number.isFinite(Number(safe.autoCount)) ? Number(safe.autoCount) : 0;
+      safe.current = { ...defaultState.current, ...(safe.current || {}) };
+      return safe;
+    }
+
+    function linesToArray(text) {
+      return String(text)
+        .split("\n")
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
     function makeResult(name, source = "manual") {
-      const now = Date.now();
       return {
         name,
-        message: rand(messages),
+        message: rand(state.messages.length ? state.messages : defaultState.messages),
         luckyColor: rand(colors),
         luckyNumber: luckyNumber(),
         loveScore: loveScore(),
@@ -289,139 +428,204 @@
         career: rand(careers),
         health: rand(healths),
         source,
-        updatedAt: now,
-        nextAutoAt: now + 30000
+        shownAt: Date.now()
       };
     }
 
-    async function pushName() {
-      const input = document.getElementById("nameInput");
-      const name = input.value.trim().replace(/\s+/g, " ");
-      if (!name) {
-        setStatus("Please enter a name.");
-        return;
+    async function saveState() {
+      const payload = {
+        ...state,
+        updatedAt: serverTimestamp()
+      };
+      await setDoc(astroRef, payload, { merge: true });
+    }
+
+    async function ensureDocExists() {
+      const snap = await getDoc(astroRef);
+      if (!snap.exists()) {
+        const now = Date.now();
+        await setDoc(astroRef, {
+          ...defaultState,
+          nextAutoAt: now + (defaultState.autoDelay * 1000),
+          updatedAt: serverTimestamp()
+        });
+        logDebug("Created Firestore doc: astroLive/current");
+      } else {
+        logDebug("Firestore doc already exists");
       }
-
-      const data = makeResult(name, "manual");
-      await setDoc(liveRef, data);
-      input.value = "";
-      setStatus("Name sent to display.");
     }
 
-    async function pushRandomNow() {
-      const data = makeResult(rand(fallbackNames), "auto");
-      await setDoc(liveRef, data);
-      setStatus("Random result sent.");
+    function syncInputsFromState() {
+      document.getElementById("heading").value = state.heading || "";
+      document.getElementById("ctaText").value = state.ctaText || "";
+      document.getElementById("autoDelay").value = state.autoDelay ?? 30;
+      document.getElementById("theme").value = state.theme || "gold";
+      document.getElementById("fallbackNames").value = (state.fallbackNames || []).join("\n");
+      document.getElementById("messages").value = (state.messages || []).join("\n");
     }
 
-    async function resetTimerOnly() {
-      currentData.nextAutoAt = Date.now() + 30000;
-      await setDoc(liveRef, currentData);
-      setStatus("30-second timer reset.");
+    async function refreshSettingsFromInputs() {
+      state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
+      state.ctaText = document.getElementById("ctaText").value.trim() || defaultState.ctaText;
+      state.autoDelay = clampNum(document.getElementById("autoDelay").value, 5, 120, 30);
+      state.theme = document.getElementById("theme").value || "gold";
+      state.fallbackNames = linesToArray(document.getElementById("fallbackNames").value);
+      state.messages = linesToArray(document.getElementById("messages").value);
     }
 
-    async function clearCurrent() {
-      const now = Date.now();
-      await setDoc(liveRef, {
-        name: "Waiting...",
-        message: "Next live result will appear soon.",
-        luckyColor: "--",
-        luckyNumber: "--",
-        loveScore: "--",
-        mood: "--",
-        moneyLuck: "--",
-        energy: "--",
-        career: "--",
-        health: "--",
-        source: "waiting",
-        updatedAt: now,
-        nextAutoAt: now + 30000
-      });
-      setStatus("Current result cleared.");
-    }
-
-    let currentData = {
-      source: "waiting",
-      nextAutoAt: Date.now() + 30000,
-      manualCount: 0,
-      autoCount: 0
+    window.saveSettingsOnly = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        if (!state.current?.shownAt) {
+          state.nextAutoAt = Date.now() + (state.autoDelay * 1000);
+        }
+        await saveState();
+        logDebug("Astro settings saved");
+      } catch (err) {
+        console.error(err);
+        logDebug("Save settings error:\n" + err.message);
+      }
     };
 
-    function setStatus(text) {
-      document.getElementById("statusText").textContent = text;
-      clearTimeout(setStatus._t);
-      setStatus._t = setTimeout(() => {
-        document.getElementById("statusText").textContent = "";
-      }, 2500);
-    }
+    window.showManualName = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        const name = document.getElementById("manualName").value.trim();
+        if (!name) {
+          alert("Please enter a name.");
+          return;
+        }
 
-    function escapeHtml(text) {
-      return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+        state.current = makeResult(name, "manual");
+        state.manualCount = (state.manualCount || 0) + 1;
+        state.nextAutoAt = Date.now() + (state.autoDelay * 1000);
 
-    function render(data) {
-      currentData = data;
-
-      const box = document.getElementById("currentBox");
-      box.innerHTML = `
-        <div><strong>Name:</strong> ${escapeHtml(data.name ?? "Waiting...")}</div>
-        <div><strong>Message:</strong> ${escapeHtml(data.message ?? "")}</div>
-        <div><strong>Lucky Color:</strong> ${escapeHtml(data.luckyColor ?? "--")}</div>
-        <div><strong>Lucky Number:</strong> ${escapeHtml(data.luckyNumber ?? "--")}</div>
-        <div><strong>Love Score:</strong> ${escapeHtml(data.loveScore ?? "--")}${typeof data.loveScore === "number" ? "%" : ""}</div>
-        <div><strong>Mood:</strong> ${escapeHtml(data.mood ?? "--")}</div>
-        <div><strong>Money Luck:</strong> ${escapeHtml(data.moneyLuck ?? "--")}</div>
-        <div><strong>Energy:</strong> ${escapeHtml(data.energy ?? "--")}</div>
-        <div><strong>Career:</strong> ${escapeHtml(data.career ?? "--")}</div>
-        <div><strong>Health:</strong> ${escapeHtml(data.health ?? "--")}</div>
-        <div><strong>Source:</strong> ${escapeHtml((data.source ?? "waiting").toUpperCase())}</div>
-      `;
-
-      document.getElementById("modeText").textContent = (data.source ?? "waiting").toUpperCase();
-    }
-
-    function updateCountdown() {
-      const next = currentData?.nextAutoAt || (Date.now() + 30000);
-      const left = Math.max(0, Math.ceil((next - Date.now()) / 1000));
-      document.getElementById("secondsLeft").textContent = left;
-    }
-
-    let manualShows = 0;
-    let autoShows = 0;
-    let seenUpdatedAt = null;
-
-    onSnapshot(liveRef, (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-
-      if (seenUpdatedAt !== data.updatedAt) {
-        if (data.source === "manual") manualShows++;
-        if (data.source === "auto") autoShows++;
-        seenUpdatedAt = data.updatedAt;
+        await saveState();
+        document.getElementById("manualName").value = "";
+        logDebug(`Manual result shown for: ${name}`);
+      } catch (err) {
+        console.error(err);
+        logDebug("Show manual name error:\n" + err.message);
       }
+    };
 
-      document.getElementById("manualCount").textContent = manualShows;
-      document.getElementById("autoCount").textContent = autoShows;
+    window.showRandomNow = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        const names = state.fallbackNames.length ? state.fallbackNames : defaultState.fallbackNames;
+        state.current = makeResult(rand(names), "auto");
+        state.autoCount = (state.autoCount || 0) + 1;
+        state.nextAutoAt = Date.now() + (state.autoDelay * 1000);
 
-      render(data);
-      updateCountdown();
-    });
+        await saveState();
+        logDebug("Random astro result shown");
+      } catch (err) {
+        console.error(err);
+        logDebug("Random now error:\n" + err.message);
+      }
+    };
 
-    document.getElementById("showBtn").addEventListener("click", pushName);
-    document.getElementById("randomBtn").addEventListener("click", pushRandomNow);
-    document.getElementById("extendBtn").addEventListener("click", resetTimerOnly);
-    document.getElementById("clearBtn").addEventListener("click", clearCurrent);
+    window.resetTimerOnly = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        state.nextAutoAt = Date.now() + (state.autoDelay * 1000);
+        await saveState();
+        logDebug("Auto timer reset");
+      } catch (err) {
+        console.error(err);
+        logDebug("Reset timer error:\n" + err.message);
+      }
+    };
 
-    document.getElementById("nameInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") pushName();
-    });
+    window.clearCurrent = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        state.current = {
+          name: "WAITING...",
+          message: "Next live result will appear soon.",
+          luckyColor: "--",
+          luckyNumber: "--",
+          loveScore: "--",
+          mood: "--",
+          moneyLuck: "--",
+          energy: "--",
+          career: "--",
+          health: "--",
+          source: "waiting",
+          shownAt: Date.now()
+        };
+        state.nextAutoAt = Date.now() + (state.autoDelay * 1000);
 
-    setInterval(updateCountdown, 1000);
+        await saveState();
+        logDebug("Current astro result cleared");
+      } catch (err) {
+        console.error(err);
+        logDebug("Clear current error:\n" + err.message);
+      }
+    };
+
+    function renderPreview() {
+      const box = document.getElementById("currentPreview");
+      const c = state.current || defaultState.current;
+
+      box.innerHTML = `
+        <div class="item">
+          <strong>${escapeHtml(c.name || "WAITING...")}</strong>
+          <div class="meta"><b>Message:</b> ${escapeHtml(c.message || "")}</div>
+          <div class="meta"><b>Lucky Color:</b> ${escapeHtml(c.luckyColor || "--")}</div>
+          <div class="meta"><b>Lucky Number:</b> ${escapeHtml(c.luckyNumber || "--")}</div>
+          <div class="meta"><b>Love Score:</b> ${escapeHtml(c.loveScore || "--")}${typeof c.loveScore === "number" ? "%" : ""}</div>
+          <div class="meta"><b>Mood:</b> ${escapeHtml(c.mood || "--")}</div>
+          <div class="meta"><b>Money Luck:</b> ${escapeHtml(c.moneyLuck || "--")}</div>
+          <div class="meta"><b>Energy:</b> ${escapeHtml(c.energy || "--")}</div>
+          <div class="meta"><b>Career:</b> ${escapeHtml(c.career || "--")}</div>
+          <div class="meta"><b>Health:</b> ${escapeHtml(c.health || "--")}</div>
+          <div class="meta"><b>Source:</b> ${escapeHtml((c.source || "waiting").toUpperCase())}</div>
+        </div>
+      `;
+    }
+
+    function renderStatus() {
+      const left = Math.max(0, Math.ceil(((state.nextAutoAt || Date.now()) - Date.now()) / 1000));
+
+      document.getElementById("statusBox").innerHTML = `
+<b>Heading:</b> ${escapeHtml(state.heading)}
+<b>CTA:</b> ${escapeHtml(state.ctaText)}
+<b>Theme:</b> ${escapeHtml(state.theme)}
+<b>Auto Delay:</b> ${state.autoDelay}s
+<b>Seconds Left:</b> ${left}
+<b>Manual Count:</b> ${state.manualCount}
+<b>Auto Count:</b> ${state.autoCount}
+<b>Fallback Names:</b> ${state.fallbackNames.length}
+<b>Messages:</b> ${state.messages.length}
+<b>Current Name:</b> ${escapeHtml(state.current?.name || "WAITING...")}
+      `;
+    }
+
+    function renderAll() {
+      syncInputsFromState();
+      renderPreview();
+      renderStatus();
+    }
+
+    try {
+      await ensureDocExists();
+
+      onSnapshot(astroRef, (snap) => {
+        if (!snap.exists()) return;
+        state = normalizeState(snap.data());
+        renderAll();
+        logDebug("Live Firestore sync working");
+      }, (error) => {
+        console.error(error);
+        logDebug("Snapshot error:\n" + error.message);
+      });
+
+      setInterval(renderStatus, 1000);
+    } catch (err) {
+      console.error(err);
+      logDebug("Startup error:\n" + err.message);
+    }
   </script>
 </body>
 </html>
