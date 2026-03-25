@@ -1,409 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Astro Admin</title>
-  <style>
-    :root{
-      --bg1:#0b1020;
-      --bg2:#111933;
-      --card:rgba(255,255,255,0.08);
-      --border:rgba(255,255,255,0.12);
-      --text:#fff;
-      --muted:#cbd5e1;
-      --accent1:#8b5cf6;
-      --accent2:#ec4899;
-      --blue:#3b82f6;
-      --red:#ef4444;
-      --yellow:#f59e0b;
-      --green:#10b981;
-    }
-
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      font-family:Arial, sans-serif;
-    }
-
-    body{
-      min-height:100vh;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(139,92,246,0.22), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(236,72,153,0.18), transparent 30%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      padding:20px;
-    }
-
-    .wrap{
-      max-width:1000px;
-      margin:0 auto;
-    }
-
-    .panel{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:22px;
-      backdrop-filter:blur(12px);
-      margin-bottom:20px;
-    }
-
-    h1{
-      font-size:clamp(28px,4vw,42px);
-      margin-bottom:8px;
-    }
-
-    .sub{
-      color:var(--muted);
-      line-height:1.6;
-      margin-bottom:18px;
-    }
-
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    input{
-      flex:1 1 280px;
-      min-width:0;
-      padding:16px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.14);
-      background:rgba(255,255,255,0.1);
-      color:#fff;
-      font-size:16px;
-      outline:none;
-    }
-
-    input::placeholder{
-      color:#dbeafe;
-    }
-
-    button, a.linkbtn{
-      border:none;
-      cursor:pointer;
-      text-decoration:none;
-      color:#fff;
-      padding:14px 18px;
-      border-radius:16px;
-      font-weight:700;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .btn-main{ background:linear-gradient(135deg,var(--accent1),var(--accent2)); }
-    .btn-blue{ background:linear-gradient(135deg,#2563eb,#3b82f6); }
-    .btn-red{ background:linear-gradient(135deg,#dc2626,#ef4444); }
-    .btn-yellow{ background:linear-gradient(135deg,#d97706,#f59e0b); }
-    .btn-green{ background:linear-gradient(135deg,#059669,#10b981); }
-
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
-      margin-top:18px;
-    }
-
-    .stat{
-      background:rgba(255,255,255,0.07);
-      border:1px solid rgba(255,255,255,0.1);
-      border-radius:18px;
-      padding:16px;
-      text-align:center;
-    }
-
-    .num{
-      font-size:28px;
-      font-weight:800;
-      margin-bottom:6px;
-    }
-
-    .label{
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .currentBox{
-      margin-top:18px;
-      padding:18px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.07);
-      border:1px solid rgba(255,255,255,0.1);
-      line-height:1.7;
-    }
-
-    .currentBox strong{
-      color:#f9a8d4;
-    }
-
-    .small{
-      color:var(--muted);
-      font-size:14px;
-      margin-top:10px;
-      line-height:1.6;
-    }
-
-    @media (max-width:700px){
-      .stats{ grid-template-columns:repeat(2,1fr); }
-    }
-
-    @media (max-width:480px){
-      .stats{ grid-template-columns:1fr; }
-      .row > *{ width:100%; }
-    }
-  </style>
 </head>
-<body>
-  <div class="wrap">
-    <div class="panel">
-      <h1>🔮 Astro Admin</h1>
-      <div class="sub">
-        Enter a name and send it to the live display. If no new name is sent, the display page will automatically show a random fallback result after 30 seconds.
-      </div>
+<body style="font-family: Arial; padding:20px">
 
-      <div class="row">
-        <input type="text" id="nameInput" placeholder="Enter name from comments..." />
-        <button class="btn-main" id="showBtn">Show Name</button>
-        <button class="btn-blue" id="randomNowBtn">Random Now</button>
-      </div>
+<h2>Astrology Admin</h2>
 
-      <div class="row" style="margin-top:12px;">
-        <button class="btn-yellow" id="clearBtn">Clear Current</button>
-        <button class="btn-red" id="resetTimerBtn">Reset 30s Timer</button>
-        <a class="linkbtn btn-green" href="astrodisplay.html" target="_blank">Open Display</a>
-      </div>
+<input id="name" placeholder="Enter Name" style="padding:10px; width:200px">
+<button onclick="send()">Show</button>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="num" id="manualCount">0</div>
-          <div class="label">Manual Shows</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="autoCount">0</div>
-          <div class="label">Auto Random Shows</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="secondsLeft">30</div>
-          <div class="label">Seconds Left</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="modeText">MANUAL</div>
-          <div class="label">Mode</div>
-        </div>
-      </div>
+<script type="module">
+import { db } from "./firebase-config.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      <div class="currentBox" id="currentBox">
-        No live result yet.
-      </div>
+async function send() {
+  const name = document.getElementById("name").value.trim();
+  if (!name) return alert("Enter name");
 
-      <div class="small">
-        Tip: keep this page open in backend. Audience should only see <strong>astrodisplay.html</strong>.
-      </div>
-    </div>
-  </div>
+  const data = generateResult(name);
 
-  <script>
-    const STORAGE_KEY = "astro_live_data_v1";
+  await setDoc(doc(db, "astro_live", "current"), {
+    ...data,
+    updatedAt: Date.now(),
+    mode: "manual"
+  });
+}
 
-    const colors = ["Blue","Red","Green","Pink","Purple","Gold","White","Black","Yellow","Silver","Orange","Sky Blue","Rose Gold","Lavender"];
-    const moods = ["Confident","Happy","Focused","Peaceful","Emotional","Lucky","Calm","Powerful","Positive","Hopeful","Bold","Stable"];
-    const moneyLuck = ["Low","Medium","Good","High","Very High","Rising","Strong"];
-    const energies = ["Low","Balanced","Rising","Strong","Very Strong","Powerful","Fresh"];
-    const careers = ["Growth Ahead","Good News","Strong Progress","New Chance","Success Ahead","Recognition Coming","Stable Day"];
-    const healths = ["Feeling Good","Stable","Take Rest","Fresh Energy","Balanced","Positive Vibe","Recharge Needed"];
+// random generator
+function generateResult(name){
+  const messages = [
+    "Today brings positive energy.",
+    "A surprise is waiting for you.",
+    "Stay calm, things will improve.",
+    "Today is your lucky day.",
+    "Avoid overthinking today."
+  ];
 
-    const dailyMessages = [
-      "Today a positive change may come from an unexpected side.",
-      "Today your energy is helping you move ahead with confidence.",
-      "Today a delayed matter may finally start moving in your favor.",
-      "Today is good for trusting your instinct over outside noise.",
-      "Today someone may notice your value more clearly than before.",
-      "Today your patience can protect you from a wrong decision.",
-      "Today a small step can create a bigger result than expected.",
-      "Today your mood improves as clarity starts coming back.",
-      "Today is a strong day for confidence and fresh beginnings.",
-      "Today your effort has a high chance of being noticed.",
-      "Today you may receive good news through a message or call.",
-      "Today your heart feels lighter if you stop overthinking.",
-      "Today luck supports smart moves, not rushed ones.",
-      "Today you may feel stronger about a decision you were delaying.",
-      "Today your personal energy attracts helpful people.",
-      "Today is better for action than waiting.",
-      "Today one calm choice may save you from extra stress.",
-      "Today your vibe is stronger than you think.",
-      "Today the right timing may work in your favor.",
-      "Today a hidden opportunity can appear through normal conversation.",
-      "Today your focus can turn confusion into progress.",
-      "Today you may feel emotionally clearer than recent days.",
-      "Today your name may rise in a place you were not expecting.",
-      "Today confidence brings better results than fear.",
-      "Today is a good day to say yes to progress."
-    ];
+  const moods = ["Happy","Focused","Confident","Lucky","Calm"];
+  const luck = ["Low","Medium","High","Very High"];
 
-    function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+  return {
+    name,
+    message: messages[Math.floor(Math.random()*messages.length)],
+    number: Math.floor(Math.random()*9)+1,
+    color: ["Red","Blue","Green","Yellow"][Math.floor(Math.random()*4)],
+    love: Math.floor(Math.random()*60)+40,
+    mood: moods[Math.floor(Math.random()*moods.length)],
+    money: luck[Math.floor(Math.random()*luck.length)],
+    energy: luck[Math.floor(Math.random()*luck.length)]
+  };
+}
 
-      const initial = {
-        current: null,
-        lastManualAt: 0,
-        lastShownAt: 0,
-        mode: "MANUAL",
-        manualCount: 0,
-        autoCount: 0
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
-    }
+window.send = send;
+</script>
 
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    function rand(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function luckyNumber() {
-      return Math.floor(Math.random() * 9) + 1;
-    }
-
-    function loveScore() {
-      return Math.floor(Math.random() * 61) + 40;
-    }
-
-    function buildResult(name, source = "manual") {
-      return {
-        name: name,
-        message: rand(dailyMessages),
-        luckyColor: rand(colors),
-        luckyNumber: luckyNumber(),
-        loveScore: loveScore(),
-        mood: rand(moods),
-        moneyLuck: rand(moneyLuck),
-        energy: rand(energies),
-        career: rand(careers),
-        health: rand(healths),
-        source,
-        createdAt: Date.now()
-      };
-    }
-
-    function showManualName() {
-      const input = document.getElementById("nameInput");
-      const name = input.value.trim().replace(/\s+/g, " ");
-      if (!name) {
-        alert("Please enter a name.");
-        return;
-      }
-
-      const data = loadData();
-      data.current = buildResult(name, "manual");
-      data.lastManualAt = Date.now();
-      data.lastShownAt = Date.now();
-      data.mode = "MANUAL";
-      data.manualCount += 1;
-      saveData(data);
-
-      input.value = "";
-      render();
-    }
-
-    function randomNow() {
-      const fallbackNames = ["Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha","Jaspreet","Gurleen","Manpreet","Navdeep","Tanya","Kabir","Aarti","Riya"];
-      const data = loadData();
-      data.current = buildResult(rand(fallbackNames), "auto");
-      data.lastShownAt = Date.now();
-      data.mode = "AUTO";
-      data.autoCount += 1;
-      saveData(data);
-      render();
-    }
-
-    function clearCurrent() {
-      const data = loadData();
-      data.current = null;
-      data.mode = "MANUAL";
-      data.lastManualAt = Date.now();
-      data.lastShownAt = Date.now();
-      saveData(data);
-      render();
-    }
-
-    function resetTimer() {
-      const data = loadData();
-      data.lastManualAt = Date.now();
-      data.lastShownAt = Date.now();
-      saveData(data);
-      render();
-    }
-
-    function render() {
-      const data = loadData();
-      document.getElementById("manualCount").textContent = data.manualCount;
-      document.getElementById("autoCount").textContent = data.autoCount;
-      document.getElementById("modeText").textContent = data.mode;
-
-      const box = document.getElementById("currentBox");
-      if (!data.current) {
-        box.innerHTML = "No live result yet.";
-      } else {
-        box.innerHTML = `
-          <div><strong>Name:</strong> ${escapeHtml(data.current.name)}</div>
-          <div><strong>Message:</strong> ${escapeHtml(data.current.message)}</div>
-          <div><strong>Lucky Color:</strong> ${escapeHtml(data.current.luckyColor)}</div>
-          <div><strong>Lucky Number:</strong> ${escapeHtml(data.current.luckyNumber)}</div>
-          <div><strong>Love Score:</strong> ${escapeHtml(data.current.loveScore)}%</div>
-          <div><strong>Mood:</strong> ${escapeHtml(data.current.mood)}</div>
-          <div><strong>Money Luck:</strong> ${escapeHtml(data.current.moneyLuck)}</div>
-          <div><strong>Energy:</strong> ${escapeHtml(data.current.energy)}</div>
-          <div><strong>Career:</strong> ${escapeHtml(data.current.career)}</div>
-          <div><strong>Health:</strong> ${escapeHtml(data.current.health)}</div>
-          <div><strong>Source:</strong> ${escapeHtml(data.current.source.toUpperCase())}</div>
-        `;
-      }
-    }
-
-    function updateCountdown() {
-      const data = loadData();
-      const baseTime = data.lastManualAt || data.lastShownAt || Date.now();
-      const passed = Math.floor((Date.now() - baseTime) / 1000);
-      const left = Math.max(0, 30 - passed);
-      document.getElementById("secondsLeft").textContent = left;
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    document.getElementById("showBtn").addEventListener("click", showManualName);
-    document.getElementById("randomNowBtn").addEventListener("click", randomNow);
-    document.getElementById("clearBtn").addEventListener("click", clearCurrent);
-    document.getElementById("resetTimerBtn").addEventListener("click", resetTimer);
-
-    document.getElementById("nameInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") showManualName();
-    });
-
-    window.addEventListener("storage", () => {
-      render();
-      updateCountdown();
-    });
-
-    render();
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  </script>
 </body>
 </html>
