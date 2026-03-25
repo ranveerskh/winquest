@@ -1,242 +1,540 @@
-<script type="module">
-  import { db } from "./firebase-config.js";
-  import {
-    doc,
-    onSnapshot,
-    updateDoc
-  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-  const quizRef = doc(db, "liveQuiz", "current");
-
-  const defaultState = {
-    heading: "WinQuest Live Quiz Night",
-    subheading: "Comment the correct answer before time runs out",
-    theme: "purple",
-    defaultTimer: 10,
-    revealDuration: 3,
-    questions: [],
-    currentIndex: 0,
-    currentTimer: 10,
-    isRunning: false,
-    answerRevealed: false,
-    showCertificate: false,
-    winners: []
-  };
-
-  let state = structuredClone(defaultState);
-  let tickInterval = null;
-  let revealTimeout = null;
-
-  function normalizeState(data) {
-    const safe = { ...structuredClone(defaultState), ...(data || {}) };
-
-    safe.questions = Array.isArray(safe.questions) ? safe.questions : [];
-    safe.winners = Array.isArray(safe.winners) ? safe.winners : [];
-
-    safe.currentIndex = Number.isInteger(safe.currentIndex)
-      ? safe.currentIndex
-      : parseInt(safe.currentIndex, 10);
-
-    if (Number.isNaN(safe.currentIndex)) safe.currentIndex = 0;
-    if (safe.currentIndex < 0) safe.currentIndex = 0;
-    if (safe.currentIndex >= safe.questions.length && safe.questions.length > 0) {
-      safe.currentIndex = 0;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WinQuest Quiz Display</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root{
+      --bg1:#0a1020;
+      --bg2:#151d3f;
+      --card:rgba(255,255,255,.08);
+      --line:rgba(255,255,255,.13);
+      --text:#f4f7ff;
+      --muted:rgba(255,255,255,.72);
     }
-
-    safe.currentTimer = Number.isFinite(Number(safe.currentTimer))
-      ? Number(safe.currentTimer)
-      : safe.defaultTimer;
-
-    safe.defaultTimer = Number.isFinite(Number(safe.defaultTimer))
-      ? Number(safe.defaultTimer)
-      : 10;
-
-    safe.revealDuration = Number.isFinite(Number(safe.revealDuration))
-      ? Number(safe.revealDuration)
-      : 3;
-
-    safe.heading = safe.heading || defaultState.heading;
-    safe.subheading = safe.subheading || defaultState.subheading;
-    safe.theme = safe.theme || "purple";
-
-    return safe;
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function render() {
-    document.body.className = "theme-" + (state.theme || "purple");
-
-    const quizScreen = document.getElementById("quizScreen");
-    const certificateScreen = document.getElementById("certificateScreen");
-
-    if (state.showCertificate) {
-      quizScreen.classList.add("hide");
-      certificateScreen.classList.add("show");
-      renderCertificate();
-      return;
-    } else {
-      quizScreen.classList.remove("hide");
-      certificateScreen.classList.remove("show");
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top left, rgba(124,92,255,.30), transparent 28%),
+        radial-gradient(circle at top right, rgba(50,197,255,.22), transparent 28%),
+        radial-gradient(circle at bottom center, rgba(255,255,255,.08), transparent 20%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
     }
+    body.theme-purple{ --bg1:#0a1020; --bg2:#151d3f; }
+    body.theme-blue{ --bg1:#08121e; --bg2:#12314c; }
+    body.theme-green{ --bg1:#08170f; --bg2:#153824; }
+    body.theme-gold{ --bg1:#1b1307; --bg2:#3a250a; }
+    body.theme-red{ --bg1:#1b0a12; --bg2:#401425; }
 
-    document.getElementById("heading").textContent = state.heading;
-    document.getElementById("subheading").textContent = state.subheading;
-    document.getElementById("timer").textContent = state.currentTimer;
-
-    const total = state.questions.length;
-    const currentDisplayIndex = total > 0 ? state.currentIndex + 1 : 0;
-    document.getElementById("questionCount").textContent = `Question ${currentDisplayIndex} / ${total}`;
-    document.getElementById("quizStateLabel").textContent =
-      state.answerRevealed ? "Answer Revealed" : (state.isRunning ? "Live" : "Waiting");
-
-    const q = total > 0 ? state.questions[state.currentIndex] : null;
-    document.getElementById("questionText").textContent = q ? q.question : "Add questions from admin";
-
-    const optionsBox = document.getElementById("optionsBox");
-    optionsBox.innerHTML = "";
-
-    if (q && Array.isArray(q.options)) {
-      q.options.forEach((opt, i) => {
-        const div = document.createElement("div");
-        let cls = "opt";
-
-        if (state.answerRevealed) {
-          if (i === q.correctIndex) cls += " reveal-correct";
-          else cls += " dim";
-        }
-
-        div.className = cls;
-        div.innerHTML = `
-          <div class="letter">${String.fromCharCode(65 + i)}</div>
-          <div class="text">${escapeHtml(opt)}</div>
-        `;
-        optionsBox.appendChild(div);
-      });
+    .screen{
+      width:100%;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      position:relative;
     }
-
-    document.getElementById("celebrateBox").classList.toggle("show", !!state.answerRevealed);
-  }
-
-  function renderCertificate() {
-    document.getElementById("certSub").textContent =
-      state.winners.length ? "Congratulations to our top winners!" : "Quiz completed.";
-
-    const grid = document.getElementById("winnerGrid");
-    grid.innerHTML = "";
-
-    if (!state.winners.length) {
-      grid.innerHTML = `<div class="emptyWinners">No winners added yet.</div>`;
-      return;
+    .container{
+      width:min(1300px, 100%);
+      display:grid;
+      gap:18px;
     }
-
-    state.winners.slice(0, 10).forEach((name, idx) => {
-      const card = document.createElement("div");
-      card.className = "winnerCard";
-      card.innerHTML = `
-        <div class="rank">${idx + 1}</div>
-        <div>
-          <div class="winnerName">${escapeHtml(name)}</div>
-          <div class="winnerTextSmall">Certified Winner</div>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  function fireConfetti() {
-    const layer = document.getElementById("confetti");
-    layer.innerHTML = "";
-
-    const colors = ["#7c5cff", "#32c5ff", "#2dd381", "#ffd166", "#ff7f50", "#ffffff"];
-    const count = 80;
-
-    for (let i = 0; i < count; i++) {
-      const piece = document.createElement("div");
-      piece.className = "piece";
-      piece.style.left = Math.random() * 100 + "vw";
-      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-      piece.style.animationDelay = Math.random() * 0.4 + "s";
-      piece.style.transform = `rotate(${Math.random() * 180}deg)`;
-      layer.appendChild(piece);
+    .top{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:18px;
+      align-items:start;
     }
+    .glass{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+    }
+    .head{ padding:24px 28px; }
+    .kicker{
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      color:var(--muted);
+      margin-bottom:10px;
+      font-weight:700;
+    }
+    .heading{
+      font-size:48px;
+      font-weight:900;
+      line-height:1.06;
+      margin-bottom:8px;
+    }
+    .subheading{
+      font-size:18px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .timerbox{
+      padding:20px 26px;
+      min-width:180px;
+      text-align:center;
+    }
+    .timerlabel{
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:700;
+    }
+    .timer{
+      font-size:68px;
+      font-weight:900;
+      line-height:1;
+      color:#fff;
+    }
+    .questionWrap{ padding:28px; }
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      margin-bottom:16px;
+      color:var(--muted);
+      font-size:15px;
+      font-weight:700;
+    }
+    .question{
+      font-size:46px;
+      line-height:1.2;
+      font-weight:900;
+      margin-bottom:24px;
+    }
+    .options{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .opt{
+      padding:20px 22px;
+      border-radius:22px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      min-height:110px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      transition:all .35s ease;
+    }
+    .opt .letter{
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.12);
+      font-weight:900;
+      font-size:22px;
+      flex-shrink:0;
+    }
+    .opt .text{
+      font-size:28px;
+      line-height:1.3;
+      font-weight:800;
+    }
+    .opt.reveal-correct{
+      background:linear-gradient(135deg, rgba(45,211,129,.25), rgba(45,211,129,.10));
+      border-color:rgba(45,211,129,.65);
+      box-shadow:0 0 0 2px rgba(45,211,129,.18), 0 0 30px rgba(45,211,129,.18);
+    }
+    .opt.dim{
+      opacity:.45;
+    }
+    .celebrate{
+      display:none;
+      text-align:center;
+      padding:18px 24px;
+      font-size:34px;
+      font-weight:900;
+      background:linear-gradient(135deg, rgba(45,211,129,.18), rgba(255,255,255,.06));
+      animation:pulse 1s ease-in-out infinite;
+    }
+    .celebrate.show{ display:block; }
+    @keyframes pulse{
+      0%{ transform:scale(1); }
+      50%{ transform:scale(1.015); }
+      100%{ transform:scale(1); }
+    }
+    .certificateScreen{ display:none; width:min(1200px,100%); }
+    .certificateScreen.show{ display:block; }
+    .certificate{
+      padding:40px 34px;
+      border-radius:32px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05)),
+        linear-gradient(135deg, rgba(255,209,102,.12), rgba(255,183,3,.06));
+      border:1px solid rgba(255,209,102,.32);
+      text-align:center;
+    }
+    .certKicker{
+      color:#ffe6a6;
+      text-transform:uppercase;
+      letter-spacing:3px;
+      font-size:14px;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+    .certTitle{
+      font-size:56px;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+    .certSub{
+      font-size:18px;
+      color:var(--muted);
+      margin-bottom:30px;
+    }
+    .winnerGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      text-align:left;
+    }
+    .winnerCard{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:20px;
+      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+    .rank{
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, rgba(255,209,102,.4), rgba(255,183,3,.22));
+      color:#fff2c4;
+      font-weight:900;
+      font-size:20px;
+      flex-shrink:0;
+    }
+    .winnerName{
+      font-size:26px;
+      font-weight:800;
+      line-height:1.25;
+    }
+    .winnerTextSmall{
+      font-size:13px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-top:3px;
+    }
+    .emptyWinners{
+      padding:18px;
+      color:var(--muted);
+      font-size:18px;
+    }
+    .quizScreen.hide{ display:none; }
 
-    setTimeout(() => {
-      layer.innerHTML = "";
-    }, 2600);
-  }
-
-  async function tickOnce() {
-    if (!state.isRunning) return;
-    if (state.answerRevealed) return;
-    if (!state.questions.length) return;
-    if (state.showCertificate) return;
-
-    if (state.currentTimer > 0) {
-      const newTime = state.currentTimer - 1;
-      state.currentTimer = newTime;
-      render();
-
-      await updateDoc(quizRef, {
-        currentTimer: newTime
-      });
-
-      if (newTime === 0) {
-        await updateDoc(quizRef, {
-          answerRevealed: true
-        });
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .piece{
+      position:absolute;
+      top:-20px;
+      width:10px;
+      height:16px;
+      opacity:.9;
+      animation:fall 2.2s linear forwards;
+    }
+    @keyframes fall{
+      to{
+        transform:translateY(110vh) rotate(540deg);
+        opacity:0;
       }
     }
-  }
 
-  function startTicker() {
-    if (tickInterval) clearInterval(tickInterval);
-    tickInterval = setInterval(tickOnce, 1000);
-  }
+    @media (max-width: 980px){
+      .top{ grid-template-columns:1fr; }
+      .timerbox{ min-width:unset; }
+      .heading{ font-size:38px; }
+      .question{ font-size:34px; }
+      .opt .text{ font-size:22px; }
+      .options{ grid-template-columns:1fr; }
+      .certTitle{ font-size:42px; }
+      .winnerGrid{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body class="theme-purple">
+  <div class="screen">
+    <div class="container quizScreen" id="quizScreen">
+      <div class="top">
+        <div class="glass head">
+          <div class="kicker">Live Quiz</div>
+          <div class="heading" id="heading">WinQuest Live Quiz Night</div>
+          <div class="subheading" id="subheading">Comment the correct answer before time runs out</div>
+        </div>
 
-  function scheduleAutoNext() {
-    if (revealTimeout) clearTimeout(revealTimeout);
+        <div class="glass timerbox">
+          <div class="timerlabel">Time Left</div>
+          <div class="timer" id="timer">10</div>
+        </div>
+      </div>
 
-    revealTimeout = setTimeout(async () => {
-      if (state.showCertificate) return;
+      <div class="glass questionWrap">
+        <div class="meta">
+          <div id="questionCount">Question 0 / 0</div>
+          <div id="quizStateLabel">Waiting</div>
+        </div>
+
+        <div class="question" id="questionText">Add questions from admin</div>
+        <div class="options" id="optionsBox"></div>
+      </div>
+
+      <div class="glass celebrate" id="celebrateBox">🎉 Correct Answer Revealed 🎉</div>
+    </div>
+
+    <div class="certificateScreen" id="certificateScreen">
+      <div class="certificate">
+        <div class="certKicker">Certificate of Achievement</div>
+        <div class="certTitle">Top 10 Winners</div>
+        <div class="certSub" id="certSub">Congratulations to our top winners!</div>
+        <div class="winnerGrid" id="winnerGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import {
+      doc,
+      onSnapshot,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const quizRef = doc(db, "liveQuiz", "current");
+
+    const defaultState = {
+      heading: "WinQuest Live Quiz Night",
+      subheading: "Comment the correct answer before time runs out",
+      theme: "purple",
+      defaultTimer: 10,
+      revealDuration: 3,
+      questions: [],
+      currentIndex: 0,
+      currentTimer: 10,
+      isRunning: false,
+      answerRevealed: false,
+      showCertificate: false,
+      winners: []
+    };
+
+    let state = structuredClone(defaultState);
+    let tickInterval = null;
+    let revealTimeout = null;
+
+    function normalizeState(data) {
+      const safe = { ...structuredClone(defaultState), ...(data || {}) };
+      safe.questions = Array.isArray(safe.questions) ? safe.questions : [];
+      safe.winners = Array.isArray(safe.winners) ? safe.winners : [];
+      safe.currentIndex = Number.isInteger(safe.currentIndex) ? safe.currentIndex : parseInt(safe.currentIndex, 10);
+      if (Number.isNaN(safe.currentIndex) || safe.currentIndex < 0) safe.currentIndex = 0;
+      if (safe.questions.length > 0 && safe.currentIndex >= safe.questions.length) safe.currentIndex = 0;
+      safe.currentTimer = Number.isFinite(Number(safe.currentTimer)) ? Number(safe.currentTimer) : 10;
+      safe.defaultTimer = Number.isFinite(Number(safe.defaultTimer)) ? Number(safe.defaultTimer) : 10;
+      safe.revealDuration = Number.isFinite(Number(safe.revealDuration)) ? Number(safe.revealDuration) : 3;
+      safe.heading = safe.heading || defaultState.heading;
+      safe.subheading = safe.subheading || defaultState.subheading;
+      safe.theme = safe.theme || "purple";
+      return safe;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function render() {
+      document.body.className = "theme-" + (state.theme || "purple");
+
+      const quizScreen = document.getElementById("quizScreen");
+      const certificateScreen = document.getElementById("certificateScreen");
+
+      if (state.showCertificate) {
+        quizScreen.classList.add("hide");
+        certificateScreen.classList.add("show");
+        renderCertificate();
+        return;
+      } else {
+        quizScreen.classList.remove("hide");
+        certificateScreen.classList.remove("show");
+      }
+
+      document.getElementById("heading").textContent = state.heading;
+      document.getElementById("subheading").textContent = state.subheading;
+      document.getElementById("timer").textContent = state.currentTimer;
 
       const total = state.questions.length;
-      if (!total) return;
+      const currentDisplayIndex = total > 0 ? state.currentIndex + 1 : 0;
+      document.getElementById("questionCount").textContent = `Question ${currentDisplayIndex} / ${total}`;
+      document.getElementById("quizStateLabel").textContent =
+        state.answerRevealed ? "Answer Revealed" : (state.isRunning ? "Live" : "Waiting");
 
-      if (state.currentIndex < total - 1) {
-        await updateDoc(quizRef, {
-          currentIndex: state.currentIndex + 1,
-          currentTimer: state.defaultTimer || 10,
-          answerRevealed: false
-        });
-      } else {
-        await updateDoc(quizRef, {
-          isRunning: false,
-          showCertificate: true
+      const q = total > 0 ? state.questions[state.currentIndex] : null;
+      document.getElementById("questionText").textContent = q ? q.question : "Add questions from admin";
+
+      const optionsBox = document.getElementById("optionsBox");
+      optionsBox.innerHTML = "";
+
+      if (q && Array.isArray(q.options)) {
+        q.options.forEach((opt, i) => {
+          const div = document.createElement("div");
+          let cls = "opt";
+
+          if (state.answerRevealed) {
+            if (i === q.correctIndex) cls += " reveal-correct";
+            else cls += " dim";
+          }
+
+          div.className = cls;
+          div.innerHTML = `
+            <div class="letter">${String.fromCharCode(65 + i)}</div>
+            <div class="text">${escapeHtml(opt)}</div>
+          `;
+          optionsBox.appendChild(div);
         });
       }
-    }, (state.revealDuration || 3) * 1000);
-  }
 
-  onSnapshot(quizRef, (snap) => {
-    if (!snap.exists()) return;
-
-    const prevReveal = !!state.answerRevealed;
-    state = normalizeState(snap.data());
-    render();
-
-    if (!prevReveal && state.answerRevealed) {
-      fireConfetti();
-      scheduleAutoNext();
+      document.getElementById("celebrateBox").classList.toggle("show", !!state.answerRevealed);
     }
-  });
 
-  startTicker();
-</script>
+    function renderCertificate() {
+      document.getElementById("certSub").textContent =
+        state.winners.length ? "Congratulations to our top winners!" : "Quiz completed.";
+
+      const grid = document.getElementById("winnerGrid");
+      grid.innerHTML = "";
+
+      if (!state.winners.length) {
+        grid.innerHTML = `<div class="emptyWinners">No winners added yet.</div>`;
+        return;
+      }
+
+      state.winners.slice(0, 10).forEach((name, idx) => {
+        const card = document.createElement("div");
+        card.className = "winnerCard";
+        card.innerHTML = `
+          <div class="rank">${idx + 1}</div>
+          <div>
+            <div class="winnerName">${escapeHtml(name)}</div>
+            <div class="winnerTextSmall">Certified Winner</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function fireConfetti() {
+      const layer = document.getElementById("confetti");
+      layer.innerHTML = "";
+      const colors = ["#7c5cff", "#32c5ff", "#2dd381", "#ffd166", "#ff7f50", "#ffffff"];
+
+      for (let i = 0; i < 80; i++) {
+        const piece = document.createElement("div");
+        piece.className = "piece";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 0.4 + "s";
+        piece.style.transform = `rotate(${Math.random() * 180}deg)`;
+        layer.appendChild(piece);
+      }
+
+      setTimeout(() => { layer.innerHTML = ""; }, 2600);
+    }
+
+    async function tickOnce() {
+      if (!state.isRunning) return;
+      if (state.answerRevealed) return;
+      if (!state.questions.length) return;
+      if (state.showCertificate) return;
+
+      if (state.currentTimer > 0) {
+        const newTime = state.currentTimer - 1;
+        state.currentTimer = newTime;
+        render();
+
+        await updateDoc(quizRef, { currentTimer: newTime });
+
+        if (newTime === 0) {
+          await updateDoc(quizRef, { answerRevealed: true });
+        }
+      }
+    }
+
+    function startTicker() {
+      if (tickInterval) clearInterval(tickInterval);
+      tickInterval = setInterval(tickOnce, 1000);
+    }
+
+    function scheduleAutoNext() {
+      if (revealTimeout) clearTimeout(revealTimeout);
+
+      revealTimeout = setTimeout(async () => {
+        if (state.showCertificate) return;
+        const total = state.questions.length;
+        if (!total) return;
+
+        if (state.currentIndex < total - 1) {
+          await updateDoc(quizRef, {
+            currentIndex: state.currentIndex + 1,
+            currentTimer: state.defaultTimer || 10,
+            answerRevealed: false
+          });
+        } else {
+          await updateDoc(quizRef, {
+            isRunning: false,
+            showCertificate: true
+          });
+        }
+      }, (state.revealDuration || 3) * 1000);
+    }
+
+    onSnapshot(quizRef, (snap) => {
+      if (!snap.exists()) return;
+
+      const prevReveal = !!state.answerRevealed;
+      state = normalizeState(snap.data());
+      render();
+
+      if (!prevReveal && state.answerRevealed) {
+        fireConfetti();
+        scheduleAutoNext();
+      }
+    }, (error) => {
+      console.error("Display snapshot error:", error);
+    });
+
+    startTicker();
+  </script>
+</body>
+</html>
