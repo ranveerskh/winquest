@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Quiz Admin</title>
+  <title>WinQuest Quiz Admin</title>
   <style>
     * { box-sizing: border-box; }
     :root{
@@ -27,10 +27,10 @@
       padding:18px;
     }
     .wrap{
-      max-width:1450px;
+      max-width:1480px;
       margin:auto;
       display:grid;
-      grid-template-columns:1.2fr .9fr;
+      grid-template-columns:1.2fr .95fr;
       gap:18px;
     }
     .panel{
@@ -43,7 +43,13 @@
     h1,h2,h3{ margin:0 0 12px; }
     h1{ font-size:30px; }
     h2{ font-size:20px; }
-    h3{ font-size:14px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+    h3{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
     .row{ margin-bottom:14px; }
     .grid{
       display:grid;
@@ -76,9 +82,6 @@
       min-height:290px;
       resize:vertical;
       line-height:1.55;
-    }
-    .small-textarea textarea{
-      min-height:120px;
     }
     .btns{
       display:flex;
@@ -113,7 +116,7 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      max-height:300px;
+      max-height:350px;
       overflow:auto;
       padding-right:4px;
     }
@@ -140,7 +143,7 @@
     }
     .winner-row{
       display:grid;
-      grid-template-columns:1fr auto auto;
+      grid-template-columns:1fr auto auto auto;
       gap:8px;
       align-items:center;
       margin-bottom:8px;
@@ -162,26 +165,36 @@
       border:1px solid var(--line);
       border-radius:14px;
       padding:14px;
-      line-height:1.6;
+      line-height:1.7;
       color:var(--muted);
       font-size:14px;
     }
     .status b{ color:var(--text); }
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
     @media (max-width: 1100px){
       .wrap{ grid-template-columns:1fr; }
+    }
+    @media (max-width: 700px){
+      .grid, .grid3{ grid-template-columns:1fr; }
+      .winner-row{ grid-template-columns:1fr auto auto; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <h1>Live Quiz Admin</h1>
-      <div class="hint">Paste MCQs, control timer, run the quiz, add winners live, and show the final certificate screen.</div>
+      <h1>WinQuest Quiz Admin</h1>
+      <div class="hint">Paste MCQs, control timer, run the quiz, add winners live, and switch to the final certificate screen.</div>
 
       <div class="grid row" style="margin-top:16px;">
         <div>
           <label>Heading</label>
-          <input id="heading" placeholder="Type heading..." value="ThinkVerse Live Quiz Night" />
+          <input id="heading" placeholder="Type heading..." value="WinQuest Live Quiz Night" />
         </div>
         <div>
           <label>Subheading</label>
@@ -195,7 +208,7 @@
           <input id="defaultTimer" type="number" min="1" max="30" value="10" />
         </div>
         <div>
-          <label>Reveal / Celebration Duration (sec)</label>
+          <label>Reveal / Celebration Duration (1–10 sec)</label>
           <input id="revealDuration" type="number" min="1" max="10" value="3" />
         </div>
         <div>
@@ -212,27 +225,23 @@
 
       <div class="row">
         <label>Paste MCQs here</label>
-        <textarea id="bulkInput" placeholder="Supported formats:
-
-Q: What is the capital of Canada?
+        <textarea id="bulkInput" placeholder="Q: What is the capital of Canada?
 A: Toronto
 B: Vancouver
 C: Ottawa [correct]
 D: Montreal
 
-OR
-
-What is the capital of Canada?
-A) Toronto
-B) Vancouver
-C) Ottawa *
-D) Montreal"></textarea>
+Q: Which planet is known as the Red Planet?
+A: Earth
+B: Mars *
+C: Jupiter
+D: Venus"></textarea>
         <div class="hint">
-          Use exactly 4 options for each question. Mark one correct option using <b>*</b> or <b>[correct]</b>.
+          Use exactly 4 options per question. Mark one correct option with <b>*</b> or <b>[correct]</b>.
         </div>
       </div>
 
-      <div class="btns row">
+      <div class="top-actions">
         <button class="primary" onclick="parseAndSaveQuestions()">Parse & Save Questions</button>
         <button class="ghost" onclick="previewQuestions()">Preview Parsed</button>
         <button class="danger" onclick="clearQuestions()">Clear All Questions</button>
@@ -255,7 +264,7 @@ D) Montreal"></textarea>
         <div class="grid3" style="margin-top:10px;">
           <button class="ghost" onclick="setCurrentTimer()">Edit Current Timer</button>
           <button class="danger" onclick="endQuizNow()">End Quiz</button>
-          <button class="primary" onclick="showCertificate()">Show Winners Screen</button>
+          <button class="primary" onclick="showCertificateScreen()">Show Winners Screen</button>
         </div>
       </div>
 
@@ -288,11 +297,20 @@ D) Montreal"></textarea>
     </div>
   </div>
 
-  <script>
-    const STORAGE_KEY = "liveQuizAppState_v1";
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import {
+      doc,
+      getDoc,
+      setDoc,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const quizRef = doc(db, "liveQuiz", "current");
 
     const defaultState = {
-      heading: "ThinkVerse Live Quiz Night",
+      heading: "WinQuest Live Quiz Night",
       subheading: "Comment the correct answer before time runs out",
       theme: "purple",
       defaultTimer: 10,
@@ -301,36 +319,27 @@ D) Montreal"></textarea>
       currentIndex: 0,
       currentTimer: 10,
       isRunning: false,
-      isPaused: false,
       answerRevealed: false,
       showCertificate: false,
       winners: [],
-      endMessage: "Congratulations to our top winners!"
+      updatedAt: null
     };
 
-    let state = loadState();
+    let state = structuredClone(defaultState);
 
-    function loadState() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return structuredClone(defaultState);
-      try {
-        return { ...structuredClone(defaultState), ...JSON.parse(saved) };
-      } catch {
-        return structuredClone(defaultState);
-      }
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      renderAll();
-    }
-
-    function syncInputsFromState() {
-      document.getElementById("heading").value = state.heading;
-      document.getElementById("subheading").value = state.subheading;
-      document.getElementById("defaultTimer").value = state.defaultTimer;
-      document.getElementById("revealDuration").value = state.revealDuration;
-      document.getElementById("theme").value = state.theme;
+    function clampNum(value, min, max, fallback) {
+      let n = parseInt(value, 10);
+      if (Number.isNaN(n)) n = fallback;
+      return Math.max(min, Math.min(max, n));
     }
 
     function parseQuestionsFromText(text) {
@@ -368,23 +377,41 @@ D) Montreal"></textarea>
         }
 
         if (question && options.length === 4 && correctIndex >= 0) {
-          parsed.push({
-            question,
-            options,
-            correctIndex
-          });
+          parsed.push({ question, options, correctIndex });
         }
       }
 
       return parsed;
     }
 
-    function parseAndSaveQuestions() {
+    async function saveState() {
+      const payload = {
+        ...state,
+        updatedAt: serverTimestamp()
+      };
+      await setDoc(quizRef, payload, { merge: true });
+    }
+
+    async function ensureDocExists() {
+      const snap = await getDoc(quizRef);
+      if (!snap.exists()) {
+        await setDoc(quizRef, {
+          ...defaultState,
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+
+    async function refreshFromInputsBase() {
       state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
       state.subheading = document.getElementById("subheading").value.trim() || defaultState.subheading;
       state.defaultTimer = clampNum(document.getElementById("defaultTimer").value, 1, 30, 10);
       state.revealDuration = clampNum(document.getElementById("revealDuration").value, 1, 10, 3);
       state.theme = document.getElementById("theme").value;
+    }
+
+    window.parseAndSaveQuestions = async function () {
+      await refreshFromInputsBase();
 
       const raw = document.getElementById("bulkInput").value;
       const questions = parseQuestionsFromText(raw);
@@ -400,38 +427,18 @@ D) Montreal"></textarea>
       state.answerRevealed = false;
       state.showCertificate = false;
       state.isRunning = false;
-      saveState();
-      alert(`${questions.length} questions saved.`);
-    }
 
-    function previewQuestions() {
+      await saveState();
+      alert(`${questions.length} questions saved.`);
+    };
+
+    window.previewQuestions = function () {
       const raw = document.getElementById("bulkInput").value;
       const questions = parseQuestionsFromText(raw);
+      renderPreview(questions);
+    };
 
-      const box = document.getElementById("questionPreview");
-      box.innerHTML = "";
-
-      if (!questions.length) {
-        box.innerHTML = `<div class="item">No valid questions parsed yet.</div>`;
-        return;
-      }
-
-      questions.forEach((q, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <strong>${idx + 1}. ${escapeHtml(q.question)}</strong>
-          ${q.options.map((opt, i) => `
-            <div class="option ${i === q.correctIndex ? "correct" : ""}">
-              ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)} ${i === q.correctIndex ? "✓" : ""}
-            </div>
-          `).join("")}
-        `;
-        box.appendChild(div);
-      });
-    }
-
-    function clearQuestions() {
+    window.clearQuestions = async function () {
       if (!confirm("Clear all questions?")) return;
       state.questions = [];
       state.currentIndex = 0;
@@ -440,127 +447,143 @@ D) Montreal"></textarea>
       state.isRunning = false;
       state.showCertificate = false;
       document.getElementById("bulkInput").value = "";
-      saveState();
-    }
+      await saveState();
+    };
 
-    function startQuiz() {
+    window.startQuiz = async function () {
       if (!state.questions.length) {
         alert("Please add questions first.");
         return;
       }
-      state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
-      state.subheading = document.getElementById("subheading").value.trim() || defaultState.subheading;
-      state.defaultTimer = clampNum(document.getElementById("defaultTimer").value, 1, 30, 10);
-      state.revealDuration = clampNum(document.getElementById("revealDuration").value, 1, 10, 3);
-      state.theme = document.getElementById("theme").value;
+
+      await refreshFromInputsBase();
 
       state.isRunning = true;
       state.showCertificate = false;
+
       if (state.currentTimer < 1 || state.currentTimer > 30) {
         state.currentTimer = state.defaultTimer;
       }
-      saveState();
-    }
 
-    function stopQuiz() {
+      await saveState();
+    };
+
+    window.stopQuiz = async function () {
       state.isRunning = false;
-      saveState();
-    }
+      await saveState();
+    };
 
-    function resetQuiz() {
+    window.resetQuiz = async function () {
       state.currentIndex = 0;
       state.currentTimer = state.defaultTimer;
       state.answerRevealed = false;
       state.isRunning = false;
       state.showCertificate = false;
-      saveState();
-    }
+      await saveState();
+    };
 
-    function nextQuestion() {
+    window.nextQuestion = async function () {
       if (!state.questions.length) return;
+
       if (state.currentIndex < state.questions.length - 1) {
         state.currentIndex++;
         state.currentTimer = state.defaultTimer;
         state.answerRevealed = false;
         state.showCertificate = false;
-        saveState();
       } else {
         state.isRunning = false;
         state.showCertificate = true;
-        saveState();
       }
-    }
 
-    function prevQuestion() {
+      await saveState();
+    };
+
+    window.prevQuestion = async function () {
       if (!state.questions.length) return;
+
       if (state.currentIndex > 0) {
         state.currentIndex--;
         state.currentTimer = state.defaultTimer;
         state.answerRevealed = false;
         state.showCertificate = false;
-        saveState();
+        await saveState();
       }
-    }
+    };
 
-    function revealAnswerNow() {
+    window.revealAnswerNow = async function () {
       state.answerRevealed = true;
-      saveState();
-    }
+      await saveState();
+    };
 
-    function setCurrentTimer() {
-      const value = prompt("Set current question timer (1-30 seconds):", state.currentTimer);
+    window.setCurrentTimer = async function () {
+      const value = prompt("Set current question timer (1-30):", state.currentTimer);
       if (value === null) return;
       state.currentTimer = clampNum(value, 1, 30, state.defaultTimer);
-      saveState();
-    }
+      await saveState();
+    };
 
-    function endQuizNow() {
+    window.endQuizNow = async function () {
       state.isRunning = false;
       state.showCertificate = true;
-      saveState();
-    }
+      await saveState();
+    };
 
-    function showCertificate() {
+    window.showCertificateScreen = async function () {
       state.showCertificate = true;
       state.isRunning = false;
-      saveState();
-    }
+      await saveState();
+    };
 
-    function addWinner() {
+    window.addWinner = async function () {
       const input = document.getElementById("winnerName");
       const name = input.value.trim();
       if (!name) return;
+
       state.winners.unshift(name);
       state.winners = state.winners.slice(0, 10);
       input.value = "";
-      saveState();
-    }
+      await saveState();
+    };
 
-    function removeWinner(index) {
+    window.removeWinner = async function (index) {
       state.winners.splice(index, 1);
-      saveState();
-    }
+      await saveState();
+    };
 
-    function moveWinnerUp(index) {
+    window.moveWinnerUp = async function (index) {
       if (index === 0) return;
       [state.winners[index - 1], state.winners[index]] = [state.winners[index], state.winners[index - 1]];
-      saveState();
-    }
+      await saveState();
+    };
 
-    function moveWinnerDown(index) {
-      if (index >= state.winners.length - 1) return;
-      [state.winners[index + 1], state.winners[index]] = [state.winners[index], state.winners[index + 1]];
-      saveState();
-    }
-
-    function clearWinners() {
+    window.clearWinners = async function () {
       if (!confirm("Clear all winners?")) return;
       state.winners = [];
-      saveState();
+      await saveState();
+    };
+
+    function renderPreview(questionsToRender = state.questions) {
+      const box = document.getElementById("questionPreview");
+      if (!questionsToRender.length) {
+        box.innerHTML = `<div class="item">No saved questions.</div>`;
+        return;
+      }
+
+      box.innerHTML = questionsToRender.map((q, idx) => `
+        <div class="item">
+          <strong>${idx + 1}. ${escapeHtml(q.question)}</strong>
+          ${q.options.map((opt, i) => `
+            <div class="option ${i === q.correctIndex ? "correct" : ""}">
+              ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)} ${i === q.correctIndex ? "✓" : ""}
+            </div>
+          `).join("")}
+        </div>
+      `).join("");
     }
 
     function renderWinners() {
       const box = document.getElementById("winnerList");
+
       if (!state.winners.length) {
         box.innerHTML = `<div class="hint">No winners yet.</div>`;
         return;
@@ -572,33 +595,7 @@ D) Montreal"></textarea>
           <button class="ghost mini" onclick="moveWinnerUp(${idx})">↑</button>
           <button class="danger mini" onclick="removeWinner(${idx})">✕</button>
         </div>
-      `).join("") + state.winners.map((_, idx) => `
-        <div style="display:none" data-down="${idx}"></div>
       `).join("");
-    }
-
-    function renderPreviewFromState() {
-      const box = document.getElementById("questionPreview");
-      box.innerHTML = "";
-
-      if (!state.questions.length) {
-        box.innerHTML = `<div class="item">No saved questions.</div>`;
-        return;
-      }
-
-      state.questions.forEach((q, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <strong>${idx + 1}. ${escapeHtml(q.question)}</strong>
-          ${q.options.map((opt, i) => `
-            <div class="option ${i === q.correctIndex ? "correct" : ""}">
-              ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)} ${i === q.correctIndex ? "✓" : ""}
-            </div>
-          `).join("")}
-        `;
-        box.appendChild(div);
-      });
     }
 
     function renderStatus() {
@@ -616,36 +613,29 @@ D) Montreal"></textarea>
       `;
     }
 
+    function syncInputsFromState() {
+      document.getElementById("heading").value = state.heading || "";
+      document.getElementById("subheading").value = state.subheading || "";
+      document.getElementById("defaultTimer").value = state.defaultTimer ?? 10;
+      document.getElementById("revealDuration").value = state.revealDuration ?? 3;
+      document.getElementById("theme").value = state.theme || "purple";
+    }
+
     function renderAll() {
       syncInputsFromState();
-      renderPreviewFromState();
+      renderPreview();
       renderWinners();
       renderStatus();
     }
 
-    function clampNum(value, min, max, fallback) {
-      let n = parseInt(value, 10);
-      if (Number.isNaN(n)) n = fallback;
-      return Math.max(min, Math.min(max, n));
-    }
+    await ensureDocExists();
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    window.addEventListener("storage", (e) => {
-      if (e.key === STORAGE_KEY) {
-        state = loadState();
-        renderAll();
-      }
+    onSnapshot(quizRef, (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      state = { ...structuredClone(defaultState), ...data };
+      renderAll();
     });
-
-    renderAll();
   </script>
 </body>
 </html>
