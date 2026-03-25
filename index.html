@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Quiz Display</title>
+  <title>WinQuest Quiz Display</title>
   <style>
     * { box-sizing: border-box; }
     :root{
@@ -16,9 +16,6 @@
       --accent:#7c5cff;
       --accent2:#32c5ff;
       --correct:#2dd381;
-      --wrong:rgba(255,255,255,.08);
-      --gold1:#ffd166;
-      --gold2:#ffb703;
     }
 
     body{
@@ -232,7 +229,6 @@
     .certificateScreen.show{ display:block; }
 
     .certificate{
-      position:relative;
       padding:40px 34px;
       border-radius:32px;
       background:
@@ -347,7 +343,7 @@
       <div class="top">
         <div class="glass head">
           <div class="kicker">Live Quiz</div>
-          <div class="heading" id="heading">ThinkVerse Live Quiz Night</div>
+          <div class="heading" id="heading">WinQuest Live Quiz Night</div>
           <div class="subheading" id="subheading">Comment the correct answer before time runs out</div>
         </div>
 
@@ -383,37 +379,42 @@
 
   <div class="confetti" id="confetti"></div>
 
-  <script>
-    const STORAGE_KEY = "liveQuizAppState_v1";
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import {
+      doc,
+      onSnapshot,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-    let state = loadState();
-    let localTicker = null;
-    let lastRevealFlag = false;
-    let lastQuestionIndex = -1;
+    const quizRef = doc(db, "liveQuiz", "current");
 
-    function loadState() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) {
-        return {
-          heading: "ThinkVerse Live Quiz Night",
-          subheading: "Comment the correct answer before time runs out",
-          theme: "purple",
-          defaultTimer: 10,
-          revealDuration: 3,
-          questions: [],
-          currentIndex: 0,
-          currentTimer: 10,
-          isRunning: false,
-          answerRevealed: false,
-          showCertificate: false,
-          winners: []
-        };
-      }
-      return JSON.parse(saved);
-    }
+    const defaultState = {
+      heading: "WinQuest Live Quiz Night",
+      subheading: "Comment the correct answer before time runs out",
+      theme: "purple",
+      defaultTimer: 10,
+      revealDuration: 3,
+      questions: [],
+      currentIndex: 0,
+      currentTimer: 10,
+      isRunning: false,
+      answerRevealed: false,
+      showCertificate: false,
+      winners: []
+    };
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    let state = structuredClone(defaultState);
+    let tickInterval = null;
+    let revealTimeout = null;
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function render() {
@@ -467,8 +468,7 @@
         });
       }
 
-      const celebrate = document.getElementById("celebrateBox");
-      celebrate.classList.toggle("show", !!state.answerRevealed);
+      document.getElementById("celebrateBox").classList.toggle("show", !!state.answerRevealed);
     }
 
     function renderCertificate() {
@@ -499,66 +499,6 @@
       });
     }
 
-    function tickQuiz() {
-      state = loadState();
-
-      if (state.showCertificate) {
-        render();
-        return;
-      }
-
-      if (!state.questions || !state.questions.length) {
-        render();
-        return;
-      }
-
-      if (!state.isRunning) {
-        render();
-        return;
-      }
-
-      if (state.answerRevealed) {
-        render();
-        return;
-      }
-
-      if (state.currentTimer > 0) {
-        state.currentTimer -= 1;
-        saveState();
-        render();
-
-        if (state.currentTimer === 0) {
-          state.answerRevealed = true;
-          saveState();
-          render();
-          fireConfetti();
-          setTimeout(() => {
-            let fresh = loadState();
-
-            if (fresh.showCertificate) return;
-
-            if (fresh.currentIndex < fresh.questions.length - 1) {
-              fresh.currentIndex += 1;
-              fresh.currentTimer = fresh.defaultTimer;
-              fresh.answerRevealed = false;
-              saveStateDirect(fresh);
-            } else {
-              fresh.isRunning = false;
-              fresh.showCertificate = true;
-              saveStateDirect(fresh);
-            }
-
-            state = loadState();
-            render();
-          }, (state.revealDuration || 3) * 1000);
-        }
-      }
-    }
-
-    function saveStateDirect(obj) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-    }
-
     function fireConfetti() {
       const layer = document.getElementById("confetti");
       layer.innerHTML = "";
@@ -581,32 +521,73 @@
       }, 2600);
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    async function tickOnce() {
+      if (!state.isRunning) return;
+      if (state.answerRevealed) return;
+      if (!state.questions?.length) return;
+      if (state.showCertificate) return;
+
+      if (state.currentTimer > 0) {
+        const newTime = state.currentTimer - 1;
+        state.currentTimer = newTime;
+        render();
+
+        await updateDoc(quizRef, {
+          currentTimer: newTime
+        });
+
+        if (newTime === 0) {
+          await updateDoc(quizRef, {
+            answerRevealed: true
+          });
+        }
+      }
     }
 
-    window.addEventListener("storage", (e) => {
-      if (e.key === STORAGE_KEY) {
-        const newState = loadState();
+    function startTicker() {
+      if (tickInterval) clearInterval(tickInterval);
+      tickInterval = setInterval(tickOnce, 1000);
+    }
 
-        if (!lastRevealFlag && newState.answerRevealed) {
-          fireConfetti();
+    function scheduleAutoNext() {
+      if (revealTimeout) clearTimeout(revealTimeout);
+
+      revealTimeout = setTimeout(async () => {
+        if (state.showCertificate) return;
+
+        const total = state.questions?.length || 0;
+        if (!total) return;
+
+        if (state.currentIndex < total - 1) {
+          await updateDoc(quizRef, {
+            currentIndex: state.currentIndex + 1,
+            currentTimer: state.defaultTimer || 10,
+            answerRevealed: false
+          });
+        } else {
+          await updateDoc(quizRef, {
+            isRunning: false,
+            showCertificate: true
+          });
         }
+      }, (state.revealDuration || 3) * 1000);
+    }
 
-        lastRevealFlag = !!newState.answerRevealed;
-        lastQuestionIndex = newState.currentIndex;
-        state = newState;
-        render();
+    onSnapshot(quizRef, (snap) => {
+      if (!snap.exists()) return;
+
+      const prevReveal = !!state.answerRevealed;
+      const data = snap.data();
+      state = { ...structuredClone(defaultState), ...data };
+      render();
+
+      if (!prevReveal && state.answerRevealed) {
+        fireConfetti();
+        scheduleAutoNext();
       }
     });
 
-    render();
-    localTicker = setInterval(tickQuiz, 1000);
+    startTicker();
   </script>
 </body>
 </html>
