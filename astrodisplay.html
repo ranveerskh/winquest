@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astro Display</title>
+  <style>
+    :root{
+      --bg1:#070b18;
+      --bg2:#121938;
+      --card:rgba(255,255,255,0.08);
+      --border:rgba(255,255,255,0.13);
+      --text:#ffffff;
+      --muted:#cbd5e1;
+      --purple:#8b5cf6;
+      --pink:#ec4899;
+      --blue:#3b82f6;
+      --green:#10b981;
+      --yellow:#f59e0b;
+      --shadow:0 18px 50px rgba(0,0,0,0.35);
+      --radius:24px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(139,92,246,0.22), transparent 20%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,0.18), transparent 20%),
+        radial-gradient(circle at 50% 100%, rgba(59,130,246,0.15), transparent 25%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      padding:20px;
+    }
+
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+
+    .brand{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px 20px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+      flex:1 1 300px;
+    }
+
+    .brand h1{
+      font-size:clamp(24px, 5vw, 40px);
+      margin-bottom:6px;
+    }
+
+    .brand p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .links a{
+      text-decoration:none;
+      color:#fff;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:bold;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+      box-shadow:var(--shadow);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.15fr 0.85fr;
+      gap:20px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:20px;
+      backdrop-filter:blur(14px);
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      min-height:460px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .hero-top{
+      text-align:center;
+      margin-bottom:18px;
+    }
+
+    .hero-top .mini{
+      color:#f5d0fe;
+      font-weight:700;
+      letter-spacing:1px;
+      margin-bottom:12px;
+      font-size:14px;
+      text-transform:uppercase;
+    }
+
+    .hero-top .name{
+      font-size:clamp(34px, 8vw, 76px);
+      font-weight:900;
+      line-height:1.05;
+      margin-bottom:14px;
+      word-break:break-word;
+    }
+
+    .hero-top .title{
+      font-size:clamp(20px, 4vw, 34px);
+      color:#f0abfc;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+
+    .message{
+      font-size:clamp(17px, 2.2vw, 22px);
+      line-height:1.7;
+      color:#e2e8f0;
+      max-width:850px;
+      margin:0 auto;
+    }
+
+    .chips{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:22px;
+    }
+
+    .chip{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+    }
+
+    .chip-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:7px;
+    }
+
+    .chip-value{
+      font-size:24px;
+      font-weight:800;
+    }
+
+    .controls{
+      margin-top:22px;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      padding:15px 18px;
+      border-radius:16px;
+      color:#fff;
+      font-weight:800;
+      font-size:15px;
+      transition:transform .15s ease;
+    }
+
+    .btn:hover{ transform:translateY(-1px); }
+    .btn:active{ transform:translateY(1px); }
+
+    .btn-main{
+      background:linear-gradient(135deg, var(--purple), var(--pink));
+      min-width:190px;
+    }
+
+    .btn-secondary{
+      background:linear-gradient(135deg, var(--blue), #7c3aed);
+      min-width:160px;
+    }
+
+    .btn-reset{
+      background:linear-gradient(135deg, #d97706, #f59e0b);
+      min-width:140px;
+    }
+
+    .side-stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+    }
+
+    .stat .num{
+      font-size:30px;
+      font-weight:900;
+      margin-bottom:6px;
+    }
+
+    .stat .label{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .subhead{
+      font-size:22px;
+      margin-bottom:12px;
+      font-weight:800;
+    }
+
+    .small{
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+      margin-bottom:12px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:560px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .item{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .item-name{
+      font-size:17px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .item-title{
+      color:#f0abfc;
+      font-weight:700;
+      margin-bottom:5px;
+      font-size:14px;
+    }
+
+    .item-meta{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed rgba(255,255,255,0.2);
+      border-radius:18px;
+      padding:24px 12px;
+      background:rgba(255,255,255,0.04);
+    }
+
+    .live-finished{
+      margin-top:20px;
+    }
+
+    .footer-note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+
+    @media (max-width: 900px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      .chips{
+        grid-template-columns:1fr;
+      }
+
+      .side-stats{
+        grid-template-columns:1fr;
+      }
+
+      .controls .btn{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>🔮 Astro Live Display</h1>
+        <p>Pick a random name and show a built-in destiny result live.</p>
+      </div>
+
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="astroadmin.html" target="_blank">Open Admin</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel hero">
+        <div>
+          <div class="hero-top">
+            <div class="mini">Current Live Result</div>
+            <div class="name" id="displayName">Mystery Name</div>
+            <div class="title" id="displayTitle">Press the button to reveal a result</div>
+            <div class="message" id="displayMessage">
+              Your live astrology-style result will appear here. If no admin names are added,
+              the page will use a random built-in name.
+            </div>
+          </div>
+
+          <div class="chips">
+            <div class="chip">
+              <div class="chip-label">Lucky Number</div>
+              <div class="chip-value" id="luckyNumber">--</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Lucky Color</div>
+              <div class="chip-value" id="luckyColor">--</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Energy</div>
+              <div class="chip-value" id="energyLevel">--</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="controls">
+            <button class="btn btn-main" id="randomBtn">Random Name</button>
+            <button class="btn btn-secondary" id="randomBuiltBtn">Random Fallback Name</button>
+            <button class="btn btn-reset" id="resetBtn">Reset Live</button>
+          </div>
+          <div class="footer-note">
+            Finished names appear at the end of the page automatically.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="subhead">Live Status</div>
+        <div class="side-stats">
+          <div class="stat">
+            <div class="num" id="pendingCount">0</div>
+            <div class="label">Pending</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="finishedCount">0</div>
+            <div class="label">Finished</div>
+          </div>
+        </div>
+
+        <div class="subhead">Pending Names</div>
+        <div class="small">These are the names waiting to be picked from admin.</div>
+        <div class="list" id="pendingList"></div>
+      </div>
+    </div>
+
+    <div class="panel live-finished">
+      <div class="subhead">Finished Live</div>
+      <div class="small">All completed results are shown here.</div>
+      <div class="list" id="finishedList"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      names: "astro_names",
+      finished: "astro_finished",
+      current: "astro_current_result"
+    };
+
+    const fallbackNames = [
+      "Aman", "Simran", "Karan", "Mehak", "Rahul", "Priya", "Arjun", "Neha",
+      "Jaspreet", "Navdeep", "Gurleen", "Manpreet", "Sandeep", "Tanya", "Rohit", "Aarti",
+      "Riya", "Kabir", "Anmol", "Nisha", "Jashan", "Mahi", "Harman", "Komal"
+    ];
+
+    const astroResults = [
+      { title:"Big Success Coming", message:"A delayed task is moving in your favor. The next step may look small, but it opens a much bigger road for you.", color:"Blue", energy:"Strong" },
+      { title:"Money Luck Rising", message:"A money-related matter shows movement. Be alert with spending because one smart choice can help you more than expected.", color:"Green", energy:"High" },
+      { title:"Love Energy Strong", message:"Your emotional side is becoming more magnetic. Someone may notice your value more clearly than before.", color:"Pink", energy:"Warm" },
+      { title:"New Opportunity Near", message:"A fresh chance may arrive through a person, message, or unexpected situation. Stay open and quick in response.", color:"Purple", energy:"Active" },
+      { title:"Good News Soon", message:"A positive update is close. Something you were mentally carrying may feel lighter very soon.", color:"Yellow", energy:"Bright" },
+      { title:"Hidden Jealousy Around You", message:"Not everyone around you is celebrating your growth. Protect your energy and avoid sharing every plan too early.", color:"Black", energy:"Alert" },
+      { title:"Travel Sign Appearing", message:"Movement is around you. It may be a short trip, sudden outing, or a bigger journey starting from a small plan.", color:"Sky Blue", energy:"Moving" },
+      { title:"Someone Missing You", message:"A person from your past or distance may still think about you. A call or memory may reconnect that energy.", color:"Silver", energy:"Soft" },
+      { title:"Hard Work Pays Off", message:"Your effort has not gone unseen. Results may come after a delay, but the reward looks meaningful.", color:"Orange", energy:"Stable" },
+      { title:"Unexpected Call Coming", message:"Watch for surprise communication. A message, update, or phone call may shift your mood quickly.", color:"White", energy:"Open" },
+      { title:"Confidence Returning", message:"A weaker phase is ending. You are stepping back into your own power with more clarity.", color:"Red", energy:"Bold" },
+      { title:"Past Issue Closing", message:"An old stress is losing its hold. You may finally feel ready to move ahead without carrying that same weight.", color:"Brown", energy:"Healing" },
+      { title:"Family Support Strong", message:"Support may come from family or from someone who feels like family. Do not assume you are alone in this.", color:"Cream", energy:"Grounded" },
+      { title:"Lucky Timing Today", message:"Timing is helping you. Even simple actions can work in your favor if you stop delaying them.", color:"Gold", energy:"Lucky" },
+      { title:"Emotional Healing", message:"Your heart is calming down. A painful thought may still visit, but it is losing power over you.", color:"Lavender", energy:"Gentle" },
+      { title:"Decision Clarity", message:"Confusion is reducing. You may soon see what deserves your yes and what deserves your no.", color:"Navy", energy:"Clear" },
+      { title:"Recognition Ahead", message:"Your name may get noticed in a place where you thought no one was paying attention.", color:"Maroon", energy:"Rising" },
+      { title:"Delayed Win Arrives", message:"Something late is not lost. The result may come after patience, but it can still land in your favor.", color:"Teal", energy:"Patient" },
+      { title:"Fresh Start Energy", message:"This is a reset moment. You do not need a perfect plan, only a clean beginning.", color:"Mint", energy:"Fresh" },
+      { title:"Relationship Warning", message:"Be careful with emotional assumptions. A calm conversation can save unnecessary distance.", color:"Grey", energy:"Watchful" },
+      { title:"Wish Manifesting", message:"One desire you keep repeating mentally is gathering momentum. Stay consistent with your actions.", color:"Rose", energy:"Magnetic" },
+      { title:"Career Push", message:"A work or skill-related boost is visible. Keep showing up even if the pace feels slow right now.", color:"Indigo", energy:"Focused" },
+      { title:"Lucky People Around", message:"Helpful people are entering your circle. One connection may matter more than you realize.", color:"Emerald", energy:"Supported" },
+      { title:"Silent Breakthrough", message:"Your biggest progress may happen quietly before others even notice it.", color:"Charcoal", energy:"Deep" },
+      { title:"Heart Wants Truth", message:"You may feel pushed to stop pretending about one emotional matter. Honesty will help you breathe easier.", color:"Coral", energy:"Real" },
+      { title:"Message From Destiny", message:"Something random may actually guide you. A sentence, person, or sign may hit you at the right time.", color:"Violet", energy:"Mystic" },
+      { title:"Protection Around You", message:"A difficult situation may not hit as hard as expected. Invisible protection is working in your favor.", color:"Turquoise", energy:"Protected" },
+      { title:"Victory After Pressure", message:"Pressure built you stronger than you think. You are closer to a win than your mood suggests.", color:"Crimson", energy:"Powerful" },
+      { title:"Lucky News in Love", message:"A soft emotional moment may surprise you. Love energy looks responsive and active.", color:"Magenta", energy:"Romantic" },
+      { title:"Mind Needs Rest", message:"Too much overthinking is blocking your natural luck. Slow your mind before making the next move.", color:"Ice Blue", energy:"Low" },
+      { title:"Change in Circle", message:"Your social energy is shifting. Some people fade while new ones begin to matter more.", color:"Olive", energy:"Turning" },
+      { title:"Blessing Through Delay", message:"A delay may secretly protect you from the wrong outcome. Let the timing reveal itself.", color:"Beige", energy:"Balanced" },
+      { title:"Strong Intuition", message:"Trust your first internal signal today. Your instinct is sharper than usual.", color:"Purple", energy:"Psychic" },
+      { title:"Unexpected Relief", message:"A burden may reduce suddenly. Something stressful can become manageable faster than expected.", color:"Aqua", energy:"Relieved" },
+      { title:"Your Name Is Rising", message:"Your presence is becoming stronger. Even quiet efforts are building your image.", color:"Royal Blue", energy:"Upward" },
+      { title:"New Door Opening", message:"A closed road is forcing you toward a better one. Stay flexible instead of stubborn.", color:"Amber", energy:"Expanding" },
+      { title:"Inner Strength Activated", message:"You have more fight in you than recent days made you feel. The spark is coming back.", color:"Ruby", energy:"Fierce" },
+      { title:"Money Caution", message:"Luck is present, but careless choices can drain it. Avoid impulsive spending or promises.", color:"Dark Green", energy:"Careful" },
+      { title:"Peaceful Shift", message:"A calmer atmosphere is building around you. Tension may slowly dissolve with less effort than expected.", color:"Pearl", energy:"Peaceful" },
+      { title:"Spotlight Moment", message:"Attention may come toward you unexpectedly. Be ready to present yourself with confidence.", color:"Sun Yellow", energy:"Visible" },
+      { title:"A Secret Will Surface", message:"Something hidden may come out soon. This can help you see a person or situation more clearly.", color:"Smoke Grey", energy:"Revealing" },
+      { title:"Healing Through Distance", message:"Stepping back from one person or issue may actually help your heart settle.", color:"Soft Blue", energy:"Recovering" },
+      { title:"Fast Movement Ahead", message:"A slow phase may suddenly become busy. Keep yourself mentally ready for quick decisions.", color:"Electric Blue", energy:"Fast" },
+      { title:"Lucky Collaboration", message:"Working with someone else may bring better results than trying to do everything alone.", color:"Sea Green", energy:"Connected" },
+      { title:"Old Fear Weakening", message:"The thing that scared you is losing control over you. You are outgrowing it.", color:"Copper", energy:"Brave" },
+      { title:"Personal Glow Up", message:"Your aura is improving. Others may start reacting to your confidence, style, or clarity.", color:"Rose Gold", energy:"Attractive" },
+      { title:"Clear Win in Sight", message:"The road is not fully finished, but the direction is finally becoming obvious.", color:"Steel Blue", energy:"Certain" },
+      { title:"Destiny Test", message:"You may be tested in patience, attitude, or trust. Pass the moment calmly and the reward follows.", color:"Deep Purple", energy:"Tested" },
+      { title:"Support From Unexpected Side", message:"Help may come from a person you were not even counting on. Stay respectful and open.", color:"Jade", energy:"Blessed" },
+      { title:"Bold Move Favored", message:"This is not the time to stay frozen. A brave but smart move may shift things in your favor.", color:"Scarlet", energy:"Courageous" }
+    ];
+
+    function getNames() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.names) || "[]");
+    }
+
+    function saveNames(arr) {
+      localStorage.setItem(STORAGE_KEYS.names, JSON.stringify(arr));
+    }
+
+    function getFinished() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.finished) || "[]");
+    }
+
+    function saveFinished(arr) {
+      localStorage.setItem(STORAGE_KEYS.finished, JSON.stringify(arr));
+    }
+
+    function getCurrent() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.current) || "null");
+    }
+
+    function saveCurrent(obj) {
+      if (obj === null) {
+        localStorage.removeItem(STORAGE_KEYS.current);
+      } else {
+        localStorage.setItem(STORAGE_KEYS.current, JSON.stringify(obj));
+      }
+    }
+
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function makeLuckyNumber() {
+      return Math.floor(Math.random() * 9) + 1;
+    }
+
+    function buildResult(name, isFallback = false) {
+      const result = randomFrom(astroResults);
+
+      return {
+        id: Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+        name,
+        title: result.title,
+        message: result.message,
+        luckyNumber: makeLuckyNumber(),
+        luckyColor: result.color,
+        energy: result.energy,
+        fallback: isFallback,
+        createdAt: new Date().toLocaleString()
+      };
+    }
+
+    function pickRandomName() {
+      const names = getNames();
+
+      if (names.length > 0) {
+        const randomIndex = Math.floor(Math.random() * names.length);
+        const selected = names[randomIndex];
+
+        names.splice(randomIndex, 1);
+        saveNames(names);
+
+        const result = buildResult(selected.name, false);
+        saveCurrent(result);
+
+        const finished = getFinished();
+        finished.unshift(result);
+        saveFinished(finished);
+
+        renderAll();
+        return;
+      }
+
+      pickRandomFallbackName();
+    }
+
+    function pickRandomFallbackName() {
+      const name = randomFrom(fallbackNames);
+      const result = buildResult(name, true);
+      saveCurrent(result);
+      renderAll();
+    }
+
+    function resetLive() {
+      saveCurrent(null);
+      renderAll();
+    }
+
+    function renderHero() {
+      const current = getCurrent();
+
+      const nameEl = document.getElementById("displayName");
+      const titleEl = document.getElementById("displayTitle");
+      const msgEl = document.getElementById("displayMessage");
+      const luckyNumEl = document.getElementById("luckyNumber");
+      const luckyColorEl = document.getElementById("luckyColor");
+      const energyEl = document.getElementById("energyLevel");
+
+      if (!current) {
+        nameEl.textContent = "Mystery Name";
+        titleEl.textContent = "Press the button to reveal a result";
+        msgEl.textContent = "Your live astrology-style result will appear here. If no admin names are added, the page will use a random built-in name.";
+        luckyNumEl.textContent = "--";
+        luckyColorEl.textContent = "--";
+        energyEl.textContent = "--";
+        return;
+      }
+
+      nameEl.textContent = current.name;
+      titleEl.textContent = current.title + (current.fallback ? " (Fallback)" : "");
+      msgEl.textContent = current.message;
+      luckyNumEl.textContent = current.luckyNumber;
+      luckyColorEl.textContent = current.luckyColor;
+      energyEl.textContent = current.energy;
+    }
+
+    function renderStats() {
+      const pending = getNames().length;
+      const finished = getFinished().length;
+      document.getElementById("pendingCount").textContent = pending;
+      document.getElementById("finishedCount").textContent = finished;
+    }
+
+    function renderPending() {
+      const names = getNames();
+      const list = document.getElementById("pendingList");
+
+      if (!names.length) {
+        list.innerHTML = `<div class="empty">No pending admin names. You can still use the fallback random name button.</div>`;
+        return;
+      }
+
+      list.innerHTML = names.map((item, index) => `
+        <div class="item">
+          <div class="item-name">${index + 1}. ${escapeHtml(item.name)}</div>
+          <div class="item-meta">Waiting for live result</div>
+        </div>
+      `).join("");
+    }
+
+    function renderFinished() {
+      const finished = getFinished();
+      const list = document.getElementById("finishedList");
+
+      if (!finished.length) {
+        list.innerHTML = `<div class="empty">No finished live results yet.</div>`;
+        return;
+      }
+
+      list.innerHTML = finished.map((item, index) => `
+        <div class="item">
+          <div class="item-name">${index + 1}. ${escapeHtml(item.name)}</div>
+          <div class="item-title">${escapeHtml(item.title)}</div>
+          <div class="item-meta">
+            Lucky Number: ${escapeHtml(item.luckyNumber)} |
+            Lucky Color: ${escapeHtml(item.luckyColor)} |
+            Energy: ${escapeHtml(item.energy)}
+            <br>
+            ${item.fallback ? "Fallback Name" : "Admin Name"} • ${escapeHtml(item.createdAt)}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderAll() {
+      renderHero();
+      renderStats();
+      renderPending();
+      renderFinished();
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.getElementById("randomBtn").addEventListener("click", pickRandomName);
+    document.getElementById("randomBuiltBtn").addEventListener("click", pickRandomFallbackName);
+    document.getElementById("resetBtn").addEventListener("click", resetLive);
+
+    window.addEventListener("storage", renderAll);
+
+    renderAll();
+  </script>
+</body>
+</html>
