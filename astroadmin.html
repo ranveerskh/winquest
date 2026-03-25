@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astro Admin</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#121a33;
+      --card:rgba(255,255,255,0.08);
+      --border:rgba(255,255,255,0.14);
+      --text:#ffffff;
+      --muted:#cbd5e1;
+      --accent1:#8b5cf6;
+      --accent2:#ec4899;
+      --green:#10b981;
+      --red:#ef4444;
+      --yellow:#f59e0b;
+      --blue:#3b82f6;
+      --shadow:0 18px 45px rgba(0,0,0,0.35);
+      --radius:22px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(139,92,246,0.25), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(236,72,153,0.18), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      padding:20px;
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:22px;
+    }
+
+    .titlebox{
+      background:var(--card);
+      border:1px solid var(--border);
+      backdrop-filter:blur(12px);
+      border-radius:var(--radius);
+      padding:18px 20px;
+      box-shadow:var(--shadow);
+      flex:1 1 320px;
+    }
+
+    .titlebox h1{
+      font-size:clamp(24px, 4vw, 38px);
+      margin-bottom:6px;
+    }
+
+    .titlebox p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .navlinks{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .navlinks a{
+      text-decoration:none;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.25));
+      border:1px solid var(--border);
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:bold;
+      box-shadow:var(--shadow);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr 0.9fr;
+      gap:20px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      backdrop-filter:blur(14px);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow);
+    }
+
+    .panel h2{
+      margin-bottom:14px;
+      font-size:22px;
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:16px;
+      line-height:1.5;
+    }
+
+    .form{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .form input{
+      flex:1 1 240px;
+      min-width:0;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      padding:15px 16px;
+      font-size:16px;
+      background:rgba(255,255,255,0.12);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.12);
+    }
+
+    .form input::placeholder{
+      color:#dbeafe;
+      opacity:0.8;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      color:white;
+      font-weight:700;
+      border-radius:14px;
+      padding:14px 16px;
+      transition:transform .15s ease, opacity .2s ease;
+    }
+
+    .btn:hover{ transform:translateY(-1px); }
+    .btn:active{ transform:translateY(1px); }
+
+    .btn-add{ background:linear-gradient(135deg, var(--accent1), var(--accent2)); }
+    .btn-green{ background:linear-gradient(135deg, #059669, #10b981); }
+    .btn-red{ background:linear-gradient(135deg, #dc2626, #ef4444); }
+    .btn-yellow{ background:linear-gradient(135deg, #d97706, #f59e0b); }
+    .btn-blue{ background:linear-gradient(135deg, #2563eb, #3b82f6); }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+    }
+
+    .stat .num{
+      font-size:28px;
+      font-weight:800;
+      margin-bottom:6px;
+    }
+
+    .stat .label{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:520px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .item{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    .name{
+      font-size:17px;
+      font-weight:700;
+      word-break:break-word;
+    }
+
+    .mini{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+
+    .item-buttons{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .tiny-btn{
+      border:none;
+      cursor:pointer;
+      padding:9px 12px;
+      border-radius:12px;
+      font-weight:700;
+      color:#fff;
+    }
+
+    .delete-btn{ background:linear-gradient(135deg, #b91c1c, #ef4444); }
+    .move-btn{ background:linear-gradient(135deg, #2563eb, #7c3aed); }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:25px 10px;
+      border:1px dashed rgba(255,255,255,0.18);
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+    }
+
+    .note{
+      margin-top:14px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    @media (max-width: 860px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 600px){
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      .item{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .item-buttons{
+        width:100%;
+      }
+
+      .tiny-btn{
+        flex:1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="titlebox">
+        <h1>🔮 Astro Admin</h1>
+        <p>Add names for the live astrology result page.</p>
+      </div>
+
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="astrodisplay.html" target="_blank">Open Display</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Add Names</h2>
+        <p class="sub">
+          Just type the name and press add. The display page will pick from these names randomly.
+        </p>
+
+        <div class="form">
+          <input type="text" id="nameInput" placeholder="Enter name..." />
+          <button class="btn btn-add" id="addBtn">Add Name</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-blue" id="addSamplesBtn">Add Sample Names</button>
+          <button class="btn btn-yellow" id="resetFinishedBtn">Reset Finished</button>
+          <button class="btn btn-red" id="clearAllBtn">Clear All</button>
+        </div>
+
+        <p class="note">
+          “Clear All” removes pending names, finished names, and current live result.
+          “Reset Finished” moves finished names back into pending names.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h2>Live Stats</h2>
+        <div class="stats">
+          <div class="stat">
+            <div class="num" id="pendingCount">0</div>
+            <div class="label">Pending Names</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="finishedCount">0</div>
+            <div class="label">Finished Live</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="totalCount">0</div>
+            <div class="label">Total</div>
+          </div>
+        </div>
+
+        <div class="empty" id="currentLiveBox">
+          No live result selected yet.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <h2>Pending Names</h2>
+      <p class="sub">These names are available for the display page to pick.</p>
+      <div class="list" id="namesList"></div>
+    </div>
+
+    <div class="panel" style="margin-top:20px;">
+      <h2>Finished Live</h2>
+      <p class="sub">These names were already shown on the display page.</p>
+      <div class="list" id="finishedList"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      names: "astro_names",
+      finished: "astro_finished",
+      current: "astro_current_result"
+    };
+
+    const sampleNames = [
+      "Aman", "Simran", "Karan", "Mehak", "Rahul", "Priya", "Arjun", "Neha",
+      "Jaspreet", "Nav", "Gurleen", "Manpreet", "Sandeep", "Tanya", "Rohit", "Aarti"
+    ];
+
+    function getNames() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.names) || "[]");
+    }
+
+    function saveNames(arr) {
+      localStorage.setItem(STORAGE_KEYS.names, JSON.stringify(arr));
+    }
+
+    function getFinished() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.finished) || "[]");
+    }
+
+    function saveFinished(arr) {
+      localStorage.setItem(STORAGE_KEYS.finished, JSON.stringify(arr));
+    }
+
+    function getCurrent() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.current) || "null");
+    }
+
+    function saveCurrent(obj) {
+      if (obj === null) {
+        localStorage.removeItem(STORAGE_KEYS.current);
+      } else {
+        localStorage.setItem(STORAGE_KEYS.current, JSON.stringify(obj));
+      }
+    }
+
+    function normalizeName(name) {
+      return name.replace(/\s+/g, " ").trim();
+    }
+
+    function addName() {
+      const input = document.getElementById("nameInput");
+      const raw = input.value;
+      const name = normalizeName(raw);
+
+      if (!name) {
+        alert("Please enter a name.");
+        return;
+      }
+
+      const names = getNames();
+      names.push({
+        id: Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+        name
+      });
+
+      saveNames(names);
+      input.value = "";
+      renderAll();
+    }
+
+    function deletePending(id) {
+      const names = getNames().filter(item => item.id !== id);
+      saveNames(names);
+      renderAll();
+    }
+
+    function deleteFinished(id) {
+      const finished = getFinished().filter(item => item.id !== id);
+      saveFinished(finished);
+      renderAll();
+    }
+
+    function moveFinishedBack(id) {
+      const finished = getFinished();
+      const item = finished.find(x => x.id === id);
+      if (!item) return;
+
+      const newFinished = finished.filter(x => x.id !== id);
+      const names = getNames();
+      names.push({ id: item.id, name: item.name });
+
+      saveFinished(newFinished);
+      saveNames(names);
+      renderAll();
+    }
+
+    function addSampleNames() {
+      const names = getNames();
+      const now = Date.now();
+
+      sampleNames.forEach((name, i) => {
+        names.push({
+          id: now + "_" + i + "_" + Math.random().toString(36).slice(2, 7),
+          name
+        });
+      });
+
+      saveNames(names);
+      renderAll();
+    }
+
+    function clearAll() {
+      if (!confirm("Clear all pending names, finished names, and current live result?")) return;
+
+      saveNames([]);
+      saveFinished([]);
+      saveCurrent(null);
+      renderAll();
+    }
+
+    function resetFinished() {
+      const finished = getFinished();
+      if (!finished.length) {
+        alert("No finished names found.");
+        return;
+      }
+
+      const names = getNames();
+      const merged = [...names, ...finished.map(item => ({ id: item.id, name: item.name }))];
+
+      saveNames(merged);
+      saveFinished([]);
+      saveCurrent(null);
+      renderAll();
+    }
+
+    function renderCurrent() {
+      const current = getCurrent();
+      const box = document.getElementById("currentLiveBox");
+
+      if (!current) {
+        box.innerHTML = "No live result selected yet.";
+        return;
+      }
+
+      box.innerHTML = `
+        <div style="font-size:22px;font-weight:800;margin-bottom:8px;">Current Live: ${escapeHtml(current.name)}</div>
+        <div style="color:#e9d5ff;font-weight:700;margin-bottom:6px;">${escapeHtml(current.title || "Astro Result")}</div>
+        <div style="color:#cbd5e1;line-height:1.6;">${escapeHtml(current.message || "")}</div>
+      `;
+    }
+
+    function renderList() {
+      const names = getNames();
+      const list = document.getElementById("namesList");
+
+      if (!names.length) {
+        list.innerHTML = `<div class="empty">No pending names yet.</div>`;
+        return;
+      }
+
+      list.innerHTML = names.map((item, index) => `
+        <div class="item">
+          <div>
+            <div class="name">${index + 1}. ${escapeHtml(item.name)}</div>
+            <div class="mini">Waiting for display page</div>
+          </div>
+          <div class="item-buttons">
+            <button class="tiny-btn delete-btn" onclick="deletePending('${item.id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderFinishedList() {
+      const finished = getFinished();
+      const list = document.getElementById("finishedList");
+
+      if (!finished.length) {
+        list.innerHTML = `<div class="empty">No finished names yet.</div>`;
+        return;
+      }
+
+      list.innerHTML = finished.map((item, index) => `
+        <div class="item">
+          <div>
+            <div class="name">${index + 1}. ${escapeHtml(item.name)}</div>
+            <div class="mini">${escapeHtml(item.title || "Completed")}</div>
+          </div>
+          <div class="item-buttons">
+            <button class="tiny-btn move-btn" onclick="moveFinishedBack('${item.id}')">Move Back</button>
+            <button class="tiny-btn delete-btn" onclick="deleteFinished('${item.id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderStats() {
+      const pending = getNames().length;
+      const finished = getFinished().length;
+      document.getElementById("pendingCount").textContent = pending;
+      document.getElementById("finishedCount").textContent = finished;
+      document.getElementById("totalCount").textContent = pending + finished;
+    }
+
+    function renderAll() {
+      renderStats();
+      renderCurrent();
+      renderList();
+      renderFinishedList();
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document.getElementById("addBtn").addEventListener("click", addName);
+    document.getElementById("addSamplesBtn").addEventListener("click", addSampleNames);
+    document.getElementById("clearAllBtn").addEventListener("click", clearAll);
+    document.getElementById("resetFinishedBtn").addEventListener("click", resetFinished);
+
+    document.getElementById("nameInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addName();
+    });
+
+    window.addEventListener("storage", renderAll);
+
+    renderAll();
+  </script>
+</body>
+</html>
