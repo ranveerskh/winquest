@@ -40,16 +40,9 @@
       padding:18px;
       box-shadow:0 20px 50px rgba(0,0,0,.25);
     }
-    h1,h2,h3{ margin:0 0 12px; }
+    h1,h2{ margin:0 0 12px; }
     h1{ font-size:30px; }
     h2{ font-size:20px; }
-    h3{
-      font-size:14px;
-      color:var(--muted);
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:1px;
-    }
     .row{ margin-bottom:14px; }
     .grid{
       display:grid;
@@ -83,12 +76,6 @@
       resize:vertical;
       line-height:1.55;
     }
-    .btns{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:10px;
-    }
     button{
       border:none;
       border-radius:14px;
@@ -102,14 +89,17 @@
     .ok{ background:linear-gradient(135deg,#16a34a,var(--ok)); }
     .warn{ background:linear-gradient(135deg,#ff9f1c,var(--warn)); color:#1d1600; }
     .danger{ background:linear-gradient(135deg,#ef476f,var(--danger)); }
-    .ghost{
-      background:#182243;
-      border:1px solid var(--line);
-    }
+    .ghost{ background:#182243; border:1px solid var(--line); }
     .hint{
       color:var(--muted);
       font-size:13px;
       line-height:1.5;
+      margin-top:8px;
+    }
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
       margin-top:8px;
     }
     .list{
@@ -143,7 +133,7 @@
     }
     .winner-row{
       display:grid;
-      grid-template-columns:1fr auto auto auto;
+      grid-template-columns:1fr auto auto;
       gap:8px;
       align-items:center;
       margin-bottom:8px;
@@ -168,20 +158,24 @@
       line-height:1.7;
       color:var(--muted);
       font-size:14px;
+      white-space:pre-wrap;
     }
     .status b{ color:var(--text); }
-    .top-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:8px;
+    .debug{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      background:#091327;
+      border:1px solid #20345f;
+      color:#9fc1ff;
+      font-size:13px;
+      white-space:pre-wrap;
     }
     @media (max-width: 1100px){
       .wrap{ grid-template-columns:1fr; }
     }
     @media (max-width: 700px){
       .grid, .grid3{ grid-template-columns:1fr; }
-      .winner-row{ grid-template-columns:1fr auto auto; }
     }
   </style>
 </head>
@@ -189,16 +183,16 @@
   <div class="wrap">
     <div class="panel">
       <h1>WinQuest Quiz Admin</h1>
-      <div class="hint">Paste MCQs, control timer, run the quiz, add winners live, and switch to the final certificate screen.</div>
+      <div class="hint">This version auto-creates the Firestore document and shows debug messages if something fails.</div>
 
       <div class="grid row" style="margin-top:16px;">
         <div>
           <label>Heading</label>
-          <input id="heading" placeholder="Type heading..." value="WinQuest Live Quiz Night" />
+          <input id="heading" value="WinQuest Live Quiz Night" />
         </div>
         <div>
           <label>Subheading</label>
-          <input id="subheading" placeholder="Type subheading..." value="Comment the correct answer before time runs out" />
+          <input id="subheading" value="Comment the correct answer before time runs out" />
         </div>
       </div>
 
@@ -236,9 +230,7 @@ A: Earth
 B: Mars *
 C: Jupiter
 D: Venus"></textarea>
-        <div class="hint">
-          Use exactly 4 options per question. Mark one correct option with <b>*</b> or <b>[correct]</b>.
-        </div>
+        <div class="hint">Use exactly 4 options. Mark one correct answer with * or [correct].</div>
       </div>
 
       <div class="top-actions">
@@ -284,15 +276,16 @@ D: Venus"></textarea>
         </div>
       </div>
 
-      <div class="btns row">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="danger" onclick="clearWinners()">Clear Winners</button>
       </div>
 
-      <div id="winnerList"></div>
+      <div id="winnerList" style="margin-top:12px;"></div>
 
       <div class="panel" style="padding:14px; margin-top:16px;">
         <h2>Status</h2>
         <div class="status" id="statusBox"></div>
+        <div class="debug" id="debugBox">Loading...</div>
       </div>
     </div>
   </div>
@@ -327,6 +320,12 @@ D: Venus"></textarea>
 
     let state = structuredClone(defaultState);
 
+    function logDebug(msg) {
+      console.log(msg);
+      const box = document.getElementById("debugBox");
+      box.textContent = typeof msg === "string" ? msg : JSON.stringify(msg, null, 2);
+    }
+
     function escapeHtml(str) {
       return String(str)
         .replaceAll("&", "&amp;")
@@ -342,13 +341,27 @@ D: Venus"></textarea>
       return Math.max(min, Math.min(max, n));
     }
 
-    function parseQuestionsFromText(text) {
-      const blocks = text
-        .trim()
-        .split(/\n\s*\n+/)
-        .map(b => b.trim())
-        .filter(Boolean);
+    function normalizeState(data) {
+      const safe = { ...structuredClone(defaultState), ...(data || {}) };
 
+      safe.questions = Array.isArray(safe.questions) ? safe.questions : [];
+      safe.winners = Array.isArray(safe.winners) ? safe.winners : [];
+      safe.currentIndex = Number.isInteger(safe.currentIndex) ? safe.currentIndex : parseInt(safe.currentIndex, 10);
+      if (Number.isNaN(safe.currentIndex) || safe.currentIndex < 0) safe.currentIndex = 0;
+      if (safe.questions.length > 0 && safe.currentIndex >= safe.questions.length) safe.currentIndex = 0;
+
+      safe.currentTimer = Number.isFinite(Number(safe.currentTimer)) ? Number(safe.currentTimer) : 10;
+      safe.defaultTimer = Number.isFinite(Number(safe.defaultTimer)) ? Number(safe.defaultTimer) : 10;
+      safe.revealDuration = Number.isFinite(Number(safe.revealDuration)) ? Number(safe.revealDuration) : 3;
+      safe.heading = safe.heading || defaultState.heading;
+      safe.subheading = safe.subheading || defaultState.subheading;
+      safe.theme = safe.theme || "purple";
+
+      return safe;
+    }
+
+    function parseQuestionsFromText(text) {
+      const blocks = text.trim().split(/\n\s*\n+/).map(b => b.trim()).filter(Boolean);
       const parsed = [];
 
       for (const block of blocks) {
@@ -399,6 +412,9 @@ D: Venus"></textarea>
           ...defaultState,
           updatedAt: serverTimestamp()
         });
+        logDebug("Created Firestore doc: liveQuiz/current");
+      } else {
+        logDebug("Firestore doc already exists");
       }
     }
 
@@ -411,155 +427,222 @@ D: Venus"></textarea>
     }
 
     window.parseAndSaveQuestions = async function () {
-      await refreshFromInputsBase();
+      try {
+        await refreshFromInputsBase();
+        const raw = document.getElementById("bulkInput").value;
+        const questions = parseQuestionsFromText(raw);
 
-      const raw = document.getElementById("bulkInput").value;
-      const questions = parseQuestionsFromText(raw);
+        if (!questions.length) {
+          alert("No valid MCQs found.");
+          return;
+        }
 
-      if (!questions.length) {
-        alert("No valid MCQs found. Use 4 options and mark one correct option with * or [correct].");
-        return;
+        state.questions = questions;
+        state.currentIndex = 0;
+        state.currentTimer = state.defaultTimer;
+        state.answerRevealed = false;
+        state.showCertificate = false;
+        state.isRunning = false;
+
+        await saveState();
+        logDebug(`Saved ${questions.length} questions to Firestore`);
+        alert(`${questions.length} questions saved.`);
+      } catch (err) {
+        console.error(err);
+        logDebug("Parse & Save error:\n" + err.message);
+        alert("Save failed. Check debug box.");
       }
-
-      state.questions = questions;
-      state.currentIndex = 0;
-      state.currentTimer = state.defaultTimer;
-      state.answerRevealed = false;
-      state.showCertificate = false;
-      state.isRunning = false;
-
-      await saveState();
-      alert(`${questions.length} questions saved.`);
     };
 
     window.previewQuestions = function () {
       const raw = document.getElementById("bulkInput").value;
       const questions = parseQuestionsFromText(raw);
       renderPreview(questions);
+      logDebug(`Preview parsed ${questions.length} questions`);
     };
 
     window.clearQuestions = async function () {
-      if (!confirm("Clear all questions?")) return;
-      state.questions = [];
-      state.currentIndex = 0;
-      state.currentTimer = state.defaultTimer;
-      state.answerRevealed = false;
-      state.isRunning = false;
-      state.showCertificate = false;
-      document.getElementById("bulkInput").value = "";
-      await saveState();
+      try {
+        state.questions = [];
+        state.currentIndex = 0;
+        state.currentTimer = state.defaultTimer;
+        state.answerRevealed = false;
+        state.isRunning = false;
+        state.showCertificate = false;
+        document.getElementById("bulkInput").value = "";
+        await saveState();
+        logDebug("Cleared questions");
+      } catch (err) {
+        logDebug("Clear questions error:\n" + err.message);
+      }
     };
 
     window.startQuiz = async function () {
-      if (!state.questions.length) {
-        alert("Please add questions first.");
-        return;
+      try {
+        if (!state.questions.length) {
+          alert("Please add questions first.");
+          return;
+        }
+        await refreshFromInputsBase();
+        state.isRunning = true;
+        state.showCertificate = false;
+        if (state.currentTimer < 1 || state.currentTimer > 30) {
+          state.currentTimer = state.defaultTimer;
+        }
+        await saveState();
+        logDebug("Quiz started");
+      } catch (err) {
+        logDebug("Start quiz error:\n" + err.message);
       }
-
-      await refreshFromInputsBase();
-
-      state.isRunning = true;
-      state.showCertificate = false;
-
-      if (state.currentTimer < 1 || state.currentTimer > 30) {
-        state.currentTimer = state.defaultTimer;
-      }
-
-      await saveState();
     };
 
     window.stopQuiz = async function () {
-      state.isRunning = false;
-      await saveState();
+      try {
+        state.isRunning = false;
+        await saveState();
+        logDebug("Quiz stopped");
+      } catch (err) {
+        logDebug("Stop quiz error:\n" + err.message);
+      }
     };
 
     window.resetQuiz = async function () {
-      state.currentIndex = 0;
-      state.currentTimer = state.defaultTimer;
-      state.answerRevealed = false;
-      state.isRunning = false;
-      state.showCertificate = false;
-      await saveState();
+      try {
+        state.currentIndex = 0;
+        state.currentTimer = state.defaultTimer;
+        state.answerRevealed = false;
+        state.isRunning = false;
+        state.showCertificate = false;
+        await saveState();
+        logDebug("Quiz reset");
+      } catch (err) {
+        logDebug("Reset quiz error:\n" + err.message);
+      }
     };
 
     window.nextQuestion = async function () {
-      if (!state.questions.length) return;
-
-      if (state.currentIndex < state.questions.length - 1) {
-        state.currentIndex++;
-        state.currentTimer = state.defaultTimer;
-        state.answerRevealed = false;
-        state.showCertificate = false;
-      } else {
-        state.isRunning = false;
-        state.showCertificate = true;
+      try {
+        if (!state.questions.length) return;
+        if (state.currentIndex < state.questions.length - 1) {
+          state.currentIndex++;
+          state.currentTimer = state.defaultTimer;
+          state.answerRevealed = false;
+          state.showCertificate = false;
+        } else {
+          state.isRunning = false;
+          state.showCertificate = true;
+        }
+        await saveState();
+        logDebug("Moved to next question");
+      } catch (err) {
+        logDebug("Next question error:\n" + err.message);
       }
-
-      await saveState();
     };
 
     window.prevQuestion = async function () {
-      if (!state.questions.length) return;
-
-      if (state.currentIndex > 0) {
-        state.currentIndex--;
-        state.currentTimer = state.defaultTimer;
-        state.answerRevealed = false;
-        state.showCertificate = false;
-        await saveState();
+      try {
+        if (!state.questions.length) return;
+        if (state.currentIndex > 0) {
+          state.currentIndex--;
+          state.currentTimer = state.defaultTimer;
+          state.answerRevealed = false;
+          state.showCertificate = false;
+          await saveState();
+          logDebug("Moved to previous question");
+        }
+      } catch (err) {
+        logDebug("Previous question error:\n" + err.message);
       }
     };
 
     window.revealAnswerNow = async function () {
-      state.answerRevealed = true;
-      await saveState();
+      try {
+        state.answerRevealed = true;
+        await saveState();
+        logDebug("Answer revealed");
+      } catch (err) {
+        logDebug("Reveal answer error:\n" + err.message);
+      }
     };
 
     window.setCurrentTimer = async function () {
-      const value = prompt("Set current question timer (1-30):", state.currentTimer);
-      if (value === null) return;
-      state.currentTimer = clampNum(value, 1, 30, state.defaultTimer);
-      await saveState();
+      try {
+        const value = prompt("Set current timer (1-30):", state.currentTimer);
+        if (value === null) return;
+        state.currentTimer = clampNum(value, 1, 30, state.defaultTimer);
+        await saveState();
+        logDebug("Current timer updated");
+      } catch (err) {
+        logDebug("Set timer error:\n" + err.message);
+      }
     };
 
     window.endQuizNow = async function () {
-      state.isRunning = false;
-      state.showCertificate = true;
-      await saveState();
+      try {
+        state.isRunning = false;
+        state.showCertificate = true;
+        await saveState();
+        logDebug("Quiz ended");
+      } catch (err) {
+        logDebug("End quiz error:\n" + err.message);
+      }
     };
 
     window.showCertificateScreen = async function () {
-      state.showCertificate = true;
-      state.isRunning = false;
-      await saveState();
+      try {
+        state.showCertificate = true;
+        state.isRunning = false;
+        await saveState();
+        logDebug("Certificate screen shown");
+      } catch (err) {
+        logDebug("Certificate screen error:\n" + err.message);
+      }
     };
 
     window.addWinner = async function () {
-      const input = document.getElementById("winnerName");
-      const name = input.value.trim();
-      if (!name) return;
-
-      state.winners.unshift(name);
-      state.winners = state.winners.slice(0, 10);
-      input.value = "";
-      await saveState();
+      try {
+        const input = document.getElementById("winnerName");
+        const name = input.value.trim();
+        if (!name) return;
+        state.winners.unshift(name);
+        state.winners = state.winners.slice(0, 10);
+        input.value = "";
+        await saveState();
+        logDebug(`Added winner: ${name}`);
+      } catch (err) {
+        logDebug("Add winner error:\n" + err.message);
+      }
     };
 
     window.removeWinner = async function (index) {
-      state.winners.splice(index, 1);
-      await saveState();
+      try {
+        state.winners.splice(index, 1);
+        await saveState();
+        logDebug("Winner removed");
+      } catch (err) {
+        logDebug("Remove winner error:\n" + err.message);
+      }
     };
 
     window.moveWinnerUp = async function (index) {
-      if (index === 0) return;
-      [state.winners[index - 1], state.winners[index]] = [state.winners[index], state.winners[index - 1]];
-      await saveState();
+      try {
+        if (index === 0) return;
+        [state.winners[index - 1], state.winners[index]] = [state.winners[index], state.winners[index - 1]];
+        await saveState();
+        logDebug("Winner moved up");
+      } catch (err) {
+        logDebug("Move winner error:\n" + err.message);
+      }
     };
 
     window.clearWinners = async function () {
-      if (!confirm("Clear all winners?")) return;
-      state.winners = [];
-      await saveState();
+      try {
+        state.winners = [];
+        await saveState();
+        logDebug("Cleared winners");
+      } catch (err) {
+        logDebug("Clear winners error:\n" + err.message);
+      }
     };
 
     function renderPreview(questionsToRender = state.questions) {
@@ -583,7 +666,6 @@ D: Venus"></textarea>
 
     function renderWinners() {
       const box = document.getElementById("winnerList");
-
       if (!state.winners.length) {
         box.innerHTML = `<div class="hint">No winners yet.</div>`;
         return;
@@ -601,15 +683,15 @@ D: Venus"></textarea>
     function renderStatus() {
       const current = state.questions[state.currentIndex];
       document.getElementById("statusBox").innerHTML = `
-        <div><b>Total Questions:</b> ${state.questions.length}</div>
-        <div><b>Current Question:</b> ${state.questions.length ? state.currentIndex + 1 : 0}</div>
-        <div><b>Current Timer:</b> ${state.currentTimer}s</div>
-        <div><b>Quiz Running:</b> ${state.isRunning ? "Yes" : "No"}</div>
-        <div><b>Answer Revealed:</b> ${state.answerRevealed ? "Yes" : "No"}</div>
-        <div><b>Winner Count:</b> ${state.winners.length}</div>
-        <div><b>Theme:</b> ${state.theme}</div>
-        <div><b>Screen Mode:</b> ${state.showCertificate ? "Certificate" : "Quiz"}</div>
-        <div><b>Current Question Text:</b> ${current ? escapeHtml(current.question) : "-"}</div>
+<b>Total Questions:</b> ${state.questions.length}
+<b>Current Question:</b> ${state.questions.length ? state.currentIndex + 1 : 0}
+<b>Current Timer:</b> ${state.currentTimer}s
+<b>Quiz Running:</b> ${state.isRunning ? "Yes" : "No"}
+<b>Answer Revealed:</b> ${state.answerRevealed ? "Yes" : "No"}
+<b>Winner Count:</b> ${state.winners.length}
+<b>Theme:</b> ${state.theme}
+<b>Screen Mode:</b> ${state.showCertificate ? "Certificate" : "Quiz"}
+<b>Current Question Text:</b> ${current ? escapeHtml(current.question) : "-"}
       `;
     }
 
@@ -628,14 +710,22 @@ D: Venus"></textarea>
       renderStatus();
     }
 
-    await ensureDocExists();
+    try {
+      await ensureDocExists();
 
-    onSnapshot(quizRef, (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      state = { ...structuredClone(defaultState), ...data };
-      renderAll();
-    });
+      onSnapshot(quizRef, (snap) => {
+        if (!snap.exists()) return;
+        state = normalizeState(snap.data());
+        renderAll();
+        logDebug("Live Firestore sync working");
+      }, (error) => {
+        console.error(error);
+        logDebug("Snapshot error:\n" + error.message);
+      });
+    } catch (err) {
+      console.error(err);
+      logDebug("Startup error:\n" + err.message);
+    }
   </script>
 </body>
 </html>
