@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Quiz Admin</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root{
+      --bg:#0a1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --line:#26345d;
+      --text:#eef3ff;
+      --muted:#aeb9df;
+      --accent:#7c5cff;
+      --accent2:#32c5ff;
+      --ok:#2dd381;
+      --warn:#ffc857;
+      --danger:#ff667f;
+    }
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(160deg,#09101f,#111936 55%,#0a1020);
+      color:var(--text);
+      padding:18px;
+    }
+    .wrap{
+      max-width:1450px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.2fr .9fr;
+      gap:18px;
+    }
+    .panel{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
+    }
+    h1,h2,h3{ margin:0 0 12px; }
+    h1{ font-size:30px; }
+    h2{ font-size:20px; }
+    h3{ font-size:14px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+    .row{ margin-bottom:14px; }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .grid3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+    label{
+      display:block;
+      margin-bottom:6px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    input, textarea, select{
+      width:100%;
+      border:none;
+      outline:none;
+      background:var(--card2);
+      color:var(--text);
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      font-size:15px;
+    }
+    textarea{
+      min-height:290px;
+      resize:vertical;
+      line-height:1.55;
+    }
+    .small-textarea textarea{
+      min-height:120px;
+    }
+    .btns{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:10px;
+    }
+    button{
+      border:none;
+      border-radius:14px;
+      padding:13px 16px;
+      cursor:pointer;
+      color:#fff;
+      font-weight:800;
+      font-size:14px;
+    }
+    .primary{ background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+    .ok{ background:linear-gradient(135deg,#16a34a,var(--ok)); }
+    .warn{ background:linear-gradient(135deg,#ff9f1c,var(--warn)); color:#1d1600; }
+    .danger{ background:linear-gradient(135deg,#ef476f,var(--danger)); }
+    .ghost{
+      background:#182243;
+      border:1px solid var(--line);
+    }
+    .hint{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      margin-top:8px;
+    }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:300px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .item{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+    .item strong{
+      display:block;
+      margin-bottom:8px;
+      line-height:1.35;
+    }
+    .option{
+      font-size:13px;
+      color:var(--muted);
+      margin:4px 0;
+      line-height:1.4;
+    }
+    .correct{
+      color:#88f7b8;
+      font-weight:700;
+    }
+    .winner-row{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:8px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .winner-tag{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:700;
+    }
+    .mini{
+      padding:10px 12px;
+      font-size:13px;
+      border-radius:12px;
+    }
+    .status{
+      background:#0f1730;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      line-height:1.6;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .status b{ color:var(--text); }
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>Live Quiz Admin</h1>
+      <div class="hint">Paste MCQs, control timer, run the quiz, add winners live, and show the final certificate screen.</div>
+
+      <div class="grid row" style="margin-top:16px;">
+        <div>
+          <label>Heading</label>
+          <input id="heading" placeholder="Type heading..." value="ThinkVerse Live Quiz Night" />
+        </div>
+        <div>
+          <label>Subheading</label>
+          <input id="subheading" placeholder="Type subheading..." value="Comment the correct answer before time runs out" />
+        </div>
+      </div>
+
+      <div class="grid3 row">
+        <div>
+          <label>Default Question Timer (1–30 sec)</label>
+          <input id="defaultTimer" type="number" min="1" max="30" value="10" />
+        </div>
+        <div>
+          <label>Reveal / Celebration Duration (sec)</label>
+          <input id="revealDuration" type="number" min="1" max="10" value="3" />
+        </div>
+        <div>
+          <label>Theme</label>
+          <select id="theme">
+            <option value="purple">Purple Glow</option>
+            <option value="blue">Blue Glass</option>
+            <option value="green">Green Pulse</option>
+            <option value="gold">Gold Premium</option>
+            <option value="red">Red Energy</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Paste MCQs here</label>
+        <textarea id="bulkInput" placeholder="Supported formats:
+
+Q: What is the capital of Canada?
+A: Toronto
+B: Vancouver
+C: Ottawa [correct]
+D: Montreal
+
+OR
+
+What is the capital of Canada?
+A) Toronto
+B) Vancouver
+C) Ottawa *
+D) Montreal"></textarea>
+        <div class="hint">
+          Use exactly 4 options for each question. Mark one correct option using <b>*</b> or <b>[correct]</b>.
+        </div>
+      </div>
+
+      <div class="btns row">
+        <button class="primary" onclick="parseAndSaveQuestions()">Parse & Save Questions</button>
+        <button class="ghost" onclick="previewQuestions()">Preview Parsed</button>
+        <button class="danger" onclick="clearQuestions()">Clear All Questions</button>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Quiz Controls</h2>
+        <div class="grid3">
+          <button class="ok" onclick="startQuiz()">Start Quiz</button>
+          <button class="warn" onclick="stopQuiz()">Stop Quiz</button>
+          <button class="ghost" onclick="resetQuiz()">Reset Quiz</button>
+        </div>
+
+        <div class="grid3" style="margin-top:10px;">
+          <button class="ghost" onclick="prevQuestion()">Previous</button>
+          <button class="ghost" onclick="nextQuestion()">Next</button>
+          <button class="primary" onclick="revealAnswerNow()">Reveal Answer</button>
+        </div>
+
+        <div class="grid3" style="margin-top:10px;">
+          <button class="ghost" onclick="setCurrentTimer()">Edit Current Timer</button>
+          <button class="danger" onclick="endQuizNow()">End Quiz</button>
+          <button class="primary" onclick="showCertificate()">Show Winners Screen</button>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Questions Preview</h2>
+        <div id="questionPreview" class="list"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Winners</h2>
+      <div class="row">
+        <label>Add Winner Name</label>
+        <div class="grid" style="grid-template-columns:1fr auto;">
+          <input id="winnerName" placeholder="Type winner name..." />
+          <button class="ok" onclick="addWinner()">Add Winner</button>
+        </div>
+      </div>
+
+      <div class="btns row">
+        <button class="danger" onclick="clearWinners()">Clear Winners</button>
+      </div>
+
+      <div id="winnerList"></div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Status</h2>
+        <div class="status" id="statusBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "liveQuizAppState_v1";
+
+    const defaultState = {
+      heading: "ThinkVerse Live Quiz Night",
+      subheading: "Comment the correct answer before time runs out",
+      theme: "purple",
+      defaultTimer: 10,
+      revealDuration: 3,
+      questions: [],
+      currentIndex: 0,
+      currentTimer: 10,
+      isRunning: false,
+      isPaused: false,
+      answerRevealed: false,
+      showCertificate: false,
+      winners: [],
+      endMessage: "Congratulations to our top winners!"
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return structuredClone(defaultState);
+      try {
+        return { ...structuredClone(defaultState), ...JSON.parse(saved) };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+    }
+
+    function syncInputsFromState() {
+      document.getElementById("heading").value = state.heading;
+      document.getElementById("subheading").value = state.subheading;
+      document.getElementById("defaultTimer").value = state.defaultTimer;
+      document.getElementById("revealDuration").value = state.revealDuration;
+      document.getElementById("theme").value = state.theme;
+    }
+
+    function parseQuestionsFromText(text) {
+      const blocks = text
+        .trim()
+        .split(/\n\s*\n+/)
+        .map(b => b.trim())
+        .filter(Boolean);
+
+      const parsed = [];
+
+      for (const block of blocks) {
+        const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+        if (lines.length < 5) continue;
+
+        let question = lines[0].replace(/^Q[:.)-]?\s*/i, "").trim();
+        const options = [];
+        let correctIndex = -1;
+
+        for (let i = 1; i < lines.length; i++) {
+          const raw = lines[i];
+          const match = raw.match(/^[A-D][\)\:\.\-]?\s*(.+)$/i);
+          if (!match) continue;
+
+          let optionText = match[1].trim();
+          const isCorrect = /\[correct\]|\*/i.test(optionText);
+
+          optionText = optionText
+            .replace(/\[correct\]/ig, "")
+            .replace(/\*/g, "")
+            .trim();
+
+          options.push(optionText);
+          if (isCorrect) correctIndex = options.length - 1;
+        }
+
+        if (question && options.length === 4 && correctIndex >= 0) {
+          parsed.push({
+            question,
+            options,
+            correctIndex
+          });
+        }
+      }
+
+      return parsed;
+    }
+
+    function parseAndSaveQuestions() {
+      state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
+      state.subheading = document.getElementById("subheading").value.trim() || defaultState.subheading;
+      state.defaultTimer = clampNum(document.getElementById("defaultTimer").value, 1, 30, 10);
+      state.revealDuration = clampNum(document.getElementById("revealDuration").value, 1, 10, 3);
+      state.theme = document.getElementById("theme").value;
+
+      const raw = document.getElementById("bulkInput").value;
+      const questions = parseQuestionsFromText(raw);
+
+      if (!questions.length) {
+        alert("No valid MCQs found. Use 4 options and mark one correct option with * or [correct].");
+        return;
+      }
+
+      state.questions = questions;
+      state.currentIndex = 0;
+      state.currentTimer = state.defaultTimer;
+      state.answerRevealed = false;
+      state.showCertificate = false;
+      state.isRunning = false;
+      saveState();
+      alert(`${questions.length} questions saved.`);
+    }
+
+    function previewQuestions() {
+      const raw = document.getElementById("bulkInput").value;
+      const questions = parseQuestionsFromText(raw);
+
+      const box = document.getElementById("questionPreview");
+      box.innerHTML = "";
+
+      if (!questions.length) {
+        box.innerHTML = `<div class="item">No valid questions parsed yet.</div>`;
+        return;
+      }
+
+      questions.forEach((q, idx) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>${idx + 1}. ${escapeHtml(q.question)}</strong>
+          ${q.options.map((opt, i) => `
+            <div class="option ${i === q.correctIndex ? "correct" : ""}">
+              ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)} ${i === q.correctIndex ? "✓" : ""}
+            </div>
+          `).join("")}
+        `;
+        box.appendChild(div);
+      });
+    }
+
+    function clearQuestions() {
+      if (!confirm("Clear all questions?")) return;
+      state.questions = [];
+      state.currentIndex = 0;
+      state.currentTimer = state.defaultTimer;
+      state.answerRevealed = false;
+      state.isRunning = false;
+      state.showCertificate = false;
+      document.getElementById("bulkInput").value = "";
+      saveState();
+    }
+
+    function startQuiz() {
+      if (!state.questions.length) {
+        alert("Please add questions first.");
+        return;
+      }
+      state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
+      state.subheading = document.getElementById("subheading").value.trim() || defaultState.subheading;
+      state.defaultTimer = clampNum(document.getElementById("defaultTimer").value, 1, 30, 10);
+      state.revealDuration = clampNum(document.getElementById("revealDuration").value, 1, 10, 3);
+      state.theme = document.getElementById("theme").value;
+
+      state.isRunning = true;
+      state.showCertificate = false;
+      if (state.currentTimer < 1 || state.currentTimer > 30) {
+        state.currentTimer = state.defaultTimer;
+      }
+      saveState();
+    }
+
+    function stopQuiz() {
+      state.isRunning = false;
+      saveState();
+    }
+
+    function resetQuiz() {
+      state.currentIndex = 0;
+      state.currentTimer = state.defaultTimer;
+      state.answerRevealed = false;
+      state.isRunning = false;
+      state.showCertificate = false;
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (!state.questions.length) return;
+      if (state.currentIndex < state.questions.length - 1) {
+        state.currentIndex++;
+        state.currentTimer = state.defaultTimer;
+        state.answerRevealed = false;
+        state.showCertificate = false;
+        saveState();
+      } else {
+        state.isRunning = false;
+        state.showCertificate = true;
+        saveState();
+      }
+    }
+
+    function prevQuestion() {
+      if (!state.questions.length) return;
+      if (state.currentIndex > 0) {
+        state.currentIndex--;
+        state.currentTimer = state.defaultTimer;
+        state.answerRevealed = false;
+        state.showCertificate = false;
+        saveState();
+      }
+    }
+
+    function revealAnswerNow() {
+      state.answerRevealed = true;
+      saveState();
+    }
+
+    function setCurrentTimer() {
+      const value = prompt("Set current question timer (1-30 seconds):", state.currentTimer);
+      if (value === null) return;
+      state.currentTimer = clampNum(value, 1, 30, state.defaultTimer);
+      saveState();
+    }
+
+    function endQuizNow() {
+      state.isRunning = false;
+      state.showCertificate = true;
+      saveState();
+    }
+
+    function showCertificate() {
+      state.showCertificate = true;
+      state.isRunning = false;
+      saveState();
+    }
+
+    function addWinner() {
+      const input = document.getElementById("winnerName");
+      const name = input.value.trim();
+      if (!name) return;
+      state.winners.unshift(name);
+      state.winners = state.winners.slice(0, 10);
+      input.value = "";
+      saveState();
+    }
+
+    function removeWinner(index) {
+      state.winners.splice(index, 1);
+      saveState();
+    }
+
+    function moveWinnerUp(index) {
+      if (index === 0) return;
+      [state.winners[index - 1], state.winners[index]] = [state.winners[index], state.winners[index - 1]];
+      saveState();
+    }
+
+    function moveWinnerDown(index) {
+      if (index >= state.winners.length - 1) return;
+      [state.winners[index + 1], state.winners[index]] = [state.winners[index], state.winners[index + 1]];
+      saveState();
+    }
+
+    function clearWinners() {
+      if (!confirm("Clear all winners?")) return;
+      state.winners = [];
+      saveState();
+    }
+
+    function renderWinners() {
+      const box = document.getElementById("winnerList");
+      if (!state.winners.length) {
+        box.innerHTML = `<div class="hint">No winners yet.</div>`;
+        return;
+      }
+
+      box.innerHTML = state.winners.map((name, idx) => `
+        <div class="winner-row">
+          <div class="winner-tag">${idx + 1}. ${escapeHtml(name)}</div>
+          <button class="ghost mini" onclick="moveWinnerUp(${idx})">↑</button>
+          <button class="danger mini" onclick="removeWinner(${idx})">✕</button>
+        </div>
+      `).join("") + state.winners.map((_, idx) => `
+        <div style="display:none" data-down="${idx}"></div>
+      `).join("");
+    }
+
+    function renderPreviewFromState() {
+      const box = document.getElementById("questionPreview");
+      box.innerHTML = "";
+
+      if (!state.questions.length) {
+        box.innerHTML = `<div class="item">No saved questions.</div>`;
+        return;
+      }
+
+      state.questions.forEach((q, idx) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>${idx + 1}. ${escapeHtml(q.question)}</strong>
+          ${q.options.map((opt, i) => `
+            <div class="option ${i === q.correctIndex ? "correct" : ""}">
+              ${String.fromCharCode(65 + i)}. ${escapeHtml(opt)} ${i === q.correctIndex ? "✓" : ""}
+            </div>
+          `).join("")}
+        `;
+        box.appendChild(div);
+      });
+    }
+
+    function renderStatus() {
+      const current = state.questions[state.currentIndex];
+      document.getElementById("statusBox").innerHTML = `
+        <div><b>Total Questions:</b> ${state.questions.length}</div>
+        <div><b>Current Question:</b> ${state.questions.length ? state.currentIndex + 1 : 0}</div>
+        <div><b>Current Timer:</b> ${state.currentTimer}s</div>
+        <div><b>Quiz Running:</b> ${state.isRunning ? "Yes" : "No"}</div>
+        <div><b>Answer Revealed:</b> ${state.answerRevealed ? "Yes" : "No"}</div>
+        <div><b>Winner Count:</b> ${state.winners.length}</div>
+        <div><b>Theme:</b> ${state.theme}</div>
+        <div><b>Screen Mode:</b> ${state.showCertificate ? "Certificate" : "Quiz"}</div>
+        <div><b>Current Question Text:</b> ${current ? escapeHtml(current.question) : "-"}</div>
+      `;
+    }
+
+    function renderAll() {
+      syncInputsFromState();
+      renderPreviewFromState();
+      renderWinners();
+      renderStatus();
+    }
+
+    function clampNum(value, min, max, fallback) {
+      let n = parseInt(value, 10);
+      if (Number.isNaN(n)) n = fallback;
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === STORAGE_KEY) {
+        state = loadState();
+        renderAll();
+      }
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
