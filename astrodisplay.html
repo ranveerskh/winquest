@@ -1,468 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Astro Live Display</title>
-  <style>
-    :root{
-      --gold:#ffd27a;
-      --gold2:#ffb74d;
-      --text:#fff9f0;
-      --soft:#f9e7c8;
-      --panel:rgba(20,12,35,0.48);
-      --border:rgba(255,215,140,0.28);
-      --shadow:0 15px 45px rgba(0,0,0,0.45);
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astro Display</title>
 
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      font-family:Georgia, "Times New Roman", serif;
-    }
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  color:white;
+  text-align:center;
+  background: linear-gradient(135deg,#0f172a,#1e293b);
+}
 
-    html, body{
-      width:100%;
-      height:100%;
-      overflow:hidden;
-    }
+.container{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  padding:20px;
+}
 
-    body{
-      color:var(--text);
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,180,80,0.15), transparent 20%),
-        radial-gradient(circle at 80% 30%, rgba(180,100,255,0.15), transparent 20%),
-        radial-gradient(circle at 50% 100%, rgba(255,220,120,0.12), transparent 25%),
-        linear-gradient(180deg, #12051f 0%, #1a1034 38%, #120826 100%);
-      position:relative;
-    }
+.name{
+  font-size:40px;
+  font-weight:bold;
+}
 
-    .stars,
-    .stars2{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background-image:
-        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.9), transparent),
-        radial-gradient(2px 2px at 100px 150px, rgba(255,220,170,.8), transparent),
-        radial-gradient(1.5px 1.5px at 200px 80px, rgba(255,255,255,.7), transparent),
-        radial-gradient(2px 2px at 320px 220px, rgba(255,215,140,.75), transparent),
-        radial-gradient(1.5px 1.5px at 500px 120px, rgba(255,255,255,.8), transparent),
-        radial-gradient(2px 2px at 700px 300px, rgba(255,210,120,.7), transparent),
-        radial-gradient(1.5px 1.5px at 900px 100px, rgba(255,255,255,.8), transparent),
-        radial-gradient(2px 2px at 1100px 260px, rgba(255,225,170,.75), transparent);
-      background-size:1200px 700px;
-      animation: drift 30s linear infinite;
-      opacity:.75;
-    }
+.message{
+  margin:10px 0;
+  font-size:18px;
+  max-width:300px;
+}
 
-    .stars2{
-      animation-duration:45s;
-      opacity:.35;
-      transform:scale(1.2);
-    }
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:10px;
+}
 
-    @keyframes drift{
-      from{ transform:translateY(0px); }
-      50%{ transform:translateY(-10px); }
-      to{ transform:translateY(0px); }
-    }
+.box{
+  background:rgba(255,255,255,0.1);
+  padding:10px;
+  border-radius:10px;
+}
 
-    .wrap{
-      position:relative;
-      z-index:2;
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-    }
-
-    .screen{
-      width:min(100%, 980px);
-      height:min(100%, 1700px);
-      max-height:100%;
-      border:1px solid var(--border);
-      border-radius:30px;
-      background:linear-gradient(180deg, rgba(37,20,63,0.48), rgba(16,10,29,0.56));
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(6px);
-      padding:18px 18px 14px;
-      display:grid;
-      grid-template-rows:auto auto 1fr auto auto;
-      gap:12px;
-      overflow:hidden;
-    }
-
-    .topTitle{
-      text-align:center;
-      color:var(--gold);
-      font-weight:700;
-      letter-spacing:1px;
-      font-size:clamp(20px, 2.8vw, 34px);
-      text-shadow:0 0 14px rgba(255,194,92,.25);
-    }
-
-    .nameBox{
-      text-align:center;
-      padding:6px 10px 2px;
-    }
-
-    .name{
-      font-size:clamp(44px, 8vw, 96px);
-      line-height:1;
-      font-weight:800;
-      color:#fff6df;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      text-shadow:0 0 18px rgba(255,223,130,.18);
-      word-break:break-word;
-    }
-
-    .messageCard{
-      border:1px solid var(--border);
-      border-radius:24px;
-      background:rgba(255,240,210,0.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:16px 18px;
-      min-height:110px;
-    }
-
-    .message{
-      font-size:clamp(22px, 3.1vw, 36px);
-      line-height:1.35;
-      color:#fff8ed;
-      font-weight:700;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      align-content:start;
-    }
-
-    .item{
-      border:1px solid var(--border);
-      background:rgba(255,255,255,0.06);
-      border-radius:20px;
-      padding:12px 10px;
-      text-align:center;
-      min-height:78px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-    }
-
-    .label{
-      color:#ffd89b;
-      font-size:clamp(13px, 1.5vw, 17px);
-      margin-bottom:5px;
-      font-weight:700;
-      letter-spacing:.3px;
-    }
-
-    .value{
-      color:#fffdf8;
-      font-size:clamp(20px, 2.5vw, 30px);
-      font-weight:800;
-      line-height:1.15;
-      word-break:break-word;
-    }
-
-    .cta{
-      text-align:center;
-      color:#ffe2aa;
-      font-size:clamp(20px, 2.6vw, 32px);
-      font-weight:800;
-      padding-top:4px;
-      text-shadow:0 0 12px rgba(255,196,92,.2);
-    }
-
-    .bottom{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      align-items:center;
-    }
-
-    .timerText{
-      color:#f9ddb4;
-      font-size:clamp(15px, 1.8vw, 22px);
-      font-weight:700;
-    }
-
-    .barWrap{
-      width:100%;
-      max-width:500px;
-      height:9px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.12);
-      overflow:hidden;
-      border:1px solid rgba(255,225,160,0.18);
-    }
-
-    .bar{
-      height:100%;
-      width:100%;
-      background:linear-gradient(90deg, #ffd27a, #ff9f43);
-      transition:width 1s linear;
-    }
-
-    .fade{
-      animation:fadeIn .45s ease;
-    }
-
-    @keyframes fadeIn{
-      from{ opacity:0; transform:translateY(8px); }
-      to{ opacity:1; transform:translateY(0); }
-    }
-
-    @media (max-width:700px){
-      .screen{
-        padding:14px 14px 12px;
-        gap:10px;
-      }
-
-      .messageCard{
-        min-height:96px;
-      }
-
-      .item{
-        min-height:72px;
-      }
-    }
-  </style>
+.footer{
+  position:absolute;
+  bottom:20px;
+  font-size:14px;
+  opacity:0.8;
+}
+</style>
 </head>
+
 <body>
-  <div class="stars"></div>
-  <div class="stars2"></div>
 
-  <div class="wrap">
-    <div class="screen">
-      <div class="topTitle">LIVE ASTROLOGY • TODAY</div>
+<div class="container">
+  <div class="name" id="name">Waiting...</div>
+  <div class="message" id="message"></div>
 
-      <div class="nameBox">
-        <div class="name fade" id="nameEl">MYSTERY</div>
-      </div>
-
-      <div class="messageCard fade">
-        <div class="message" id="messageEl">
-          Today your result will appear here.
-        </div>
-      </div>
-
-      <div class="grid fade" id="gridEl">
-        <div class="item">
-          <div class="label">Lucky Color</div>
-          <div class="value" id="colorEl">Blue</div>
-        </div>
-        <div class="item">
-          <div class="label">Lucky Number</div>
-          <div class="value" id="numberEl">7</div>
-        </div>
-        <div class="item">
-          <div class="label">Love Score</div>
-          <div class="value" id="loveEl">82%</div>
-        </div>
-        <div class="item">
-          <div class="label">Mood</div>
-          <div class="value" id="moodEl">Confident</div>
-        </div>
-        <div class="item">
-          <div class="label">Money Luck</div>
-          <div class="value" id="moneyEl">High</div>
-        </div>
-        <div class="item">
-          <div class="label">Energy</div>
-          <div class="value" id="energyEl">Strong</div>
-        </div>
-        <div class="item">
-          <div class="label">Career</div>
-          <div class="value" id="careerEl">Success Ahead</div>
-        </div>
-        <div class="item">
-          <div class="label">Health</div>
-          <div class="value" id="healthEl">Feeling Good</div>
-        </div>
-      </div>
-
-      <div class="cta">Comment your name to get results</div>
-
-      <div class="bottom">
-        <div class="timerText" id="timerText">Next random result in 30s</div>
-        <div class="barWrap">
-          <div class="bar" id="progressBar"></div>
-        </div>
-      </div>
-    </div>
+  <div class="grid">
+    <div class="box" id="number"></div>
+    <div class="box" id="color"></div>
+    <div class="box" id="love"></div>
+    <div class="box" id="mood"></div>
+    <div class="box" id="money"></div>
+    <div class="box" id="energy"></div>
   </div>
 
-  <script>
-    const STORAGE_KEY = "astro_live_data_v1";
+  <div class="footer">Next result in 30 seconds</div>
+</div>
 
-    const fallbackNames = [
-      "Aman","Simran","Karan","Mehak","Rahul","Priya","Arjun","Neha",
-      "Jaspreet","Gurleen","Manpreet","Navdeep","Tanya","Kabir","Aarti","Riya",
-      "Sandeep","Komal","Anmol","Mahi"
-    ];
+<script type="module">
+import { db } from "./firebase-config.js";
+import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const colors = ["Blue","Red","Green","Pink","Purple","Gold","White","Black","Yellow","Silver","Orange","Sky Blue","Rose Gold","Lavender"];
-    const moods = ["Confident","Happy","Focused","Peaceful","Emotional","Lucky","Calm","Powerful","Positive","Hopeful","Bold","Stable"];
-    const moneyLuck = ["Low","Medium","Good","High","Very High","Rising","Strong"];
-    const energies = ["Low","Balanced","Rising","Strong","Very Strong","Powerful","Fresh"];
-    const careers = ["Growth Ahead","Good News","Strong Progress","New Chance","Success Ahead","Recognition Coming","Stable Day"];
-    const healths = ["Feeling Good","Stable","Take Rest","Fresh Energy","Balanced","Positive Vibe","Recharge Needed"];
+let lastUpdate = 0;
 
-    const dailyMessages = [
-      "Today a positive change may come from an unexpected side.",
-      "Today your energy is helping you move ahead with confidence.",
-      "Today a delayed matter may finally start moving in your favor.",
-      "Today is good for trusting your instinct over outside noise.",
-      "Today someone may notice your value more clearly than before.",
-      "Today your patience can protect you from a wrong decision.",
-      "Today a small step can create a bigger result than expected.",
-      "Today your mood improves as clarity starts coming back.",
-      "Today is a strong day for confidence and fresh beginnings.",
-      "Today your effort has a high chance of being noticed.",
-      "Today you may receive good news through a message or call.",
-      "Today your heart feels lighter if you stop overthinking.",
-      "Today luck supports smart moves, not rushed ones.",
-      "Today you may feel stronger about a decision you were delaying.",
-      "Today your personal energy attracts helpful people.",
-      "Today is better for action than waiting.",
-      "Today one calm choice may save you from extra stress.",
-      "Today your vibe is stronger than you think.",
-      "Today the right timing may work in your favor.",
-      "Today a hidden opportunity can appear through normal conversation.",
-      "Today your focus can turn confusion into progress.",
-      "Today you may feel emotionally clearer than recent days.",
-      "Today your name may rise in a place you were not expecting.",
-      "Today confidence brings better results than fear.",
-      "Today is a good day to say yes to progress."
-    ];
+// listen to firebase
+onSnapshot(doc(db,"astro_live","current"), (snap)=>{
+  if(!snap.exists()) return;
 
-    function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+  const data = snap.data();
+  lastUpdate = data.updatedAt;
 
-      const initial = {
-        current: null,
-        lastManualAt: 0,
-        lastShownAt: 0,
-        mode: "MANUAL",
-        manualCount: 0,
-        autoCount: 0
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
-    }
+  show(data);
+});
 
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
+// show data
+function show(d){
+  document.getElementById("name").innerText = d.name;
+  document.getElementById("message").innerText = d.message;
 
-    function rand(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
+  document.getElementById("number").innerText = "No: " + d.number;
+  document.getElementById("color").innerText = d.color;
+  document.getElementById("love").innerText = "Love: " + d.love + "%";
+  document.getElementById("mood").innerText = d.mood;
+  document.getElementById("money").innerText = d.money;
+  document.getElementById("energy").innerText = d.energy;
+}
 
-    function luckyNumber() {
-      return Math.floor(Math.random() * 9) + 1;
-    }
+// fallback every 30 sec
+setInterval(async ()=>{
+  const now = Date.now();
 
-    function loveScore() {
-      return Math.floor(Math.random() * 61) + 40;
-    }
+  if(now - lastUpdate < 30000) return;
 
-    function buildAutoResult() {
-      return {
-        name: rand(fallbackNames),
-        message: rand(dailyMessages),
-        luckyColor: rand(colors),
-        luckyNumber: luckyNumber(),
-        loveScore: loveScore(),
-        mood: rand(moods),
-        moneyLuck: rand(moneyLuck),
-        energy: rand(energies),
-        career: rand(careers),
-        health: rand(healths),
-        source: "auto",
-        createdAt: Date.now()
-      };
-    }
+  const data = generateRandom();
 
-    function renderCurrent() {
-      const data = loadData();
-      const current = data.current || buildAutoResult();
+  await setDoc(doc(db,"astro_live","current"), {
+    ...data,
+    updatedAt: now,
+    mode: "auto"
+  });
 
-      document.getElementById("nameEl").textContent = current.name;
-      document.getElementById("messageEl").textContent = current.message;
-      document.getElementById("colorEl").textContent = current.luckyColor;
-      document.getElementById("numberEl").textContent = current.luckyNumber;
-      document.getElementById("loveEl").textContent = current.loveScore + "%";
-      document.getElementById("moodEl").textContent = current.mood;
-      document.getElementById("moneyEl").textContent = current.moneyLuck;
-      document.getElementById("energyEl").textContent = current.energy;
-      document.getElementById("careerEl").textContent = current.career;
-      document.getElementById("healthEl").textContent = current.health;
+},30000);
 
-      flash();
-    }
 
-    function flash() {
-      const ids = ["nameEl","messageEl","gridEl"];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.remove("fade");
-        void el.offsetWidth;
-        el.classList.add("fade");
-      });
-    }
+// random fallback
+function generateRandom(){
+  const names = ["Rahul","Simran","Aman","Priya","John","Alex"];
 
-    function maybeAutoAdvance() {
-      const data = loadData();
-      const now = Date.now();
-      const lastManual = data.lastManualAt || 0;
-      const passed = Math.floor((now - lastManual) / 1000);
+  const messages = [
+    "Today brings something new.",
+    "Stay focused today.",
+    "Good news is coming.",
+    "Be confident today.",
+    "Avoid stress today."
+  ];
 
-      if (passed >= 30) {
-        data.current = buildAutoResult();
-        data.lastShownAt = now;
-        data.mode = "AUTO";
-        data.autoCount = (data.autoCount || 0) + 1;
-        saveData(data);
-        renderCurrent();
-      }
-    }
+  const moods = ["Happy","Focused","Confident","Lucky"];
+  const luck = ["Low","Medium","High"];
 
-    function updateTimer() {
-      const data = loadData();
-      const baseTime = data.lastManualAt || Date.now();
-      const passed = Math.floor((Date.now() - baseTime) / 1000);
-      const left = Math.max(0, 30 - passed);
+  return {
+    name: names[Math.floor(Math.random()*names.length)],
+    message: messages[Math.floor(Math.random()*messages.length)],
+    number: Math.floor(Math.random()*9)+1,
+    color: ["Red","Blue","Green","Yellow"][Math.floor(Math.random()*4)],
+    love: Math.floor(Math.random()*60)+40,
+    mood: moods[Math.floor(Math.random()*moods.length)],
+    money: luck[Math.floor(Math.random()*luck.length)],
+    energy: luck[Math.floor(Math.random()*luck.length)]
+  };
+}
+</script>
 
-      document.getElementById("timerText").textContent = `Next random result in ${left}s`;
-      document.getElementById("progressBar").style.width = `${(left / 30) * 100}%`;
-    }
-
-    window.addEventListener("storage", () => {
-      renderCurrent();
-      updateTimer();
-    });
-
-    renderCurrent();
-    updateTimer();
-
-    setInterval(() => {
-      maybeAutoAdvance();
-      updateTimer();
-    }, 1000);
-  </script>
 </body>
 </html>
