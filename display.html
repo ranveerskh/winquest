@@ -87,25 +87,11 @@
       margin-bottom:4px;
     }
 
-    .title-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-    }
-
     .heading{
       font-size:24px;
       font-weight:900;
       line-height:1.02;
       margin:0;
-    }
-
-    .subheading{
-      margin-top:4px;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.25;
     }
 
     .timerbox{
@@ -224,6 +210,34 @@
 
     .floating-reveal.show{
       display:block;
+    }
+
+    #bottomCTA{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:72px;
+      width:min(94%, 1000px);
+      text-align:center;
+      padding:14px 18px;
+      font-size:18px;
+      font-weight:900;
+      color:#ffffff;
+      border-radius:16px;
+      background:rgba(0,0,0,0.35);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,0.18);
+      box-shadow:0 12px 30px rgba(0,0,0,.22);
+      z-index:999;
+      animation:pulseCTA 1.5s infinite;
+      letter-spacing:.4px;
+    }
+
+    @keyframes pulseCTA{
+      0%{ transform:translateX(-50%) scale(1); }
+      50%{ transform:translateX(-50%) scale(1.03); }
+      100%{ transform:translateX(-50%) scale(1); }
     }
 
     .certificateScreen{
@@ -369,10 +383,6 @@
         font-size:30px;
       }
 
-      .subheading{
-        font-size:13px;
-      }
-
       .timerbox{
         min-height:84px;
       }
@@ -410,6 +420,19 @@
       .certTitle{
         font-size:42px;
       }
+
+      #bottomCTA{
+        font-size:20px;
+        bottom:26px;
+      }
+    }
+
+    @media (max-width: 520px){
+      #bottomCTA{
+        font-size:16px;
+        padding:12px 14px;
+        bottom:68px;
+      }
     }
   </style>
 </head>
@@ -419,10 +442,7 @@
       <div class="topbar">
         <div class="glass titlebar">
           <div class="mini-kicker">Live Quiz</div>
-          <div class="title-row">
-            <h1 class="heading" id="heading">WinQuest Live Quiz Night</h1>
-          </div>
-          <div class="subheading" id="subheading">Comment the correct answer before time runs out</div>
+          <h1 class="heading" id="heading">WinQuest Live Quiz Night</h1>
         </div>
 
         <div class="glass timerbox">
@@ -454,6 +474,7 @@
     </div>
   </div>
 
+  <div id="bottomCTA">⏳ COMMENT YOUR ANSWER NOW ⬇️</div>
   <div class="confetti" id="confetti"></div>
 
   <script type="module">
@@ -515,19 +536,21 @@
 
       const quizScreen = document.getElementById("quizScreen");
       const certificateScreen = document.getElementById("certificateScreen");
+      const bottomCTA = document.getElementById("bottomCTA");
 
       if (state.showCertificate) {
         quizScreen.classList.add("hide");
         certificateScreen.classList.add("show");
+        bottomCTA.style.display = "none";
         renderCertificate();
         return;
       } else {
         quizScreen.classList.remove("hide");
         certificateScreen.classList.remove("show");
+        bottomCTA.style.display = "block";
       }
 
       document.getElementById("heading").textContent = state.heading;
-      document.getElementById("subheading").textContent = state.subheading;
       document.getElementById("timer").textContent = state.currentTimer;
 
       const total = state.questions.length;
@@ -562,6 +585,12 @@
       }
 
       document.getElementById("floatingReveal").classList.toggle("show", !!state.answerRevealed);
+
+      if (state.answerRevealed) {
+        bottomCTA.textContent = "✅ CORRECT ANSWER REVEALED";
+      } else {
+        bottomCTA.textContent = "⏳ COMMENT YOUR ANSWER NOW ⬇️";
+      }
     }
 
     function renderCertificate() {
