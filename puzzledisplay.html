@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WinQuest Puzzle Display</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root{
+      --bg1:#12051f;
+      --bg2:#1a1034;
+      --bg3:#120826;
+      --gold:#ffd27a;
+      --gold2:#ffb74d;
+      --text:#fff9f0;
+      --soft:#f9e7c8;
+      --border:rgba(255,215,140,0.28);
+      --panel:rgba(20,12,35,0.48);
+      --shadow:0 15px 45px rgba(0,0,0,0.45);
+      --ok:#2dd381;
+      --danger:#ff667f;
+      --blue:#78c8ff;
+    }
+
+    body{
+      margin:0;
+      width:100%;
+      min-height:100vh;
+      overflow:hidden;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,180,80,0.15), transparent 20%),
+        radial-gradient(circle at 80% 30%, rgba(180,100,255,0.15), transparent 20%),
+        radial-gradient(circle at 50% 100%, rgba(255,220,120,0.12), transparent 25%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 38%, var(--bg3) 100%);
+      position:relative;
+    }
+
+    body.theme-purple{
+      --bg1:#0a1020; --bg2:#151d3f; --bg3:#101730; --gold:#d6c3ff;
+    }
+    body.theme-blue{
+      --bg1:#08121e; --bg2:#12314c; --bg3:#0c1c2c; --gold:#bfe7ff;
+    }
+    body.theme-green{
+      --bg1:#08170f; --bg2:#153824; --bg3:#0d2116; --gold:#c7ffd8;
+    }
+    body.theme-red{
+      --bg1:#1b0a12; --bg2:#401425; --bg3:#240b14; --gold:#ffd1d9;
+    }
+    body.theme-gold{
+      --bg1:#12051f; --bg2:#1a1034; --bg3:#120826; --gold:#ffd27a;
+    }
+
+    .stars,
+    .stars2{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.9), transparent),
+        radial-gradient(2px 2px at 100px 150px, rgba(255,220,170,.8), transparent),
+        radial-gradient(1.5px 1.5px at 200px 80px, rgba(255,255,255,.7), transparent),
+        radial-gradient(2px 2px at 320px 220px, rgba(255,215,140,.75), transparent),
+        radial-gradient(1.5px 1.5px at 500px 120px, rgba(255,255,255,.8), transparent),
+        radial-gradient(2px 2px at 700px 300px, rgba(255,210,120,.7), transparent),
+        radial-gradient(1.5px 1.5px at 900px 100px, rgba(255,255,255,.8), transparent),
+        radial-gradient(2px 2px at 1100px 260px, rgba(255,225,170,.75), transparent);
+      background-size:1200px 700px;
+      animation:drift 30s linear infinite;
+      opacity:.75;
+    }
+
+    .stars2{
+      animation-duration:45s;
+      opacity:.35;
+      transform:scale(1.2);
+    }
+
+    @keyframes drift{
+      from{ transform:translateY(0px); }
+      50%{ transform:translateY(-10px); }
+      to{ transform:translateY(0px); }
+    }
+
+    .screen{
+      position:relative;
+      z-index:2;
+      width:100%;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+    }
+
+    .container{
+      width:min(1280px, 100%);
+      min-height:min(94vh, 900px);
+      display:grid;
+      grid-template-rows:auto auto 1fr auto auto auto;
+      gap:14px;
+      align-content:center;
+    }
+
+    .glass{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .head{
+      padding:14px 18px;
+      text-align:center;
+      color:var(--gold);
+      font-size:clamp(20px, 2.8vw, 34px);
+      font-weight:900;
+      letter-spacing:1px;
+    }
+
+    .roundBox{
+      text-align:center;
+      color:#ffe7b5;
+      font-size:clamp(18px, 2.4vw, 28px);
+      font-weight:900;
+    }
+
+    .puzzleCard{
+      padding:24px 18px;
+      min-height:260px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .puzzle{
+      font-size:clamp(58px, 10vw, 130px);
+      line-height:1.15;
+      font-weight:900;
+      color:#fff6df;
+      word-break:break-word;
+      text-shadow:0 0 18px rgba(255,223,130,.18);
+      white-space:pre-wrap;
+    }
+
+    .cta{
+      text-align:center;
+      color:#ffe2aa;
+      font-size:clamp(22px, 2.7vw, 34px);
+      font-weight:900;
+      padding-top:2px;
+    }
+
+    .answerCard, .winnerCard{
+      padding:18px;
+      text-align:center;
+      min-height:92px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .answerLabel{
+      color:#ffd9a1;
+      font-size:clamp(16px, 1.8vw, 22px);
+      font-weight:800;
+      margin-bottom:6px;
+      letter-spacing:.5px;
+    }
+
+    .answerText{
+      color:#ffffff;
+      font-size:clamp(28px, 4.2vw, 54px);
+      font-weight:900;
+      line-height:1.15;
+      word-break:break-word;
+    }
+
+    .winnerTitle{
+      color:#9cf0bf;
+      font-size:clamp(16px, 1.8vw, 22px);
+      font-weight:900;
+      margin-bottom:6px;
+      letter-spacing:.5px;
+    }
+
+    .winnerName{
+      color:#ffffff;
+      font-size:clamp(28px, 4vw, 52px);
+      font-weight:900;
+      line-height:1.1;
+      word-break:break-word;
+    }
+
+    .winnerCountry{
+      color:#d5e9ff;
+      font-size:clamp(18px, 2.2vw, 28px);
+      font-weight:800;
+      margin-top:6px;
+      word-break:break-word;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .fade{
+      animation:fadeIn .45s ease;
+    }
+
+    @keyframes fadeIn{
+      from{ opacity:0; transform:translateY(8px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+
+    @media (max-width: 900px){
+      .screen{ padding:10px; }
+      .container{
+        min-height:94vh;
+      }
+      .puzzleCard{
+        min-height:220px;
+      }
+    }
+  </style>
+</head>
+<body class="theme-gold">
+  <div class="stars"></div>
+  <div class="stars2"></div>
+
+  <div class="screen">
+    <div class="container">
+      <div class="glass head" id="headingEl">GUESS THE WORD</div>
+
+      <div class="roundBox fade" id="roundEl">Round 1</div>
+
+      <div class="glass puzzleCard">
+        <div class="puzzle fade" id="puzzleEl">🐄 + 👦</div>
+      </div>
+
+      <div class="cta fade" id="ctaEl">Comment your answer now</div>
+
+      <div class="glass answerCard hidden" id="answerCard">
+        <div class="answerLabel">CORRECT ANSWER</div>
+        <div class="answerText fade" id="answerEl">Cowboy</div>
+      </div>
+
+      <div class="glass winnerCard hidden" id="winnerCard">
+        <div class="winnerTitle">WINNER</div>
+        <div class="winnerName fade" id="winnerNameEl">Aman</div>
+        <div class="winnerCountry fade" id="winnerCountryEl">Canada</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import {
+      doc,
+      getDoc,
+      setDoc,
+      onSnapshot,
+      collection,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const liveRef = doc(db, "livePuzzle", "current");
+    const questionsRef = collection(db, "livePuzzleQuestions");
+
+    const defaultState = {
+      heading: "GUESS THE WORD",
+      ctaText: "Comment your answer now",
+      theme: "gold",
+      currentQuestionIndex: 0,
+      showAnswer: false,
+      showWinner: false,
+      winnerName: "",
+      winnerCountry: ""
+    };
+
+    let state = structuredClone(defaultState);
+    let questions = [];
+
+    function normalizeState(data) {
+      const safe = { ...structuredClone(defaultState), ...(data || {}) };
+      safe.heading = safe.heading || defaultState.heading;
+      safe.ctaText = safe.ctaText || defaultState.ctaText;
+      safe.theme = safe.theme || "gold";
+      safe.currentQuestionIndex = Number.isFinite(Number(safe.currentQuestionIndex)) ? Number(safe.currentQuestionIndex) : 0;
+      safe.showAnswer = !!safe.showAnswer;
+      safe.showWinner = !!safe.showWinner;
+      safe.winnerName = safe.winnerName || "";
+      safe.winnerCountry = safe.winnerCountry || "";
+      return safe;
+    }
+
+    async function ensureDocExists() {
+      const snap = await getDoc(liveRef);
+      if (!snap.exists()) {
+        await setDoc(liveRef, defaultState);
+      }
+    }
+
+    function getCurrentQuestion() {
+      if (!questions.length) {
+        return {
+          puzzle: "NO QUESTIONS YET",
+          answer: "Add questions from admin page"
+        };
+      }
+
+      let index = state.currentQuestionIndex || 0;
+      if (index < 0) index = 0;
+      if (index >= questions.length) index = questions.length - 1;
+
+      return questions[index];
+    }
+
+    function flash(ids) {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove("fade");
+        void el.offsetWidth;
+        el.classList.add("fade");
+      });
+    }
+
+    function render() {
+      document.body.className = "theme-" + (state.theme || "gold");
+
+      const q = getCurrentQuestion();
+      const roundNumber = questions.length ? (Math.min(state.currentQuestionIndex + 1, questions.length)) : 0;
+
+      document.getElementById("headingEl").textContent = state.heading;
+      document.getElementById("ctaEl").textContent = state.ctaText;
+      document.getElementById("roundEl").textContent = questions.length ? `Round ${roundNumber}` : "Waiting for questions";
+      document.getElementById("puzzleEl").textContent = q.puzzle || "NO QUESTION";
+      document.getElementById("answerEl").textContent = q.answer || "--";
+      document.getElementById("winnerNameEl").textContent = state.winnerName || "";
+      document.getElementById("winnerCountryEl").textContent = state.winnerCountry || "";
+
+      document.getElementById("answerCard").classList.toggle("hidden", !state.showAnswer);
+      document.getElementById("winnerCard").classList.toggle("hidden", !state.showWinner);
+
+      flash(["roundEl", "puzzleEl", "ctaEl", "answerEl", "winnerNameEl", "winnerCountryEl"]);
+    }
+
+    await ensureDocExists();
+
+    onSnapshot(liveRef, (snap) => {
+      if (!snap.exists()) return;
+      state = normalizeState(snap.data());
+      render();
+    }, (error) => {
+      console.error("Live state snapshot error:", error);
+    });
+
+    const qy = query(questionsRef, orderBy("createdAt", "asc"));
+    onSnapshot(qy, (snap) => {
+      questions = snap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      render();
+    }, (error) => {
+      console.error("Questions snapshot error:", error);
+    });
+  </script>
+</body>
+</html>
