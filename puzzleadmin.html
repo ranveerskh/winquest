@@ -58,12 +58,6 @@
       gap:12px;
     }
 
-    .grid3{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
-
     label{
       display:block;
       margin-bottom:6px;
@@ -87,6 +81,10 @@
       min-height:120px;
       resize:vertical;
       line-height:1.55;
+    }
+
+    #bulkInput{
+      min-height:240px;
     }
 
     button, a.btn{
@@ -122,12 +120,6 @@
       gap:10px;
       flex-wrap:wrap;
       margin-top:10px;
-    }
-
-    .stack{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
     }
 
     .previewBox, .status{
@@ -234,7 +226,7 @@
     }
 
     @media (max-width: 700px){
-      .grid, .grid3{ grid-template-columns:1fr; }
+      .grid{ grid-template-columns:1fr; }
       .previewPuzzle{ font-size:38px; }
     }
   </style>
@@ -244,7 +236,7 @@
     <div class="panel">
       <h1>WinQuest Puzzle Admin</h1>
       <div class="hint">
-        Control the live puzzle from your phone. Press next for next question. Answer stays hidden until you press show answer. Winner stays hidden until you press show winner.
+        Paste many questions at once, auto-detect puzzle + answer, show answer only when you press it, and show winner only when you want.
       </div>
 
       <div class="panel" style="padding:14px; margin-top:16px;">
@@ -305,7 +297,31 @@
       </div>
 
       <div class="panel" style="padding:14px; margin-top:16px;">
-        <h2>Add / Edit Question</h2>
+        <h2>Bulk Paste Questions</h2>
+
+        <div class="row">
+          <label>Paste one question per line</label>
+          <textarea id="bulkInput" placeholder="Example:
+🐄 + 👦 = Cowboy
+🌧️ + 🌈 = Rainbow
+👁 + 🧊 = Ice"></textarea>
+        </div>
+
+        <div class="inlineButtons">
+          <button class="primary" onclick="importBulkQuestions()">Import Questions</button>
+          <button class="ghost" onclick="clearBulkBox()">Clear Paste Box</button>
+          <button class="danger" onclick="clearAllQuestions()">Clear All Questions</button>
+          <button class="ok" onclick="loadDefaultQuestions()">Load 10 Default Questions</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">
+          Best format: <b>puzzle = answer</b><br>
+          Supported: = or - or | or “A:” style
+        </div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Add / Edit Single Question</h2>
 
         <div class="row">
           <label>Emoji Puzzle / Text Puzzle</label>
@@ -320,10 +336,6 @@
         <div class="inlineButtons">
           <button class="primary" onclick="saveQuestion()">Save Question</button>
           <button class="ghost" onclick="clearQuestionForm()">Clear Form</button>
-        </div>
-
-        <div class="hint" style="margin-top:10px;">
-          You can add emoji questions later anytime. Example: 🐝 + 🍃 , 👁 + 🧊 , 🔥 + 🧍
         </div>
       </div>
     </div>
@@ -358,6 +370,8 @@
       updateDoc,
       deleteDoc,
       addDoc,
+      getDocs,
+      writeBatch,
       onSnapshot,
       collection,
       query,
@@ -379,6 +393,19 @@
       winnerCountry: "",
       updatedAt: null
     };
+
+    const defaultQuestions = [
+      { puzzle: "🐄 + 👦", answer: "Cowboy" },
+      { puzzle: "🌧️ + 🌈", answer: "Rainbow" },
+      { puzzle: "👁 + 🧊", answer: "Ice" },
+      { puzzle: "🐝 + 🍃", answer: "Belief" },
+      { puzzle: "🔥 + 👨", answer: "Fireman" },
+      { puzzle: "⭐ + 🐟", answer: "Starfish" },
+      { puzzle: "🍯 + 🌙", answer: "Honeymoon" },
+      { puzzle: "🦋 + 🏠", answer: "Butterfly House" },
+      { puzzle: "🌞 + 🕶️", answer: "Sunshade" },
+      { puzzle: "👂 + 🌎", answer: "Earring" }
+    ];
 
     let state = structuredClone(defaultState);
     let questions = [];
@@ -457,6 +484,45 @@
         ...extra,
         updatedAt: serverTimestamp()
       }, { merge: true });
+    }
+
+    function parseLineToQuestion(line) {
+      const trimmed = line.trim();
+      if (!trimmed) return null;
+
+      if (trimmed.includes(" A:")) {
+        const qMatch = trimmed.match(/^Q:\s*(.*?)\s*A:\s*(.*?)$/i);
+        if (qMatch && qMatch[1] && qMatch[2]) {
+          return { puzzle: qMatch[1].trim(), answer: qMatch[2].trim() };
+        }
+      }
+
+      const separators = [" = ", " | ", " - ", " — ", "=","|"];
+      for (const sep of separators) {
+        if (trimmed.includes(sep)) {
+          const parts = trimmed.split(sep);
+          if (parts.length >= 2) {
+            const puzzle = parts[0].trim();
+            const answer = parts.slice(1).join(sep).trim();
+            if (puzzle && answer) {
+              return { puzzle, answer };
+            }
+          }
+        }
+      }
+
+      return null;
+    }
+
+    async function addQuestionsInBulk(list) {
+      for (const item of list) {
+        await addDoc(questionsRef, {
+          puzzle: item.puzzle,
+          answer: item.answer,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
     }
 
     window.saveSettings = async function () {
@@ -662,6 +728,92 @@
       }
     };
 
+    window.importBulkQuestions = async function () {
+      try {
+        const raw = document.getElementById("bulkInput").value;
+        const lines = raw.split("\n").map(x => x.trim()).filter(Boolean);
+
+        if (!lines.length) {
+          alert("Paste some questions first.");
+          return;
+        }
+
+        const parsed = [];
+        const failed = [];
+
+        for (const line of lines) {
+          const item = parseLineToQuestion(line);
+          if (item) parsed.push(item);
+          else failed.push(line);
+        }
+
+        if (!parsed.length) {
+          alert("No valid questions found. Use format like: 🐄 + 👦 = Cowboy");
+          return;
+        }
+
+        await addQuestionsInBulk(parsed);
+
+        logDebug(`Imported ${parsed.length} questions` + (failed.length ? `\nSkipped ${failed.length} invalid lines` : ""));
+        if (failed.length) {
+          alert(`Imported ${parsed.length} questions.\nSkipped ${failed.length} invalid lines.`);
+        } else {
+          alert(`Imported ${parsed.length} questions successfully.`);
+        }
+      } catch (err) {
+        console.error(err);
+        logDebug("Import bulk error:\n" + err.message);
+      }
+    };
+
+    window.clearBulkBox = function () {
+      document.getElementById("bulkInput").value = "";
+      logDebug("Bulk paste box cleared");
+    };
+
+    window.clearAllQuestions = async function () {
+      try {
+        const sure = confirm("Delete all questions?");
+        if (!sure) return;
+
+        const snap = await getDocs(questionsRef);
+        const batch = writeBatch(db);
+
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+
+        state.currentQuestionIndex = 0;
+        state.showAnswer = false;
+        state.showWinner = false;
+        state.winnerName = "";
+        state.winnerCountry = "";
+
+        await saveLiveState({
+          currentQuestionIndex: 0,
+          showAnswer: false,
+          showWinner: false,
+          winnerName: "",
+          winnerCountry: ""
+        });
+
+        logDebug("All questions deleted");
+      } catch (err) {
+        console.error(err);
+        logDebug("Clear all questions error:\n" + err.message);
+      }
+    };
+
+    window.loadDefaultQuestions = async function () {
+      try {
+        await addQuestionsInBulk(defaultQuestions);
+        logDebug("Loaded 10 default questions");
+        alert("10 default questions added.");
+      } catch (err) {
+        console.error(err);
+        logDebug("Load default questions error:\n" + err.message);
+      }
+    };
+
     window.editQuestion = function (id) {
       const q = questions.find(x => x.id === id);
       if (!q) return;
@@ -736,7 +888,7 @@
       const box = document.getElementById("questionList");
 
       if (!questions.length) {
-        box.innerHTML = `<div class="item"><div class="meta">No questions yet. Add your first puzzle above.</div></div>`;
+        box.innerHTML = `<div class="item"><div class="meta">No questions yet. Paste or add your first puzzle above.</div></div>`;
         return;
       }
 
