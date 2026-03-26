@@ -39,127 +39,139 @@
       width:100%;
       min-height:100vh;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
-      padding:14px;
+      padding:10px;
       position:relative;
     }
 
     .container{
-      width:min(1280px, 100%);
-      height:min(94vh, 900px);
+      width:min(1200px, 100%);
+      min-height:78vh;
       display:grid;
-      grid-template-rows:auto auto 1fr auto;
-      gap:12px;
-    }
-
-    .top{
-      display:grid;
-      grid-template-columns:1fr 180px;
-      gap:12px;
-      align-items:stretch;
+      grid-template-rows:auto auto 1fr;
+      gap:10px;
+      margin-top:2px;
     }
 
     .glass{
       background:var(--card);
       border:1px solid var(--line);
-      border-radius:22px;
-      box-shadow:0 16px 40px rgba(0,0,0,.22);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
+      border-radius:20px;
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
     }
 
-    .head{
-      padding:16px 20px;
+    .topbar{
+      display:grid;
+      grid-template-columns:1fr 110px;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    .titlebar{
+      padding:12px 16px;
       display:flex;
       flex-direction:column;
       justify-content:center;
+      min-height:74px;
     }
 
-    .kicker{
-      font-size:11px;
+    .mini-kicker{
+      font-size:10px;
       text-transform:uppercase;
       letter-spacing:2px;
       color:var(--muted);
-      margin-bottom:6px;
-      font-weight:700;
-    }
-
-    .heading{
-      font-size:34px;
-      font-weight:900;
-      line-height:1.02;
+      font-weight:800;
       margin-bottom:4px;
     }
 
+    .title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .heading{
+      font-size:24px;
+      font-weight:900;
+      line-height:1.02;
+      margin:0;
+    }
+
     .subheading{
-      font-size:15px;
+      margin-top:4px;
+      font-size:12px;
       color:var(--muted);
-      line-height:1.35;
+      line-height:1.25;
     }
 
     .timerbox{
-      padding:14px 16px;
-      text-align:center;
+      min-height:74px;
       display:flex;
       flex-direction:column;
       justify-content:center;
+      align-items:center;
+      padding:8px;
+      text-align:center;
     }
 
     .timerlabel{
-      font-size:11px;
+      font-size:10px;
       text-transform:uppercase;
       letter-spacing:2px;
       color:var(--muted);
-      margin-bottom:6px;
-      font-weight:700;
+      margin-bottom:2px;
+      font-weight:800;
     }
 
     .timer{
-      font-size:52px;
+      font-size:42px;
       font-weight:900;
       line-height:1;
       color:#fff;
     }
 
     .questionWrap{
-      padding:18px 20px;
+      padding:14px 16px 16px;
       display:flex;
       flex-direction:column;
       min-height:0;
+      position:relative;
     }
 
     .meta{
       display:flex;
       justify-content:space-between;
-      gap:12px;
       align-items:center;
-      margin-bottom:10px;
+      gap:10px;
+      margin-bottom:8px;
       color:var(--muted);
-      font-size:14px;
-      font-weight:700;
+      font-size:12px;
+      font-weight:800;
     }
 
     .question{
-      font-size:34px;
-      line-height:1.1;
+      font-size:28px;
+      line-height:1.08;
       font-weight:900;
-      margin-bottom:14px;
+      margin-bottom:12px;
     }
 
     .options{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      flex:1;
+      grid-template-columns:1fr;
+      gap:10px;
     }
 
     .opt{
-      padding:14px 16px;
-      border-radius:18px;
+      padding:12px 14px;
+      border-radius:16px;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.10);
-      min-height:78px;
+      min-height:62px;
       display:flex;
       align-items:center;
       gap:12px;
@@ -167,61 +179,66 @@
     }
 
     .opt .letter{
-      width:40px;
-      height:40px;
+      width:34px;
+      height:34px;
       border-radius:50%;
       display:grid;
       place-items:center;
       background:rgba(255,255,255,.12);
       font-weight:900;
-      font-size:18px;
+      font-size:16px;
       flex-shrink:0;
     }
 
     .opt .text{
-      font-size:22px;
-      line-height:1.2;
+      font-size:18px;
+      line-height:1.15;
       font-weight:800;
     }
 
     .opt.reveal-correct{
       background:linear-gradient(135deg, rgba(45,211,129,.25), rgba(45,211,129,.10));
       border-color:rgba(45,211,129,.65);
-      box-shadow:0 0 0 2px rgba(45,211,129,.18), 0 0 24px rgba(45,211,129,.18);
+      box-shadow:0 0 0 2px rgba(45,211,129,.18), 0 0 20px rgba(45,211,129,.18);
     }
 
     .opt.dim{
-      opacity:.42;
+      opacity:.4;
     }
 
-    .celebrate{
+    .floating-reveal{
+      position:absolute;
+      right:14px;
+      top:14px;
       display:none;
-      text-align:center;
-      padding:12px 18px;
-      font-size:24px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:linear-gradient(135deg, rgba(45,211,129,.24), rgba(45,211,129,.12));
+      border:1px solid rgba(45,211,129,.45);
+      font-size:12px;
       font-weight:900;
-      background:linear-gradient(135deg, rgba(45,211,129,.18), rgba(255,255,255,.06));
-      animation:pulse 1s ease-in-out infinite;
+      color:#dfffea;
+      letter-spacing:.4px;
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
     }
 
-    .celebrate.show{ display:block; }
-
-    @keyframes pulse{
-      0%{ transform:scale(1); }
-      50%{ transform:scale(1.01); }
-      100%{ transform:scale(1); }
+    .floating-reveal.show{
+      display:block;
     }
 
     .certificateScreen{
       display:none;
-      width:min(1200px,100%);
+      width:min(1100px,100%);
+      margin-top:6px;
     }
 
-    .certificateScreen.show{ display:block; }
+    .certificateScreen.show{
+      display:block;
+    }
 
     .certificate{
-      padding:28px 24px;
-      border-radius:28px;
+      padding:24px 20px;
+      border-radius:24px;
       background:
         linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05)),
         linear-gradient(135deg, rgba(255,209,102,.12), rgba(255,183,3,.06));
@@ -233,61 +250,61 @@
       color:#ffe6a6;
       text-transform:uppercase;
       letter-spacing:3px;
-      font-size:12px;
+      font-size:11px;
       font-weight:800;
-      margin-bottom:10px;
+      margin-bottom:8px;
     }
 
     .certTitle{
-      font-size:42px;
+      font-size:34px;
       font-weight:900;
-      margin-bottom:10px;
+      margin-bottom:8px;
     }
 
     .certSub{
-      font-size:16px;
+      font-size:14px;
       color:var(--muted);
-      margin-bottom:20px;
+      margin-bottom:16px;
     }
 
     .winnerGrid{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
+      grid-template-columns:1fr;
+      gap:10px;
       text-align:left;
     }
 
     .winnerCard{
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.10);
-      border-radius:18px;
-      padding:14px 16px;
+      border-radius:16px;
+      padding:12px 14px;
       display:flex;
       align-items:center;
-      gap:14px;
+      gap:12px;
     }
 
     .rank{
-      width:42px;
-      height:42px;
+      width:36px;
+      height:36px;
       border-radius:50%;
       display:grid;
       place-items:center;
       background:linear-gradient(135deg, rgba(255,209,102,.4), rgba(255,183,3,.22));
       color:#fff2c4;
       font-weight:900;
-      font-size:17px;
+      font-size:15px;
       flex-shrink:0;
     }
 
     .winnerName{
-      font-size:22px;
+      font-size:18px;
       font-weight:800;
-      line-height:1.2;
+      line-height:1.15;
     }
 
     .winnerTextSmall{
-      font-size:11px;
+      font-size:10px;
       color:var(--muted);
       text-transform:uppercase;
       letter-spacing:1px;
@@ -297,10 +314,12 @@
     .emptyWinners{
       padding:18px;
       color:var(--muted);
-      font-size:18px;
+      font-size:16px;
     }
 
-    .quizScreen.hide{ display:none; }
+    .quizScreen.hide{
+      display:none;
+    }
 
     .confetti{
       position:fixed;
@@ -325,43 +344,96 @@
       }
     }
 
-    @media (max-width: 900px){
-      .screen{ padding:10px; }
-      .container{
-        height:auto;
-        min-height:94vh;
-        grid-template-rows:auto auto auto auto;
+    @media (min-width: 900px){
+      .screen{
+        padding:14px;
+        align-items:center;
       }
-      .top{ grid-template-columns:1fr; }
-      .heading{ font-size:28px; }
-      .subheading{ font-size:14px; }
-      .timer{ font-size:42px; }
-      .question{ font-size:28px; }
-      .options{ grid-template-columns:1fr; }
-      .opt{ min-height:66px; padding:12px 14px; }
-      .opt .text{ font-size:20px; }
-      .certTitle{ font-size:34px; }
-      .winnerGrid{ grid-template-columns:1fr; }
+
+      .container{
+        width:min(1250px, 100%);
+        min-height:auto;
+        gap:12px;
+      }
+
+      .topbar{
+        grid-template-columns:1fr 140px;
+      }
+
+      .titlebar{
+        min-height:84px;
+        padding:14px 18px;
+      }
+
+      .heading{
+        font-size:30px;
+      }
+
+      .subheading{
+        font-size:13px;
+      }
+
+      .timerbox{
+        min-height:84px;
+      }
+
+      .timer{
+        font-size:48px;
+      }
+
+      .questionWrap{
+        padding:16px 18px 18px;
+      }
+
+      .question{
+        font-size:34px;
+        margin-bottom:14px;
+      }
+
+      .options{
+        grid-template-columns:1fr 1fr;
+        gap:12px;
+      }
+
+      .opt{
+        min-height:78px;
+      }
+
+      .opt .text{
+        font-size:22px;
+      }
+
+      .winnerGrid{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .certTitle{
+        font-size:42px;
+      }
     }
   </style>
 </head>
 <body class="theme-purple">
   <div class="screen">
     <div class="container quizScreen" id="quizScreen">
-      <div class="top">
-        <div class="glass head">
-          <div class="kicker">Live Quiz</div>
-          <div class="heading" id="heading">WinQuest Live Quiz Night</div>
+      <div class="topbar">
+        <div class="glass titlebar">
+          <div class="mini-kicker">Live Quiz</div>
+          <div class="title-row">
+            <h1 class="heading" id="heading">WinQuest Live Quiz Night</h1>
+          </div>
           <div class="subheading" id="subheading">Comment the correct answer before time runs out</div>
         </div>
 
         <div class="glass timerbox">
-          <div class="timerlabel">Time Left</div>
+          <div class="timerlabel">Time</div>
           <div class="timer" id="timer">10</div>
         </div>
       </div>
 
       <div class="glass questionWrap">
+        <div class="floating-reveal" id="floatingReveal">✅ Correct Answer</div>
+
         <div class="meta">
           <div id="questionCount">Question 0 / 0</div>
           <div id="quizStateLabel">Waiting</div>
@@ -370,8 +442,6 @@
         <div class="question" id="questionText">Add questions from admin</div>
         <div class="options" id="optionsBox"></div>
       </div>
-
-      <div class="glass celebrate" id="celebrateBox">🎉 Correct Answer Revealed 🎉</div>
     </div>
 
     <div class="certificateScreen" id="certificateScreen">
@@ -491,7 +561,7 @@
         });
       }
 
-      document.getElementById("celebrateBox").classList.toggle("show", !!state.answerRevealed);
+      document.getElementById("floatingReveal").classList.toggle("show", !!state.answerRevealed);
     }
 
     function renderCertificate() {
@@ -525,7 +595,7 @@
       layer.innerHTML = "";
       const colors = ["#7c5cff", "#32c5ff", "#2dd381", "#ffd166", "#ff7f50", "#ffffff"];
 
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 60; i++) {
         const piece = document.createElement("div");
         piece.className = "piece";
         piece.style.left = Math.random() * 100 + "vw";
@@ -535,7 +605,7 @@
         layer.appendChild(piece);
       }
 
-      setTimeout(() => { layer.innerHTML = ""; }, 2600);
+      setTimeout(() => { layer.innerHTML = ""; }, 2200);
     }
 
     async function tickOnce() {
