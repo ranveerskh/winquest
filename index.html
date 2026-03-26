@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WinQuest Hub</title>
+
   <style>
     * {
       margin: 0;
@@ -14,7 +15,10 @@
 
     body {
       min-height: 100vh;
-      background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(168,85,247,0.18), transparent 30%),
+        linear-gradient(135deg, #0f172a, #1e293b, #334155);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -32,7 +36,6 @@
       font-size: 2.8rem;
       font-weight: bold;
       margin-bottom: 12px;
-      letter-spacing: 1px;
     }
 
     .subtitle {
@@ -43,107 +46,125 @@
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
     }
 
     .card {
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 24px;
-      padding: 35px 25px;
+      border-radius: 20px;
+      padding: 30px 20px;
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: 0.25s;
       cursor: pointer;
       text-decoration: none;
       color: white;
-      display: block;
     }
 
     .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      transform: translateY(-6px);
     }
 
     .icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: 2.8rem;
+      margin-bottom: 15px;
     }
 
-    .card h2 {
-      font-size: 1.8rem;
-      margin-bottom: 12px;
+    h2 {
+      margin-bottom: 10px;
     }
 
-    .card p {
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #e2e8f0;
+    p {
+      font-size: 0.95rem;
+      color: #dbeafe;
     }
 
-    .quiz-card {
-      background: linear-gradient(135deg, rgba(59,130,246,0.28), rgba(37,99,235,0.18));
+    .quiz { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+    .astro { background: linear-gradient(135deg,#a855f7,#ec4899); }
+    .puzzle { background: linear-gradient(135deg,#22c55e,#16a34a); }
+
+    .admin-btn {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      cursor: pointer;
+      width: 100%;
     }
 
-    .astro-card {
-      background: linear-gradient(135deg, rgba(168,85,247,0.28), rgba(236,72,153,0.18));
+    .admin-btn:hover {
+      background: rgba(0,0,0,0.6);
     }
 
     .footer {
-      margin-top: 35px;
+      margin-top: 30px;
       color: #94a3b8;
-      font-size: 0.95rem;
-    }
-
-    @media (max-width: 600px) {
-      .title {
-        font-size: 2.1rem;
-      }
-
-      .subtitle {
-        font-size: 1rem;
-      }
-
-      .card {
-        padding: 28px 20px;
-      }
-
-      .card h2 {
-        font-size: 1.5rem;
-      }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="title">Welcome to WinQuest Hub</div>
-    <div class="subtitle">Choose what you want to explore</div>
 
-    <div class="cards">
-      <a href="display.html" class="card quiz-card">
-        <div class="icon">🧠</div>
-        <h2>Quiz</h2>
-        <p>
-          Explore fun and engaging quizzes. Test knowledge, challenge friends,
-          and enjoy different categories in one place.
-        </p>
-      </a>
+<div class="container">
+  <div class="title">WinQuest Hub</div>
+  <div class="subtitle">Choose what you want to explore</div>
 
-      <a href="astrodisplay.html" class="card astro-card">
-        <div class="icon">🔮</div>
-        <h2>Astrology</h2>
-        <p>
-          Check zodiac content, daily predictions, lucky numbers, and special
-          astrology updates in a beautiful display section.
-        </p>
-      </a>
+  <div class="cards">
+
+    <!-- QUIZ -->
+    <div class="card quiz" onclick="goPage('display.html')">
+      <div class="icon">🧠</div>
+      <h2>Quiz</h2>
+      <p>Test your knowledge and challenge yourself</p>
+      <button class="admin-btn" onclick="event.stopPropagation(); goAdmin('admin.html')">
+        Admin Panel
+      </button>
     </div>
 
-    <div class="footer">
-      Powered by your website • Quiz + Astrology in one platform
+    <!-- ASTRO -->
+    <div class="card astro" onclick="goPage('astrodisplay.html')">
+      <div class="icon">🔮</div>
+      <h2>Astrology</h2>
+      <p>Daily predictions and zodiac insights</p>
+      <button class="admin-btn" onclick="event.stopPropagation(); goAdmin('astroadmin.html')">
+        Admin Panel
+      </button>
     </div>
+
+    <!-- PUZZLE -->
+    <div class="card puzzle" onclick="goPage('puzzledisplay.html')">
+      <div class="icon">🧩</div>
+      <h2>Puzzle</h2>
+      <p>Fun brain teasers and interactive puzzles</p>
+      <button class="admin-btn" onclick="event.stopPropagation(); goAdmin('puzzleadmin.html')">
+        Admin Panel
+      </button>
+    </div>
+
   </div>
+
+  <div class="footer">
+    Powered by WinQuest • Quiz + Astrology + Puzzle
+  </div>
+</div>
+
+<script>
+  function goPage(page) {
+    window.location.href = page;
+  }
+
+  function goAdmin(page) {
+    let pass = prompt("Enter Admin Password:");
+    if (pass === "grewalaman") {
+      window.location.href = page;
+    } else if (pass !== null) {
+      alert("Wrong Password!");
+    }
+  }
+</script>
+
 </body>
 </html>
