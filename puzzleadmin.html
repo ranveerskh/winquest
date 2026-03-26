@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WinQuest Puzzle Admin</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root{
+      --bg:#0a1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --line:#26345d;
+      --text:#eef3ff;
+      --muted:#aeb9df;
+      --accent:#7c5cff;
+      --accent2:#32c5ff;
+      --ok:#2dd381;
+      --warn:#ffc857;
+      --danger:#ff667f;
+    }
+
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(160deg,#09101f,#111936 55%,#0a1020);
+      color:var(--text);
+      padding:18px;
+    }
+
+    .wrap{
+      max-width:1400px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:18px;
+    }
+
+    .panel{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
+    }
+
+    h1,h2,h3{ margin:0 0 12px; }
+    h1{ font-size:30px; }
+    h2{ font-size:21px; }
+    h3{ font-size:17px; }
+
+    .row{ margin-bottom:14px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:6px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    input, textarea, select{
+      width:100%;
+      border:none;
+      outline:none;
+      background:var(--card2);
+      color:var(--text);
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      line-height:1.55;
+    }
+
+    button, a.btn{
+      border:none;
+      border-radius:14px;
+      padding:13px 16px;
+      cursor:pointer;
+      color:#fff;
+      font-weight:800;
+      font-size:14px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .primary{ background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+    .ok{ background:linear-gradient(135deg,#16a34a,var(--ok)); }
+    .warn{ background:linear-gradient(135deg,#ff9f1c,var(--warn)); color:#1d1600; }
+    .danger{ background:linear-gradient(135deg,#ef476f,var(--danger)); }
+    .ghost{ background:#182243; border:1px solid var(--line); }
+
+    .hint{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+      margin-top:6px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .previewBox, .status{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .previewPuzzle{
+      font-size:48px;
+      line-height:1.2;
+      font-weight:900;
+      text-align:center;
+      padding:14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
+      word-break:break-word;
+      white-space:pre-wrap;
+    }
+
+    .previewMeta{
+      margin-top:10px;
+      line-height:1.8;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:640px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .item{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .item strong{
+      display:block;
+      margin-bottom:8px;
+      line-height:1.35;
+      font-size:22px;
+      word-break:break-word;
+      white-space:pre-wrap;
+    }
+
+    .meta{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
+      word-break:break-word;
+    }
+
+    .itemActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .miniBtn{
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .status{
+      line-height:1.8;
+      font-size:14px;
+      color:var(--muted);
+      white-space:pre-wrap;
+    }
+
+    .status b{ color:var(--text); }
+
+    .debug{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      background:#091327;
+      border:1px solid #20345f;
+      color:#9fc1ff;
+      font-size:13px;
+      white-space:pre-wrap;
+      min-height:70px;
+    }
+
+    .inlineButtons{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns:1fr; }
+    }
+
+    @media (max-width: 700px){
+      .grid, .grid3{ grid-template-columns:1fr; }
+      .previewPuzzle{ font-size:38px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>WinQuest Puzzle Admin</h1>
+      <div class="hint">
+        Control the live puzzle from your phone. Press next for next question. Answer stays hidden until you press show answer. Winner stays hidden until you press show winner.
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Display Settings</h2>
+
+        <div class="grid row">
+          <div>
+            <label>Top Heading</label>
+            <input id="heading" value="GUESS THE WORD" />
+          </div>
+          <div>
+            <label>Bottom CTA</label>
+            <input id="ctaText" value="Comment your answer now" />
+          </div>
+        </div>
+
+        <div class="grid row">
+          <div>
+            <label>Theme</label>
+            <select id="theme">
+              <option value="gold">Gold Premium</option>
+              <option value="purple">Purple Glow</option>
+              <option value="blue">Blue Glass</option>
+              <option value="red">Red Energy</option>
+              <option value="green">Green Pulse</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="primary" style="width:100%;" onclick="saveSettings()">Save Display Settings</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Live Control</h2>
+
+        <div class="grid row">
+          <div>
+            <label>Winner Name</label>
+            <input id="winnerName" placeholder="Enter winner name..." />
+          </div>
+          <div>
+            <label>Winner Country</label>
+            <input id="winnerCountry" placeholder="Enter country..." />
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="ghost" onclick="prevQuestion()">⬅ Previous</button>
+          <button class="primary" onclick="nextQuestion()">Next ➡</button>
+          <button class="warn" onclick="showAnswer()">Show Answer</button>
+          <button class="ghost" onclick="hideAnswer()">Hide Answer</button>
+          <button class="ok" onclick="showWinner()">Show Winner</button>
+          <button class="ghost" onclick="hideWinner()">Hide Winner</button>
+          <button class="danger" onclick="resetLive()">Reset Live</button>
+          <a class="btn ghost" href="puzzledisplay.html" target="_blank">Open Display</a>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Add / Edit Question</h2>
+
+        <div class="row">
+          <label>Emoji Puzzle / Text Puzzle</label>
+          <textarea id="puzzleInput" placeholder="Example: 🐄 + 👦"></textarea>
+        </div>
+
+        <div class="row">
+          <label>Correct Answer</label>
+          <input id="answerInput" placeholder="Example: Cowboy" />
+        </div>
+
+        <div class="inlineButtons">
+          <button class="primary" onclick="saveQuestion()">Save Question</button>
+          <button class="ghost" onclick="clearQuestionForm()">Clear Form</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">
+          You can add emoji questions later anytime. Example: 🐝 + 🍃 , 👁 + 🧊 , 🔥 + 🧍
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Current Live Preview</h2>
+
+      <div class="previewBox">
+        <div class="previewPuzzle" id="previewPuzzle">Loading...</div>
+        <div class="previewMeta" id="previewMeta">Loading...</div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>All Questions</h2>
+        <div class="list" id="questionList"></div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Status</h2>
+        <div class="status" id="statusBox"></div>
+        <div class="debug" id="debugBox">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db } from "./firebase-config.js";
+    import {
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc,
+      deleteDoc,
+      addDoc,
+      onSnapshot,
+      collection,
+      query,
+      orderBy,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const liveRef = doc(db, "livePuzzle", "current");
+    const questionsRef = collection(db, "livePuzzleQuestions");
+
+    const defaultState = {
+      heading: "GUESS THE WORD",
+      ctaText: "Comment your answer now",
+      theme: "gold",
+      currentQuestionIndex: 0,
+      showAnswer: false,
+      showWinner: false,
+      winnerName: "",
+      winnerCountry: "",
+      updatedAt: null
+    };
+
+    let state = structuredClone(defaultState);
+    let questions = [];
+    let editingQuestionId = null;
+
+    function logDebug(msg) {
+      console.log(msg);
+      const box = document.getElementById("debugBox");
+      box.textContent = typeof msg === "string" ? msg : JSON.stringify(msg, null, 2);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function normalizeState(data) {
+      const safe = { ...structuredClone(defaultState), ...(data || {}) };
+      safe.heading = safe.heading || defaultState.heading;
+      safe.ctaText = safe.ctaText || defaultState.ctaText;
+      safe.theme = safe.theme || "gold";
+      safe.currentQuestionIndex = Number.isFinite(Number(safe.currentQuestionIndex)) ? Number(safe.currentQuestionIndex) : 0;
+      safe.showAnswer = !!safe.showAnswer;
+      safe.showWinner = !!safe.showWinner;
+      safe.winnerName = safe.winnerName || "";
+      safe.winnerCountry = safe.winnerCountry || "";
+      return safe;
+    }
+
+    async function ensureDocExists() {
+      const snap = await getDoc(liveRef);
+      if (!snap.exists()) {
+        await setDoc(liveRef, defaultState);
+        logDebug("Created Firestore doc: livePuzzle/current");
+      } else {
+        logDebug("Firestore live doc already exists");
+      }
+    }
+
+    function getCurrentQuestion() {
+      if (!questions.length) {
+        return {
+          puzzle: "NO QUESTIONS YET",
+          answer: "Add questions from admin page"
+        };
+      }
+
+      let index = state.currentQuestionIndex || 0;
+      if (index < 0) index = 0;
+      if (index >= questions.length) index = questions.length - 1;
+
+      return questions[index];
+    }
+
+    function syncInputsFromState() {
+      document.getElementById("heading").value = state.heading || "";
+      document.getElementById("ctaText").value = state.ctaText || "";
+      document.getElementById("theme").value = state.theme || "gold";
+      document.getElementById("winnerName").value = state.winnerName || "";
+      document.getElementById("winnerCountry").value = state.winnerCountry || "";
+    }
+
+    async function refreshSettingsFromInputs() {
+      state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
+      state.ctaText = document.getElementById("ctaText").value.trim() || defaultState.ctaText;
+      state.theme = document.getElementById("theme").value || "gold";
+    }
+
+    async function saveLiveState(extra = {}) {
+      await setDoc(liveRef, {
+        ...state,
+        ...extra,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    window.saveSettings = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        await saveLiveState();
+        logDebug("Display settings saved");
+      } catch (err) {
+        console.error(err);
+        logDebug("Save settings error:\n" + err.message);
+      }
+    };
+
+    window.nextQuestion = async function () {
+      try {
+        if (!questions.length) {
+          alert("Please add at least one question first.");
+          return;
+        }
+
+        await refreshSettingsFromInputs();
+        let nextIndex = (state.currentQuestionIndex || 0) + 1;
+        if (nextIndex >= questions.length) nextIndex = 0;
+
+        state.currentQuestionIndex = nextIndex;
+        state.showAnswer = false;
+        state.showWinner = false;
+        state.winnerName = "";
+        state.winnerCountry = "";
+
+        await saveLiveState({
+          currentQuestionIndex: state.currentQuestionIndex,
+          showAnswer: false,
+          showWinner: false,
+          winnerName: "",
+          winnerCountry: ""
+        });
+
+        logDebug("Moved to next question");
+      } catch (err) {
+        console.error(err);
+        logDebug("Next question error:\n" + err.message);
+      }
+    };
+
+    window.prevQuestion = async function () {
+      try {
+        if (!questions.length) {
+          alert("Please add at least one question first.");
+          return;
+        }
+
+        await refreshSettingsFromInputs();
+        let prevIndex = (state.currentQuestionIndex || 0) - 1;
+        if (prevIndex < 0) prevIndex = questions.length - 1;
+
+        state.currentQuestionIndex = prevIndex;
+        state.showAnswer = false;
+        state.showWinner = false;
+        state.winnerName = "";
+        state.winnerCountry = "";
+
+        await saveLiveState({
+          currentQuestionIndex: state.currentQuestionIndex,
+          showAnswer: false,
+          showWinner: false,
+          winnerName: "",
+          winnerCountry: ""
+        });
+
+        logDebug("Moved to previous question");
+      } catch (err) {
+        console.error(err);
+        logDebug("Previous question error:\n" + err.message);
+      }
+    };
+
+    window.showAnswer = async function () {
+      try {
+        state.showAnswer = true;
+        await saveLiveState({ showAnswer: true });
+        logDebug("Answer shown");
+      } catch (err) {
+        console.error(err);
+        logDebug("Show answer error:\n" + err.message);
+      }
+    };
+
+    window.hideAnswer = async function () {
+      try {
+        state.showAnswer = false;
+        await saveLiveState({ showAnswer: false });
+        logDebug("Answer hidden");
+      } catch (err) {
+        console.error(err);
+        logDebug("Hide answer error:\n" + err.message);
+      }
+    };
+
+    window.showWinner = async function () {
+      try {
+        const winnerName = document.getElementById("winnerName").value.trim();
+        const winnerCountry = document.getElementById("winnerCountry").value.trim();
+
+        if (!winnerName) {
+          alert("Please enter winner name.");
+          return;
+        }
+
+        state.winnerName = winnerName;
+        state.winnerCountry = winnerCountry;
+        state.showWinner = true;
+
+        await saveLiveState({
+          winnerName,
+          winnerCountry,
+          showWinner: true
+        });
+
+        logDebug(`Winner shown: ${winnerName}${winnerCountry ? " - " + winnerCountry : ""}`);
+      } catch (err) {
+        console.error(err);
+        logDebug("Show winner error:\n" + err.message);
+      }
+    };
+
+    window.hideWinner = async function () {
+      try {
+        state.showWinner = false;
+        await saveLiveState({ showWinner: false });
+        logDebug("Winner hidden");
+      } catch (err) {
+        console.error(err);
+        logDebug("Hide winner error:\n" + err.message);
+      }
+    };
+
+    window.resetLive = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        state.showAnswer = false;
+        state.showWinner = false;
+        state.winnerName = "";
+        state.winnerCountry = "";
+
+        await saveLiveState({
+          showAnswer: false,
+          showWinner: false,
+          winnerName: "",
+          winnerCountry: ""
+        });
+
+        document.getElementById("winnerName").value = "";
+        document.getElementById("winnerCountry").value = "";
+
+        logDebug("Live view reset");
+      } catch (err) {
+        console.error(err);
+        logDebug("Reset live error:\n" + err.message);
+      }
+    };
+
+    window.clearQuestionForm = function () {
+      editingQuestionId = null;
+      document.getElementById("puzzleInput").value = "";
+      document.getElementById("answerInput").value = "";
+      logDebug("Question form cleared");
+    };
+
+    window.saveQuestion = async function () {
+      try {
+        const puzzle = document.getElementById("puzzleInput").value.trim();
+        const answer = document.getElementById("answerInput").value.trim();
+
+        if (!puzzle || !answer) {
+          alert("Please enter both puzzle and answer.");
+          return;
+        }
+
+        if (editingQuestionId) {
+          await updateDoc(doc(db, "livePuzzleQuestions", editingQuestionId), {
+            puzzle,
+            answer,
+            updatedAt: serverTimestamp()
+          });
+          logDebug("Question updated");
+        } else {
+          await addDoc(questionsRef, {
+            puzzle,
+            answer,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+          logDebug("Question added");
+        }
+
+        editingQuestionId = null;
+        document.getElementById("puzzleInput").value = "";
+        document.getElementById("answerInput").value = "";
+      } catch (err) {
+        console.error(err);
+        logDebug("Save question error:\n" + err.message);
+      }
+    };
+
+    window.editQuestion = function (id) {
+      const q = questions.find(x => x.id === id);
+      if (!q) return;
+
+      editingQuestionId = id;
+      document.getElementById("puzzleInput").value = q.puzzle || "";
+      document.getElementById("answerInput").value = q.answer || "";
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      logDebug("Editing question");
+    };
+
+    window.deleteQuestionNow = async function (id) {
+      try {
+        await deleteDoc(doc(db, "livePuzzleQuestions", id));
+
+        if (questions.length <= 1) {
+          state.currentQuestionIndex = 0;
+          await saveLiveState({ currentQuestionIndex: 0 });
+        } else if (state.currentQuestionIndex >= questions.length - 1) {
+          state.currentQuestionIndex = Math.max(0, questions.length - 2);
+          await saveLiveState({ currentQuestionIndex: state.currentQuestionIndex });
+        }
+
+        logDebug("Question deleted");
+      } catch (err) {
+        console.error(err);
+        logDebug("Delete question error:\n" + err.message);
+      }
+    };
+
+    window.goLiveQuestion = async function (index) {
+      try {
+        state.currentQuestionIndex = index;
+        state.showAnswer = false;
+        state.showWinner = false;
+        state.winnerName = "";
+        state.winnerCountry = "";
+
+        await saveLiveState({
+          currentQuestionIndex: index,
+          showAnswer: false,
+          showWinner: false,
+          winnerName: "",
+          winnerCountry: ""
+        });
+
+        logDebug(`Live question changed to #${index + 1}`);
+      } catch (err) {
+        console.error(err);
+        logDebug("Go live question error:\n" + err.message);
+      }
+    };
+
+    function renderPreview() {
+      const q = getCurrentQuestion();
+      const total = questions.length;
+      const currentRound = total ? Math.min((state.currentQuestionIndex || 0) + 1, total) : 0;
+
+      document.getElementById("previewPuzzle").textContent = q.puzzle || "NO QUESTIONS YET";
+      document.getElementById("previewMeta").innerHTML = `
+        <b>Round:</b> ${total ? currentRound : 0} / ${total}<br>
+        <b>Answer:</b> ${escapeHtml(q.answer || "--")}<br>
+        <b>Show Answer:</b> ${state.showAnswer ? "YES" : "NO"}<br>
+        <b>Show Winner:</b> ${state.showWinner ? "YES" : "NO"}<br>
+        <b>Winner Name:</b> ${escapeHtml(state.winnerName || "--")}<br>
+        <b>Winner Country:</b> ${escapeHtml(state.winnerCountry || "--")}
+      `;
+    }
+
+    function renderQuestionList() {
+      const box = document.getElementById("questionList");
+
+      if (!questions.length) {
+        box.innerHTML = `<div class="item"><div class="meta">No questions yet. Add your first puzzle above.</div></div>`;
+        return;
+      }
+
+      box.innerHTML = questions.map((q, index) => `
+        <div class="item">
+          <strong>${escapeHtml(q.puzzle || "")}</strong>
+          <div class="meta"><b>Answer:</b> ${escapeHtml(q.answer || "")}</div>
+          <div class="meta"><b>Question #:</b> ${index + 1}</div>
+          <div class="meta"><b>Live Now:</b> ${(state.currentQuestionIndex || 0) === index ? "YES" : "NO"}</div>
+          <div class="itemActions">
+            <button class="miniBtn primary" onclick="goLiveQuestion(${index})">Go Live</button>
+            <button class="miniBtn ghost" onclick="editQuestion('${q.id}')">Edit</button>
+            <button class="miniBtn danger" onclick="deleteQuestionNow('${q.id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderStatus() {
+      const total = questions.length;
+      const currentRound = total ? Math.min((state.currentQuestionIndex || 0) + 1, total) : 0;
+
+      document.getElementById("statusBox").innerHTML = `
+<b>Heading:</b> ${escapeHtml(state.heading)}
+<b>CTA:</b> ${escapeHtml(state.ctaText)}
+<b>Theme:</b> ${escapeHtml(state.theme)}
+<b>Total Questions:</b> ${total}
+<b>Current Round:</b> ${currentRound}
+<b>Show Answer:</b> ${state.showAnswer ? "YES" : "NO"}
+<b>Show Winner:</b> ${state.showWinner ? "YES" : "NO"}
+<b>Winner Name:</b> ${escapeHtml(state.winnerName || "--")}
+<b>Winner Country:</b> ${escapeHtml(state.winnerCountry || "--")}
+      `;
+    }
+
+    function renderAll() {
+      syncInputsFromState();
+      renderPreview();
+      renderQuestionList();
+      renderStatus();
+    }
+
+    try {
+      await ensureDocExists();
+
+      onSnapshot(liveRef, (snap) => {
+        if (!snap.exists()) return;
+        state = normalizeState(snap.data());
+        renderAll();
+        logDebug("Live puzzle sync working");
+      }, (error) => {
+        console.error(error);
+        logDebug("Live state snapshot error:\n" + error.message);
+      });
+
+      const qy = query(questionsRef, orderBy("createdAt", "asc"));
+      onSnapshot(qy, (snap) => {
+        questions = snap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        if (state.currentQuestionIndex >= questions.length && questions.length > 0) {
+          state.currentQuestionIndex = questions.length - 1;
+        }
+        if (!questions.length) {
+          state.currentQuestionIndex = 0;
+        }
+
+        renderAll();
+      }, (error) => {
+        console.error(error);
+        logDebug("Questions snapshot error:\n" + error.message);
+      });
+
+    } catch (err) {
+      console.error(err);
+      logDebug("Startup error:\n" + err.message);
+    }
+  </script>
+</body>
+</html>
