@@ -158,8 +158,8 @@
 
   function goAdmin(page) {
     let pass = prompt("Enter Admin Password:");
-    if (pass === "grewalaman") {
-      window.location.href = page;
+    if (pass === "1420") {
+      window.open(page, "_blank"); // opens in new tab
     } else if (pass !== null) {
       alert("Wrong Password!");
     }
