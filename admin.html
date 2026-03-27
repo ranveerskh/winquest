@@ -183,7 +183,7 @@
   <div class="wrap">
     <div class="panel">
       <h1>WinQuest Quiz Admin</h1>
-      <div class="hint">This version auto-creates the Firestore document and shows debug messages if something fails.</div>
+      <div class="hint">Paste MCQs, control timer, run the quiz, add winners live, and copy one question to generate more in the same format.</div>
 
       <div class="grid row" style="margin-top:16px;">
         <div>
@@ -236,6 +236,7 @@ D: Venus"></textarea>
       <div class="top-actions">
         <button class="primary" onclick="parseAndSaveQuestions()">Parse & Save Questions</button>
         <button class="ghost" onclick="previewQuestions()">Preview Parsed</button>
+        <button class="ghost" onclick="copyOneQuestion()">Copy 1 Question</button>
         <button class="danger" onclick="clearQuestions()">Clear All Questions</button>
       </div>
 
@@ -459,6 +460,41 @@ D: Venus"></textarea>
       const questions = parseQuestionsFromText(raw);
       renderPreview(questions);
       logDebug(`Preview parsed ${questions.length} questions`);
+    };
+
+    window.copyOneQuestion = async function () {
+      try {
+        let q = null;
+
+        if (state.questions && state.questions.length) {
+          q = state.questions[state.currentIndex] || state.questions[0];
+        } else {
+          const raw = document.getElementById("bulkInput").value;
+          const parsed = parseQuestionsFromText(raw);
+          if (parsed.length) q = parsed[0];
+        }
+
+        if (!q) {
+          alert("No question available to copy.");
+          return;
+        }
+
+        const letters = ["A", "B", "C", "D"];
+        const text = [
+          `Q: ${q.question}`,
+          ...q.options.map((opt, i) =>
+            `${letters[i]}: ${opt}${i === q.correctIndex ? " [correct]" : ""}`
+          )
+        ].join("\n");
+
+        await navigator.clipboard.writeText(text);
+        logDebug("Copied 1 question format");
+        alert("One question copied.");
+      } catch (err) {
+        console.error(err);
+        logDebug("Copy question error:\n" + err.message);
+        alert("Copy failed.");
+      }
     };
 
     window.clearQuestions = async function () {
