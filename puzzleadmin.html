@@ -236,7 +236,7 @@
     <div class="panel">
       <h1>WinQuest Puzzle Admin</h1>
       <div class="hint">
-        Paste many questions at once, auto-detect puzzle + answer, show answer only when you press it, and show winner only when you want.
+        Paste many questions at once, auto-detect puzzle + answer, show answer only when you press it, and keep the last winner visible until you enter a new one.
       </div>
 
       <div class="panel" style="padding:14px; margin-top:16px;">
@@ -316,7 +316,7 @@
 
         <div class="hint" style="margin-top:10px;">
           Best format: <b>puzzle = answer</b><br>
-          Supported: = or - or | or “A:” style
+          Supported: = or - or | or “Q: ... A: ...”
         </div>
       </div>
 
@@ -388,7 +388,7 @@
       theme: "gold",
       currentQuestionIndex: 0,
       showAnswer: false,
-      showWinner: false,
+      showWinner: true,
       winnerName: "",
       winnerCountry: "",
       updatedAt: null
@@ -404,7 +404,7 @@
       { puzzle: "🍯 + 🌙", answer: "Honeymoon" },
       { puzzle: "🦋 + 🏠", answer: "Butterfly House" },
       { puzzle: "🌞 + 🕶️", answer: "Sunshade" },
-      { puzzle: "👂 + 🌎", answer: "Earring" }
+      { puzzle: "👂 + 💍", answer: "Earring" }
     ];
 
     let state = structuredClone(defaultState);
@@ -433,7 +433,7 @@
       safe.theme = safe.theme || "gold";
       safe.currentQuestionIndex = Number.isFinite(Number(safe.currentQuestionIndex)) ? Number(safe.currentQuestionIndex) : 0;
       safe.showAnswer = !!safe.showAnswer;
-      safe.showWinner = !!safe.showWinner;
+      safe.showWinner = data?.showWinner === false ? false : true;
       safe.winnerName = safe.winnerName || "";
       safe.winnerCountry = safe.winnerCountry || "";
       return safe;
@@ -490,23 +490,21 @@
       const trimmed = line.trim();
       if (!trimmed) return null;
 
-      if (trimmed.includes(" A:")) {
+      if (/^Q:\s*/i.test(trimmed) && /\sA:\s*/i.test(trimmed)) {
         const qMatch = trimmed.match(/^Q:\s*(.*?)\s*A:\s*(.*?)$/i);
         if (qMatch && qMatch[1] && qMatch[2]) {
           return { puzzle: qMatch[1].trim(), answer: qMatch[2].trim() };
         }
       }
 
-      const separators = [" = ", " | ", " - ", " — ", "=","|"];
+      const separators = [" = ", " | ", " - ", " — ", "=", "|"];
       for (const sep of separators) {
         if (trimmed.includes(sep)) {
           const parts = trimmed.split(sep);
           if (parts.length >= 2) {
             const puzzle = parts[0].trim();
             const answer = parts.slice(1).join(sep).trim();
-            if (puzzle && answer) {
-              return { puzzle, answer };
-            }
+            if (puzzle && answer) return { puzzle, answer };
           }
         }
       }
@@ -549,16 +547,10 @@
 
         state.currentQuestionIndex = nextIndex;
         state.showAnswer = false;
-        state.showWinner = false;
-        state.winnerName = "";
-        state.winnerCountry = "";
 
         await saveLiveState({
           currentQuestionIndex: state.currentQuestionIndex,
-          showAnswer: false,
-          showWinner: false,
-          winnerName: "",
-          winnerCountry: ""
+          showAnswer: false
         });
 
         logDebug("Moved to next question");
@@ -581,16 +573,10 @@
 
         state.currentQuestionIndex = prevIndex;
         state.showAnswer = false;
-        state.showWinner = false;
-        state.winnerName = "";
-        state.winnerCountry = "";
 
         await saveLiveState({
           currentQuestionIndex: state.currentQuestionIndex,
-          showAnswer: false,
-          showWinner: false,
-          winnerName: "",
-          winnerCountry: ""
+          showAnswer: false
         });
 
         logDebug("Moved to previous question");
@@ -664,19 +650,10 @@
       try {
         await refreshSettingsFromInputs();
         state.showAnswer = false;
-        state.showWinner = false;
-        state.winnerName = "";
-        state.winnerCountry = "";
 
         await saveLiveState({
-          showAnswer: false,
-          showWinner: false,
-          winnerName: "",
-          winnerCountry: ""
+          showAnswer: false
         });
-
-        document.getElementById("winnerName").value = "";
-        document.getElementById("winnerCountry").value = "";
 
         logDebug("Live view reset");
       } catch (err) {
@@ -784,16 +761,10 @@
 
         state.currentQuestionIndex = 0;
         state.showAnswer = false;
-        state.showWinner = false;
-        state.winnerName = "";
-        state.winnerCountry = "";
 
         await saveLiveState({
           currentQuestionIndex: 0,
-          showAnswer: false,
-          showWinner: false,
-          winnerName: "",
-          winnerCountry: ""
+          showAnswer: false
         });
 
         logDebug("All questions deleted");
@@ -849,16 +820,10 @@
       try {
         state.currentQuestionIndex = index;
         state.showAnswer = false;
-        state.showWinner = false;
-        state.winnerName = "";
-        state.winnerCountry = "";
 
         await saveLiveState({
           currentQuestionIndex: index,
-          showAnswer: false,
-          showWinner: false,
-          winnerName: "",
-          winnerCountry: ""
+          showAnswer: false
         });
 
         logDebug(`Live question changed to #${index + 1}`);
@@ -873,14 +838,17 @@
       const total = questions.length;
       const currentRound = total ? Math.min((state.currentQuestionIndex || 0) + 1, total) : 0;
 
+      const previewWinnerName = state.winnerName?.trim() ? state.winnerName : "No new comment yet";
+      const previewWinnerCountry = state.winnerCountry?.trim() ? state.winnerCountry : "Waiting for winner";
+
       document.getElementById("previewPuzzle").textContent = q.puzzle || "NO QUESTIONS YET";
       document.getElementById("previewMeta").innerHTML = `
         <b>Round:</b> ${total ? currentRound : 0} / ${total}<br>
         <b>Answer:</b> ${escapeHtml(q.answer || "--")}<br>
         <b>Show Answer:</b> ${state.showAnswer ? "YES" : "NO"}<br>
         <b>Show Winner:</b> ${state.showWinner ? "YES" : "NO"}<br>
-        <b>Winner Name:</b> ${escapeHtml(state.winnerName || "--")}<br>
-        <b>Winner Country:</b> ${escapeHtml(state.winnerCountry || "--")}
+        <b>Winner Name:</b> ${escapeHtml(previewWinnerName)}<br>
+        <b>Winner Country:</b> ${escapeHtml(previewWinnerCountry)}
       `;
     }
 
@@ -911,6 +879,9 @@
       const total = questions.length;
       const currentRound = total ? Math.min((state.currentQuestionIndex || 0) + 1, total) : 0;
 
+      const statusWinnerName = state.winnerName?.trim() ? state.winnerName : "No new comment yet";
+      const statusWinnerCountry = state.winnerCountry?.trim() ? state.winnerCountry : "Waiting for winner";
+
       document.getElementById("statusBox").innerHTML = `
 <b>Heading:</b> ${escapeHtml(state.heading)}
 <b>CTA:</b> ${escapeHtml(state.ctaText)}
@@ -919,8 +890,8 @@
 <b>Current Round:</b> ${currentRound}
 <b>Show Answer:</b> ${state.showAnswer ? "YES" : "NO"}
 <b>Show Winner:</b> ${state.showWinner ? "YES" : "NO"}
-<b>Winner Name:</b> ${escapeHtml(state.winnerName || "--")}
-<b>Winner Country:</b> ${escapeHtml(state.winnerCountry || "--")}
+<b>Winner Name:</b> ${escapeHtml(statusWinnerName)}
+<b>Winner Country:</b> ${escapeHtml(statusWinnerCountry)}
       `;
     }
 
