@@ -3,269 +3,360 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WinQuest Puzzle Display</title>
+  <title>WinQuest Puzzle Admin</title>
   <style>
     * { box-sizing: border-box; }
 
     :root{
-      --bg1:#12051f;
-      --bg2:#1a1034;
-      --bg3:#120826;
-      --gold:#ffd27a;
-      --gold2:#ffb74d;
-      --text:#fff9f0;
-      --soft:#f9e7c8;
-      --border:rgba(255,215,140,0.28);
-      --panel:rgba(20,12,35,0.48);
-      --shadow:0 15px 45px rgba(0,0,0,0.45);
+      --bg:#0a1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --line:#26345d;
+      --text:#eef3ff;
+      --muted:#aeb9df;
+      --accent:#7c5cff;
+      --accent2:#32c5ff;
+      --ok:#2dd381;
+      --warn:#ffc857;
+      --danger:#ff667f;
     }
 
     body{
       margin:0;
-      width:100%;
-      min-height:100vh;
-      overflow:hidden;
       font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(160deg,#09101f,#111936 55%,#0a1020);
       color:var(--text);
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,180,80,0.15), transparent 20%),
-        radial-gradient(circle at 80% 30%, rgba(180,100,255,0.15), transparent 20%),
-        radial-gradient(circle at 50% 100%, rgba(255,220,120,0.12), transparent 25%),
-        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 38%, var(--bg3) 100%);
-      position:relative;
+      padding:18px;
     }
 
-    body.theme-purple{
-      --bg1:#0a1020; --bg2:#151d3f; --bg3:#101730; --gold:#d6c3ff;
-    }
-    body.theme-blue{
-      --bg1:#08121e; --bg2:#12314c; --bg3:#0c1c2c; --gold:#bfe7ff;
-    }
-    body.theme-green{
-      --bg1:#08170f; --bg2:#153824; --bg3:#0d2116; --gold:#c7ffd8;
-    }
-    body.theme-red{
-      --bg1:#1b0a12; --bg2:#401425; --bg3:#240b14; --gold:#ffd1d9;
-    }
-    body.theme-gold{
-      --bg1:#12051f; --bg2:#1a1034; --bg3:#120826; --gold:#ffd27a;
+    .wrap{
+      max-width:1400px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:18px;
     }
 
-    .stars,
-    .stars2{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background-image:
-        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.9), transparent),
-        radial-gradient(2px 2px at 100px 150px, rgba(255,220,170,.8), transparent),
-        radial-gradient(1.5px 1.5px at 200px 80px, rgba(255,255,255,.7), transparent),
-        radial-gradient(2px 2px at 320px 220px, rgba(255,215,140,.75), transparent),
-        radial-gradient(1.5px 1.5px at 500px 120px, rgba(255,255,255,.8), transparent),
-        radial-gradient(2px 2px at 700px 300px, rgba(255,210,120,.7), transparent),
-        radial-gradient(1.5px 1.5px at 900px 100px, rgba(255,255,255,.8), transparent),
-        radial-gradient(2px 2px at 1100px 260px, rgba(255,225,170,.75), transparent);
-      background-size:1200px 700px;
-      animation:drift 30s linear infinite;
-      opacity:.75;
+    .panel{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
     }
 
-    .stars2{
-      animation-duration:45s;
-      opacity:.35;
-      transform:scale(1.2);
+    h1,h2,h3{ margin:0 0 12px; }
+    h1{ font-size:30px; }
+    h2{ font-size:21px; }
+    h3{ font-size:17px; }
+
+    .row{ margin-bottom:14px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
 
-    @keyframes drift{
-      from{ transform:translateY(0px); }
-      50%{ transform:translateY(-10px); }
-      to{ transform:translateY(0px); }
+    label{
+      display:block;
+      margin-bottom:6px;
+      font-size:13px;
+      color:var(--muted);
     }
 
-    .screen{
-      position:relative;
-      z-index:2;
+    input, textarea, select{
       width:100%;
-      min-height:100vh;
-      display:flex;
+      border:none;
+      outline:none;
+      background:var(--card2);
+      color:var(--text);
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      line-height:1.55;
+    }
+
+    #bulkInput{
+      min-height:240px;
+    }
+
+    button, a.btn{
+      border:none;
+      border-radius:14px;
+      padding:13px 16px;
+      cursor:pointer;
+      color:#fff;
+      font-weight:800;
+      font-size:14px;
+      text-decoration:none;
+      display:inline-flex;
       align-items:center;
       justify-content:center;
+      gap:8px;
+    }
+
+    .primary{ background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+    .ok{ background:linear-gradient(135deg,#16a34a,var(--ok)); }
+    .warn{ background:linear-gradient(135deg,#ff9f1c,var(--warn)); color:#1d1600; }
+    .danger{ background:linear-gradient(135deg,#ef476f,var(--danger)); }
+    .ghost{ background:#182243; border:1px solid var(--line); }
+
+    .hint{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+      margin-top:6px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .previewBox, .status{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:16px;
       padding:14px;
     }
 
-    .container{
-      width:min(1280px, 100%);
-      min-height:min(94vh, 900px);
-      display:grid;
-      grid-template-rows:auto auto 1fr auto auto auto;
-      gap:14px;
-      align-content:center;
-    }
-
-    .glass{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-    }
-
-    .head{
-      padding:14px 18px;
-      text-align:center;
-      color:var(--gold);
-      font-size:clamp(20px, 2.8vw, 34px);
+    .previewPuzzle{
+      font-size:48px;
+      line-height:1.2;
       font-weight:900;
-      letter-spacing:1px;
-    }
-
-    .roundBox{
       text-align:center;
-      color:#ffe7b5;
-      font-size:clamp(18px, 2.4vw, 28px);
-      font-weight:900;
-    }
-
-    .puzzleCard{
-      padding:24px 18px;
-      min-height:320px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-    }
-
-    .puzzle{
-      font-size:clamp(88px, 15vw, 195px);
-      line-height:1.12;
-      font-weight:900;
-      color:#fff6df;
+      padding:14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
       word-break:break-word;
-      text-shadow:0 0 18px rgba(255,223,130,.18);
       white-space:pre-wrap;
     }
 
-    .cta{
-      text-align:center;
-      color:#ffe2aa;
-      font-size:clamp(22px, 2.7vw, 34px);
-      font-weight:900;
-      padding-top:2px;
+    .previewMeta{
+      margin-top:10px;
+      line-height:1.8;
+      color:var(--muted);
+      font-size:14px;
     }
 
-    .answerCard{
-      padding:18px;
-      text-align:center;
-      min-height:92px;
+    .list{
       display:flex;
       flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      gap:10px;
+      max-height:640px;
+      overflow:auto;
+      padding-right:4px;
     }
 
-    .answerLabel{
-      color:#ffd9a1;
-      font-size:clamp(16px, 1.8vw, 22px);
-      font-weight:800;
-      margin-bottom:6px;
-      letter-spacing:.5px;
+    .item{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
     }
 
-    .answerText{
-      color:#ffffff;
-      font-size:clamp(28px, 4.2vw, 54px);
-      font-weight:900;
-      line-height:1.15;
+    .item strong{
+      display:block;
+      margin-bottom:8px;
+      line-height:1.35;
+      font-size:22px;
+      word-break:break-word;
+      white-space:pre-wrap;
+    }
+
+    .meta{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
       word-break:break-word;
     }
 
-    .winnerCard{
-      padding:18px;
-      text-align:center;
-      min-height:100px;
+    .itemActions{
       display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
     }
 
-    .winnerTitle{
-      color:#9cf0bf;
-      font-size:clamp(16px, 1.8vw, 22px);
-      font-weight:900;
-      margin-bottom:6px;
-      letter-spacing:.5px;
-    }
-
-    .winnerName{
-      color:#ffffff;
-      font-size:clamp(26px, 3.8vw, 48px);
-      font-weight:900;
-      line-height:1.1;
-      word-break:break-word;
-    }
-
-    .winnerCountry{
-      color:#d5e9ff;
-      font-size:clamp(17px, 2.1vw, 26px);
+    .miniBtn{
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:13px;
       font-weight:800;
-      margin-top:6px;
-      word-break:break-word;
     }
 
-    .hidden{
-      display:none !important;
+    .status{
+      line-height:1.8;
+      font-size:14px;
+      color:var(--muted);
+      white-space:pre-wrap;
     }
 
-    .fade{
-      animation:fadeIn .45s ease;
+    .status b{ color:var(--text); }
+
+    .debug{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      background:#091327;
+      border:1px solid #20345f;
+      color:#9fc1ff;
+      font-size:13px;
+      white-space:pre-wrap;
+      min-height:70px;
     }
 
-    @keyframes fadeIn{
-      from{ opacity:0; transform:translateY(8px); }
-      to{ opacity:1; transform:translateY(0); }
+    .inlineButtons{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
-    @media (max-width: 900px){
-      .screen{ padding:10px; }
-      .container{
-        min-height:94vh;
-      }
-      .puzzleCard{
-        min-height:260px;
-      }
-      .puzzle{
-        font-size:clamp(72px, 17vw, 150px);
-      }
+    @media (max-width: 1100px){
+      .wrap{ grid-template-columns:1fr; }
+    }
+
+    @media (max-width: 700px){
+      .grid{ grid-template-columns:1fr; }
+      .previewPuzzle{ font-size:38px; }
     }
   </style>
 </head>
-<body class="theme-gold">
-  <div class="stars"></div>
-  <div class="stars2"></div>
-
-  <div class="screen">
-    <div class="container">
-      <div class="glass head" id="headingEl">GUESS THE WORD</div>
-
-      <div class="roundBox fade" id="roundEl">Round 1</div>
-
-      <div class="glass puzzleCard">
-        <div class="puzzle fade" id="puzzleEl">🐄 + 👦</div>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>WinQuest Puzzle Admin</h1>
+      <div class="hint">
+        Paste many questions at once, auto-detect puzzle + answer, show answer only when you press it, and keep the last winner visible until you enter a new one.
       </div>
 
-      <div class="cta fade" id="ctaEl">Comment your answer now</div>
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Display Settings</h2>
 
-      <div class="glass answerCard hidden" id="answerCard">
-        <div class="answerLabel">CORRECT ANSWER</div>
-        <div class="answerText fade" id="answerEl">Cowboy</div>
+        <div class="grid row">
+          <div>
+            <label>Top Heading</label>
+            <input id="heading" value="GUESS THE WORD" />
+          </div>
+          <div>
+            <label>Bottom CTA</label>
+            <input id="ctaText" value="Comment your answer now" />
+          </div>
+        </div>
+
+        <div class="grid row">
+          <div>
+            <label>Theme</label>
+            <select id="theme">
+              <option value="gold">Gold Premium</option>
+              <option value="purple">Purple Glow</option>
+              <option value="blue">Blue Glass</option>
+              <option value="red">Red Energy</option>
+              <option value="green">Green Pulse</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button class="primary" style="width:100%;" onclick="saveSettings()">Save Display Settings</button>
+          </div>
+        </div>
       </div>
 
-      <div class="glass winnerCard" id="winnerCard">
-        <div class="winnerTitle">LATEST WINNER</div>
-        <div class="winnerName fade" id="winnerNameEl">No new comment yet</div>
-        <div class="winnerCountry fade" id="winnerCountryEl">Waiting for winner</div>
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Live Control</h2>
+
+        <div class="grid row">
+          <div>
+            <label>Winner Name</label>
+            <input id="winnerName" placeholder="Enter winner name..." />
+          </div>
+          <div>
+            <label>Winner Country</label>
+            <input id="winnerCountry" placeholder="Enter country..." />
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="ghost" onclick="prevQuestion()">⬅ Previous</button>
+          <button class="primary" onclick="nextQuestion()">Next ➡</button>
+          <button class="warn" onclick="showAnswer()">Show Answer</button>
+          <button class="ghost" onclick="hideAnswer()">Hide Answer</button>
+          <button class="ok" onclick="showWinner()">Show Winner</button>
+          <button class="ghost" onclick="hideWinner()">Hide Winner</button>
+          <button class="danger" onclick="resetLive()">Reset Live</button>
+          <a class="btn ghost" href="puzzledisplay.html" target="_blank">Open Display</a>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Bulk Paste Questions</h2>
+
+        <div class="row">
+          <label>Paste one question per line</label>
+          <textarea id="bulkInput" placeholder="Example:
+🐄 + 👦 = Cowboy
+🌧️ + 🌈 = Rainbow
+👁 + 🧊 = Ice"></textarea>
+        </div>
+
+        <div class="inlineButtons">
+          <button class="primary" onclick="importBulkQuestions()">Import Questions</button>
+          <button class="ghost" onclick="clearBulkBox()">Clear Paste Box</button>
+          <button class="danger" onclick="clearAllQuestions()">Clear All Questions</button>
+          <button class="ok" onclick="loadDefaultQuestions()">Load 10 Default Questions</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">
+          Best format: <b>puzzle = answer</b><br>
+          Supported: = or - or | or “Q: ... A: ...”
+        </div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Add / Edit Single Question</h2>
+
+        <div class="row">
+          <label>Emoji Puzzle / Text Puzzle</label>
+          <textarea id="puzzleInput" placeholder="Example: 🐄 + 👦"></textarea>
+        </div>
+
+        <div class="row">
+          <label>Correct Answer</label>
+          <input id="answerInput" placeholder="Example: Cowboy" />
+        </div>
+
+        <div class="inlineButtons">
+          <button class="primary" onclick="saveQuestion()">Save Question</button>
+          <button class="ghost" onclick="clearQuestionForm()">Clear Form</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Current Live Preview</h2>
+
+      <div class="previewBox">
+        <div class="previewPuzzle" id="previewPuzzle">Loading...</div>
+        <div class="previewMeta" id="previewMeta">Loading...</div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>All Questions</h2>
+        <div class="list" id="questionList"></div>
+      </div>
+
+      <div class="panel" style="padding:14px; margin-top:16px;">
+        <h2>Status</h2>
+        <div class="status" id="statusBox"></div>
+        <div class="debug" id="debugBox">Loading...</div>
       </div>
     </div>
   </div>
@@ -276,10 +367,16 @@
       doc,
       getDoc,
       setDoc,
+      updateDoc,
+      deleteDoc,
+      addDoc,
+      getDocs,
+      writeBatch,
       onSnapshot,
       collection,
       query,
-      orderBy
+      orderBy,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
     const liveRef = doc(db, "livePuzzle", "current");
@@ -293,11 +390,41 @@
       showAnswer: false,
       showWinner: true,
       winnerName: "",
-      winnerCountry: ""
+      winnerCountry: "",
+      updatedAt: null
     };
+
+    const defaultQuestions = [
+      { puzzle: "🐄 + 👦", answer: "Cowboy" },
+      { puzzle: "🌧️ + 🌈", answer: "Rainbow" },
+      { puzzle: "👁 + 🧊", answer: "Ice" },
+      { puzzle: "🐝 + 🍃", answer: "Belief" },
+      { puzzle: "🔥 + 👨", answer: "Fireman" },
+      { puzzle: "⭐ + 🐟", answer: "Starfish" },
+      { puzzle: "🍯 + 🌙", answer: "Honeymoon" },
+      { puzzle: "🦋 + 🏠", answer: "Butterfly House" },
+      { puzzle: "🌞 + 🕶️", answer: "Sunshade" },
+      { puzzle: "👂 + 💍", answer: "Earring" }
+    ];
 
     let state = structuredClone(defaultState);
     let questions = [];
+    let editingQuestionId = null;
+
+    function logDebug(msg) {
+      console.log(msg);
+      const box = document.getElementById("debugBox");
+      box.textContent = typeof msg === "string" ? msg : JSON.stringify(msg, null, 2);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
     function normalizeState(data) {
       const safe = { ...structuredClone(defaultState), ...(data || {}) };
@@ -316,6 +443,9 @@
       const snap = await getDoc(liveRef);
       if (!snap.exists()) {
         await setDoc(liveRef, defaultState);
+        logDebug("Created Firestore doc: livePuzzle/current");
+      } else {
+        logDebug("Firestore live doc already exists");
       }
     }
 
@@ -334,59 +464,481 @@
       return questions[index];
     }
 
-    function flash(ids) {
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.remove("fade");
-        void el.offsetWidth;
-        el.classList.add("fade");
-      });
+    function syncInputsFromState() {
+      document.getElementById("heading").value = state.heading || "";
+      document.getElementById("ctaText").value = state.ctaText || "";
+      document.getElementById("theme").value = state.theme || "gold";
+      document.getElementById("winnerName").value = state.winnerName || "";
+      document.getElementById("winnerCountry").value = state.winnerCountry || "";
     }
 
-    function render() {
-      document.body.className = "theme-" + (state.theme || "gold");
+    async function refreshSettingsFromInputs() {
+      state.heading = document.getElementById("heading").value.trim() || defaultState.heading;
+      state.ctaText = document.getElementById("ctaText").value.trim() || defaultState.ctaText;
+      state.theme = document.getElementById("theme").value || "gold";
+    }
 
+    async function saveLiveState(extra = {}) {
+      await setDoc(liveRef, {
+        ...state,
+        ...extra,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    function parseLineToQuestion(line) {
+      const trimmed = line.trim();
+      if (!trimmed) return null;
+
+      if (/^Q:\s*/i.test(trimmed) && /\sA:\s*/i.test(trimmed)) {
+        const qMatch = trimmed.match(/^Q:\s*(.*?)\s*A:\s*(.*?)$/i);
+        if (qMatch && qMatch[1] && qMatch[2]) {
+          return { puzzle: qMatch[1].trim(), answer: qMatch[2].trim() };
+        }
+      }
+
+      const separators = [" = ", " | ", " - ", " — ", "=", "|"];
+      for (const sep of separators) {
+        if (trimmed.includes(sep)) {
+          const parts = trimmed.split(sep);
+          if (parts.length >= 2) {
+            const puzzle = parts[0].trim();
+            const answer = parts.slice(1).join(sep).trim();
+            if (puzzle && answer) return { puzzle, answer };
+          }
+        }
+      }
+
+      return null;
+    }
+
+    async function addQuestionsInBulk(list) {
+      for (const item of list) {
+        await addDoc(questionsRef, {
+          puzzle: item.puzzle,
+          answer: item.answer,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+
+    window.saveSettings = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        await saveLiveState();
+        logDebug("Display settings saved");
+      } catch (err) {
+        console.error(err);
+        logDebug("Save settings error:\n" + err.message);
+      }
+    };
+
+    window.nextQuestion = async function () {
+      try {
+        if (!questions.length) {
+          alert("Please add at least one question first.");
+          return;
+        }
+
+        await refreshSettingsFromInputs();
+        let nextIndex = (state.currentQuestionIndex || 0) + 1;
+        if (nextIndex >= questions.length) nextIndex = 0;
+
+        state.currentQuestionIndex = nextIndex;
+        state.showAnswer = false;
+
+        await saveLiveState({
+          currentQuestionIndex: state.currentQuestionIndex,
+          showAnswer: false
+        });
+
+        logDebug("Moved to next question");
+      } catch (err) {
+        console.error(err);
+        logDebug("Next question error:\n" + err.message);
+      }
+    };
+
+    window.prevQuestion = async function () {
+      try {
+        if (!questions.length) {
+          alert("Please add at least one question first.");
+          return;
+        }
+
+        await refreshSettingsFromInputs();
+        let prevIndex = (state.currentQuestionIndex || 0) - 1;
+        if (prevIndex < 0) prevIndex = questions.length - 1;
+
+        state.currentQuestionIndex = prevIndex;
+        state.showAnswer = false;
+
+        await saveLiveState({
+          currentQuestionIndex: state.currentQuestionIndex,
+          showAnswer: false
+        });
+
+        logDebug("Moved to previous question");
+      } catch (err) {
+        console.error(err);
+        logDebug("Previous question error:\n" + err.message);
+      }
+    };
+
+    window.showAnswer = async function () {
+      try {
+        state.showAnswer = true;
+        await saveLiveState({ showAnswer: true });
+        logDebug("Answer shown");
+      } catch (err) {
+        console.error(err);
+        logDebug("Show answer error:\n" + err.message);
+      }
+    };
+
+    window.hideAnswer = async function () {
+      try {
+        state.showAnswer = false;
+        await saveLiveState({ showAnswer: false });
+        logDebug("Answer hidden");
+      } catch (err) {
+        console.error(err);
+        logDebug("Hide answer error:\n" + err.message);
+      }
+    };
+
+    window.showWinner = async function () {
+      try {
+        const winnerName = document.getElementById("winnerName").value.trim();
+        const winnerCountry = document.getElementById("winnerCountry").value.trim();
+
+        if (!winnerName) {
+          alert("Please enter winner name.");
+          return;
+        }
+
+        state.winnerName = winnerName;
+        state.winnerCountry = winnerCountry;
+        state.showWinner = true;
+
+        await saveLiveState({
+          winnerName,
+          winnerCountry,
+          showWinner: true
+        });
+
+        logDebug(`Winner shown: ${winnerName}${winnerCountry ? " - " + winnerCountry : ""}`);
+      } catch (err) {
+        console.error(err);
+        logDebug("Show winner error:\n" + err.message);
+      }
+    };
+
+    window.hideWinner = async function () {
+      try {
+        state.showWinner = false;
+        await saveLiveState({ showWinner: false });
+        logDebug("Winner hidden");
+      } catch (err) {
+        console.error(err);
+        logDebug("Hide winner error:\n" + err.message);
+      }
+    };
+
+    window.resetLive = async function () {
+      try {
+        await refreshSettingsFromInputs();
+        state.showAnswer = false;
+
+        await saveLiveState({
+          showAnswer: false
+        });
+
+        logDebug("Live view reset");
+      } catch (err) {
+        console.error(err);
+        logDebug("Reset live error:\n" + err.message);
+      }
+    };
+
+    window.clearQuestionForm = function () {
+      editingQuestionId = null;
+      document.getElementById("puzzleInput").value = "";
+      document.getElementById("answerInput").value = "";
+      logDebug("Question form cleared");
+    };
+
+    window.saveQuestion = async function () {
+      try {
+        const puzzle = document.getElementById("puzzleInput").value.trim();
+        const answer = document.getElementById("answerInput").value.trim();
+
+        if (!puzzle || !answer) {
+          alert("Please enter both puzzle and answer.");
+          return;
+        }
+
+        if (editingQuestionId) {
+          await updateDoc(doc(db, "livePuzzleQuestions", editingQuestionId), {
+            puzzle,
+            answer,
+            updatedAt: serverTimestamp()
+          });
+          logDebug("Question updated");
+        } else {
+          await addDoc(questionsRef, {
+            puzzle,
+            answer,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+          logDebug("Question added");
+        }
+
+        editingQuestionId = null;
+        document.getElementById("puzzleInput").value = "";
+        document.getElementById("answerInput").value = "";
+      } catch (err) {
+        console.error(err);
+        logDebug("Save question error:\n" + err.message);
+      }
+    };
+
+    window.importBulkQuestions = async function () {
+      try {
+        const raw = document.getElementById("bulkInput").value;
+        const lines = raw.split("\n").map(x => x.trim()).filter(Boolean);
+
+        if (!lines.length) {
+          alert("Paste some questions first.");
+          return;
+        }
+
+        const parsed = [];
+        const failed = [];
+
+        for (const line of lines) {
+          const item = parseLineToQuestion(line);
+          if (item) parsed.push(item);
+          else failed.push(line);
+        }
+
+        if (!parsed.length) {
+          alert("No valid questions found. Use format like: 🐄 + 👦 = Cowboy");
+          return;
+        }
+
+        await addQuestionsInBulk(parsed);
+
+        logDebug(`Imported ${parsed.length} questions` + (failed.length ? `\nSkipped ${failed.length} invalid lines` : ""));
+        if (failed.length) {
+          alert(`Imported ${parsed.length} questions.\nSkipped ${failed.length} invalid lines.`);
+        } else {
+          alert(`Imported ${parsed.length} questions successfully.`);
+        }
+      } catch (err) {
+        console.error(err);
+        logDebug("Import bulk error:\n" + err.message);
+      }
+    };
+
+    window.clearBulkBox = function () {
+      document.getElementById("bulkInput").value = "";
+      logDebug("Bulk paste box cleared");
+    };
+
+    window.clearAllQuestions = async function () {
+      try {
+        const sure = confirm("Delete all questions?");
+        if (!sure) return;
+
+        const snap = await getDocs(questionsRef);
+        const batch = writeBatch(db);
+
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+
+        state.currentQuestionIndex = 0;
+        state.showAnswer = false;
+
+        await saveLiveState({
+          currentQuestionIndex: 0,
+          showAnswer: false
+        });
+
+        logDebug("All questions deleted");
+      } catch (err) {
+        console.error(err);
+        logDebug("Clear all questions error:\n" + err.message);
+      }
+    };
+
+    window.loadDefaultQuestions = async function () {
+      try {
+        await addQuestionsInBulk(defaultQuestions);
+        logDebug("Loaded 10 default questions");
+        alert("10 default questions added.");
+      } catch (err) {
+        console.error(err);
+        logDebug("Load default questions error:\n" + err.message);
+      }
+    };
+
+    window.editQuestion = function (id) {
+      const q = questions.find(x => x.id === id);
+      if (!q) return;
+
+      editingQuestionId = id;
+      document.getElementById("puzzleInput").value = q.puzzle || "";
+      document.getElementById("answerInput").value = q.answer || "";
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      logDebug("Editing question");
+    };
+
+    window.deleteQuestionNow = async function (id) {
+      try {
+        await deleteDoc(doc(db, "livePuzzleQuestions", id));
+
+        if (questions.length <= 1) {
+          state.currentQuestionIndex = 0;
+          await saveLiveState({ currentQuestionIndex: 0 });
+        } else if (state.currentQuestionIndex >= questions.length - 1) {
+          state.currentQuestionIndex = Math.max(0, questions.length - 2);
+          await saveLiveState({ currentQuestionIndex: state.currentQuestionIndex });
+        }
+
+        logDebug("Question deleted");
+      } catch (err) {
+        console.error(err);
+        logDebug("Delete question error:\n" + err.message);
+      }
+    };
+
+    window.goLiveQuestion = async function (index) {
+      try {
+        state.currentQuestionIndex = index;
+        state.showAnswer = false;
+
+        await saveLiveState({
+          currentQuestionIndex: index,
+          showAnswer: false
+        });
+
+        logDebug(`Live question changed to #${index + 1}`);
+      } catch (err) {
+        console.error(err);
+        logDebug("Go live question error:\n" + err.message);
+      }
+    };
+
+    function renderPreview() {
       const q = getCurrentQuestion();
-      const roundNumber = questions.length ? (Math.min(state.currentQuestionIndex + 1, questions.length)) : 0;
+      const total = questions.length;
+      const currentRound = total ? Math.min((state.currentQuestionIndex || 0) + 1, total) : 0;
 
-      document.getElementById("headingEl").textContent = state.heading;
-      document.getElementById("ctaEl").textContent = state.ctaText;
-      document.getElementById("roundEl").textContent = questions.length ? `Round ${roundNumber}` : "Waiting for questions";
-      document.getElementById("puzzleEl").textContent = q.puzzle || "NO QUESTION";
-      document.getElementById("answerEl").textContent = q.answer || "--";
+      const previewWinnerName = state.winnerName?.trim() ? state.winnerName : "No new comment yet";
+      const previewWinnerCountry = state.winnerCountry?.trim() ? state.winnerCountry : "Waiting for winner";
 
-      const winnerName = state.winnerName?.trim() ? state.winnerName : "No new comment yet";
-      const winnerCountry = state.winnerCountry?.trim() ? state.winnerCountry : "Waiting for winner";
-
-      document.getElementById("winnerNameEl").textContent = winnerName;
-      document.getElementById("winnerCountryEl").textContent = winnerCountry;
-
-      document.getElementById("answerCard").classList.toggle("hidden", !state.showAnswer);
-
-      flash(["roundEl", "puzzleEl", "ctaEl", "answerEl", "winnerNameEl", "winnerCountryEl"]);
+      document.getElementById("previewPuzzle").textContent = q.puzzle || "NO QUESTIONS YET";
+      document.getElementById("previewMeta").innerHTML = `
+        <b>Round:</b> ${total ? currentRound : 0} / ${total}<br>
+        <b>Answer:</b> ${escapeHtml(q.answer || "--")}<br>
+        <b>Show Answer:</b> ${state.showAnswer ? "YES" : "NO"}<br>
+        <b>Show Winner:</b> ${state.showWinner ? "YES" : "NO"}<br>
+        <b>Winner Name:</b> ${escapeHtml(previewWinnerName)}<br>
+        <b>Winner Country:</b> ${escapeHtml(previewWinnerCountry)}
+      `;
     }
 
-    await ensureDocExists();
+    function renderQuestionList() {
+      const box = document.getElementById("questionList");
 
-    onSnapshot(liveRef, (snap) => {
-      if (!snap.exists()) return;
-      state = normalizeState(snap.data());
-      render();
-    }, (error) => {
-      console.error("Live state snapshot error:", error);
-    });
+      if (!questions.length) {
+        box.innerHTML = `<div class="item"><div class="meta">No questions yet. Paste or add your first puzzle above.</div></div>`;
+        return;
+      }
 
-    const qy = query(questionsRef, orderBy("createdAt", "asc"));
-    onSnapshot(qy, (snap) => {
-      questions = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      render();
-    }, (error) => {
-      console.error("Questions snapshot error:", error);
-    });
+      box.innerHTML = questions.map((q, index) => `
+        <div class="item">
+          <strong>${escapeHtml(q.puzzle || "")}</strong>
+          <div class="meta"><b>Answer:</b> ${escapeHtml(q.answer || "")}</div>
+          <div class="meta"><b>Question #:</b> ${index + 1}</div>
+          <div class="meta"><b>Live Now:</b> ${(state.currentQuestionIndex || 0) === index ? "YES" : "NO"}</div>
+          <div class="itemActions">
+            <button class="miniBtn primary" onclick="goLiveQuestion(${index})">Go Live</button>
+            <button class="miniBtn ghost" onclick="editQuestion('${q.id}')">Edit</button>
+            <button class="miniBtn danger" onclick="deleteQuestionNow('${q.id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderStatus() {
+      const total = questions.length;
+      const currentRound = total ? Math.min((state.currentQuestionIndex || 0) + 1, total) : 0;
+
+      const statusWinnerName = state.winnerName?.trim() ? state.winnerName : "No new comment yet";
+      const statusWinnerCountry = state.winnerCountry?.trim() ? state.winnerCountry : "Waiting for winner";
+
+      document.getElementById("statusBox").innerHTML = `
+<b>Heading:</b> ${escapeHtml(state.heading)}
+<b>CTA:</b> ${escapeHtml(state.ctaText)}
+<b>Theme:</b> ${escapeHtml(state.theme)}
+<b>Total Questions:</b> ${total}
+<b>Current Round:</b> ${currentRound}
+<b>Show Answer:</b> ${state.showAnswer ? "YES" : "NO"}
+<b>Show Winner:</b> ${state.showWinner ? "YES" : "NO"}
+<b>Winner Name:</b> ${escapeHtml(statusWinnerName)}
+<b>Winner Country:</b> ${escapeHtml(statusWinnerCountry)}
+      `;
+    }
+
+    function renderAll() {
+      syncInputsFromState();
+      renderPreview();
+      renderQuestionList();
+      renderStatus();
+    }
+
+    try {
+      await ensureDocExists();
+
+      onSnapshot(liveRef, (snap) => {
+        if (!snap.exists()) return;
+        state = normalizeState(snap.data());
+        renderAll();
+        logDebug("Live puzzle sync working");
+      }, (error) => {
+        console.error(error);
+        logDebug("Live state snapshot error:\n" + error.message);
+      });
+
+      const qy = query(questionsRef, orderBy("createdAt", "asc"));
+      onSnapshot(qy, (snap) => {
+        questions = snap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        if (state.currentQuestionIndex >= questions.length && questions.length > 0) {
+          state.currentQuestionIndex = questions.length - 1;
+        }
+        if (!questions.length) {
+          state.currentQuestionIndex = 0;
+        }
+
+        renderAll();
+      }, (error) => {
+        console.error(error);
+        logDebug("Questions snapshot error:\n" + error.message);
+      });
+
+    } catch (err) {
+      console.error(err);
+      logDebug("Startup error:\n" + err.message);
+    }
   </script>
 </body>
 </html>
