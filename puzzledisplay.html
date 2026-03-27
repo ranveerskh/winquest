@@ -18,9 +18,6 @@
       --border:rgba(255,215,140,0.28);
       --panel:rgba(20,12,35,0.48);
       --shadow:0 15px 45px rgba(0,0,0,0.45);
-      --ok:#2dd381;
-      --danger:#ff667f;
-      --blue:#78c8ff;
     }
 
     body{
@@ -132,7 +129,7 @@
 
     .puzzleCard{
       padding:24px 18px;
-      min-height:260px;
+      min-height:320px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -140,8 +137,8 @@
     }
 
     .puzzle{
-      font-size:clamp(58px, 10vw, 130px);
-      line-height:1.15;
+      font-size:clamp(88px, 15vw, 195px);
+      line-height:1.12;
       font-weight:900;
       color:#fff6df;
       word-break:break-word;
@@ -157,7 +154,7 @@
       padding-top:2px;
     }
 
-    .answerCard, .winnerCard{
+    .answerCard{
       padding:18px;
       text-align:center;
       min-height:92px;
@@ -183,6 +180,16 @@
       word-break:break-word;
     }
 
+    .winnerCard{
+      padding:18px;
+      text-align:center;
+      min-height:100px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+
     .winnerTitle{
       color:#9cf0bf;
       font-size:clamp(16px, 1.8vw, 22px);
@@ -193,7 +200,7 @@
 
     .winnerName{
       color:#ffffff;
-      font-size:clamp(28px, 4vw, 52px);
+      font-size:clamp(26px, 3.8vw, 48px);
       font-weight:900;
       line-height:1.1;
       word-break:break-word;
@@ -201,7 +208,7 @@
 
     .winnerCountry{
       color:#d5e9ff;
-      font-size:clamp(18px, 2.2vw, 28px);
+      font-size:clamp(17px, 2.1vw, 26px);
       font-weight:800;
       margin-top:6px;
       word-break:break-word;
@@ -226,7 +233,10 @@
         min-height:94vh;
       }
       .puzzleCard{
-        min-height:220px;
+        min-height:260px;
+      }
+      .puzzle{
+        font-size:clamp(72px, 17vw, 150px);
       }
     }
   </style>
@@ -252,10 +262,10 @@
         <div class="answerText fade" id="answerEl">Cowboy</div>
       </div>
 
-      <div class="glass winnerCard hidden" id="winnerCard">
-        <div class="winnerTitle">WINNER</div>
-        <div class="winnerName fade" id="winnerNameEl">Aman</div>
-        <div class="winnerCountry fade" id="winnerCountryEl">Canada</div>
+      <div class="glass winnerCard" id="winnerCard">
+        <div class="winnerTitle">LATEST WINNER</div>
+        <div class="winnerName fade" id="winnerNameEl">No new comment yet</div>
+        <div class="winnerCountry fade" id="winnerCountryEl">Waiting for winner</div>
       </div>
     </div>
   </div>
@@ -281,7 +291,7 @@
       theme: "gold",
       currentQuestionIndex: 0,
       showAnswer: false,
-      showWinner: false,
+      showWinner: true,
       winnerName: "",
       winnerCountry: ""
     };
@@ -296,7 +306,7 @@
       safe.theme = safe.theme || "gold";
       safe.currentQuestionIndex = Number.isFinite(Number(safe.currentQuestionIndex)) ? Number(safe.currentQuestionIndex) : 0;
       safe.showAnswer = !!safe.showAnswer;
-      safe.showWinner = !!safe.showWinner;
+      safe.showWinner = data?.showWinner === false ? false : true;
       safe.winnerName = safe.winnerName || "";
       safe.winnerCountry = safe.winnerCountry || "";
       return safe;
@@ -345,11 +355,14 @@
       document.getElementById("roundEl").textContent = questions.length ? `Round ${roundNumber}` : "Waiting for questions";
       document.getElementById("puzzleEl").textContent = q.puzzle || "NO QUESTION";
       document.getElementById("answerEl").textContent = q.answer || "--";
-      document.getElementById("winnerNameEl").textContent = state.winnerName || "";
-      document.getElementById("winnerCountryEl").textContent = state.winnerCountry || "";
+
+      const winnerName = state.winnerName?.trim() ? state.winnerName : "No new comment yet";
+      const winnerCountry = state.winnerCountry?.trim() ? state.winnerCountry : "Waiting for winner";
+
+      document.getElementById("winnerNameEl").textContent = winnerName;
+      document.getElementById("winnerCountryEl").textContent = winnerCountry;
 
       document.getElementById("answerCard").classList.toggle("hidden", !state.showAnswer);
-      document.getElementById("winnerCard").classList.toggle("hidden", !state.showWinner);
 
       flash(["roundEl", "puzzleEl", "ctaEl", "answerEl", "winnerNameEl", "winnerCountryEl"]);
     }
