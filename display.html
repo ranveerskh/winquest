@@ -46,10 +46,10 @@
     }
 
     .container{
-      width:min(1200px, 100%);
-      min-height:78vh;
+      width:min(1280px, 100%);
+      min-height:96vh;
       display:grid;
-      grid-template-rows:auto auto 1fr;
+      grid-template-rows:auto auto auto 1fr;
       gap:10px;
       margin-top:2px;
     }
@@ -65,7 +65,7 @@
 
     .topbar{
       display:grid;
-      grid-template-columns:1fr 110px;
+      grid-template-columns:1fr 120px;
       gap:10px;
       align-items:stretch;
     }
@@ -75,7 +75,7 @@
       display:flex;
       flex-direction:column;
       justify-content:center;
-      min-height:74px;
+      min-height:78px;
     }
 
     .mini-kicker{
@@ -95,7 +95,7 @@
     }
 
     .timerbox{
-      min-height:74px;
+      min-height:78px;
       display:flex;
       flex-direction:column;
       justify-content:center;
@@ -212,32 +212,89 @@
       display:block;
     }
 
-    #bottomCTA{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:72px;
-      width:min(94%, 1000px);
+    .ctaBar{
       text-align:center;
-      padding:14px 18px;
-      font-size:18px;
+      padding:12px 14px;
+      font-size:16px;
       font-weight:900;
-      color:#ffffff;
-      border-radius:16px;
-      background:rgba(0,0,0,0.35);
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,0.18);
-      box-shadow:0 12px 30px rgba(0,0,0,.22);
-      z-index:999;
-      animation:pulseCTA 1.5s infinite;
+      color:#fff;
       letter-spacing:.4px;
     }
 
-    @keyframes pulseCTA{
-      0%{ transform:translateX(-50%) scale(1); }
-      50%{ transform:translateX(-50%) scale(1.03); }
-      100%{ transform:translateX(-50%) scale(1); }
+    .latestWrap{
+      padding:14px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .latestHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+      gap:10px;
+    }
+
+    .latestTitle{
+      font-size:20px;
+      font-weight:900;
+      line-height:1.1;
+    }
+
+    .latestSub{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:1.5px;
+      font-weight:800;
+    }
+
+    .latestList{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      flex:1;
+    }
+
+    .nameCard{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-height:56px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    .nameRank{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.12);
+      font-size:14px;
+      font-weight:900;
+      flex-shrink:0;
+    }
+
+    .nameText{
+      font-size:18px;
+      font-weight:800;
+      line-height:1.15;
+      word-break:break-word;
+    }
+
+    .emptyLatest{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.05);
+      border:1px dashed rgba(255,255,255,.12);
+      color:var(--muted);
+      font-size:15px;
+      text-align:center;
     }
 
     .certificateScreen{
@@ -365,17 +422,16 @@
       }
 
       .container{
-        width:min(1250px, 100%);
-        min-height:auto;
-        gap:12px;
+        width:min(1300px, 100%);
+        min-height:96vh;
       }
 
       .topbar{
-        grid-template-columns:1fr 140px;
+        grid-template-columns:1fr 150px;
       }
 
       .titlebar{
-        min-height:84px;
+        min-height:86px;
         padding:14px 18px;
       }
 
@@ -384,11 +440,11 @@
       }
 
       .timerbox{
-        min-height:84px;
+        min-height:86px;
       }
 
       .timer{
-        font-size:48px;
+        font-size:52px;
       }
 
       .questionWrap{
@@ -396,7 +452,7 @@
       }
 
       .question{
-        font-size:34px;
+        font-size:36px;
         margin-bottom:14px;
       }
 
@@ -406,11 +462,23 @@
       }
 
       .opt{
-        min-height:78px;
+        min-height:76px;
       }
 
       .opt .text{
         font-size:22px;
+      }
+
+      .latestWrap{
+        padding:16px 18px 18px;
+      }
+
+      .latestList{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .nameText{
+        font-size:20px;
       }
 
       .winnerGrid{
@@ -419,19 +487,6 @@
 
       .certTitle{
         font-size:42px;
-      }
-
-      #bottomCTA{
-        font-size:20px;
-        bottom:26px;
-      }
-    }
-
-    @media (max-width: 520px){
-      #bottomCTA{
-        font-size:16px;
-        padding:12px 14px;
-        bottom:68px;
       }
     }
   </style>
@@ -462,6 +517,18 @@
         <div class="question" id="questionText">Add questions from admin</div>
         <div class="options" id="optionsBox"></div>
       </div>
+
+      <div class="glass ctaBar" id="ctaBar">⏳ COMMENT YOUR ANSWER NOW ⬇️</div>
+
+      <div class="glass latestWrap">
+        <div class="latestHeader">
+          <div>
+            <div class="latestSub">Live Comments</div>
+            <div class="latestTitle">Latest Correct Answer Givers</div>
+          </div>
+        </div>
+        <div class="latestList" id="latestList"></div>
+      </div>
     </div>
 
     <div class="certificateScreen" id="certificateScreen">
@@ -474,7 +541,6 @@
     </div>
   </div>
 
-  <div id="bottomCTA">⏳ COMMENT YOUR ANSWER NOW ⬇️</div>
   <div class="confetti" id="confetti"></div>
 
   <script type="module">
@@ -517,7 +583,6 @@
       safe.defaultTimer = Number.isFinite(Number(safe.defaultTimer)) ? Number(safe.defaultTimer) : 10;
       safe.revealDuration = Number.isFinite(Number(safe.revealDuration)) ? Number(safe.revealDuration) : 3;
       safe.heading = safe.heading || defaultState.heading;
-      safe.subheading = safe.subheading || defaultState.subheading;
       safe.theme = safe.theme || "purple";
       return safe;
     }
@@ -531,23 +596,43 @@
         .replaceAll("'", "&#039;");
     }
 
+    function renderLatestNames() {
+      const latestList = document.getElementById("latestList");
+      latestList.innerHTML = "";
+
+      const latestFive = state.winners.slice(0, 5);
+
+      if (!latestFive.length) {
+        latestList.innerHTML = `<div class="emptyLatest">No names added yet. Add correct answer givers from admin.</div>`;
+        return;
+      }
+
+      latestFive.forEach((name, idx) => {
+        const card = document.createElement("div");
+        card.className = "nameCard";
+        card.innerHTML = `
+          <div class="nameRank">${idx + 1}</div>
+          <div class="nameText">${escapeHtml(name)}</div>
+        `;
+        latestList.appendChild(card);
+      });
+    }
+
     function render() {
       document.body.className = "theme-" + (state.theme || "purple");
 
       const quizScreen = document.getElementById("quizScreen");
       const certificateScreen = document.getElementById("certificateScreen");
-      const bottomCTA = document.getElementById("bottomCTA");
+      const ctaBar = document.getElementById("ctaBar");
 
       if (state.showCertificate) {
         quizScreen.classList.add("hide");
         certificateScreen.classList.add("show");
-        bottomCTA.style.display = "none";
         renderCertificate();
         return;
       } else {
         quizScreen.classList.remove("hide");
         certificateScreen.classList.remove("show");
-        bottomCTA.style.display = "block";
       }
 
       document.getElementById("heading").textContent = state.heading;
@@ -587,10 +672,12 @@
       document.getElementById("floatingReveal").classList.toggle("show", !!state.answerRevealed);
 
       if (state.answerRevealed) {
-        bottomCTA.textContent = "✅ CORRECT ANSWER REVEALED";
+        ctaBar.textContent = "✅ CORRECT ANSWER REVEALED";
       } else {
-        bottomCTA.textContent = "⏳ COMMENT YOUR ANSWER NOW ⬇️";
+        ctaBar.textContent = "⏳ COMMENT YOUR ANSWER NOW ⬇️";
       }
+
+      renderLatestNames();
     }
 
     function renderCertificate() {
