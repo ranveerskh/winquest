@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- ASCII-clean version: no emojis/smart characters, prevents weird symbols on mobile/Netlify. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -62,7 +63,7 @@
     .badge{font-size:12px;border-radius:999px;padding:6px 10px;background:var(--soft);color:var(--accent2);font-weight:800}.badge.warn{background:var(--soft2);color:var(--warn)}.badge.danger{background:#fff1f3;color:var(--danger)}
     .btn{border:0;border-radius:14px;background:var(--accent);color:white;font-weight:800;padding:11px 14px;box-shadow:0 8px 18px rgba(31,122,91,.2)}
     .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}.btn.danger{background:var(--danger)}.btn.smallbtn{padding:8px 10px;font-size:12px;border-radius:12px}
-    details{border:1px solid var(--line);border-radius:16px;background:#fff;margin:10px 0;overflow:hidden}summary{padding:14px 14px;cursor:pointer;font-weight:900;list-style:none;display:flex;justify-content:space-between;gap:8px}summary::-webkit-details-marker{display:none}summary:after{content:"+";font-size:20px;color:var(--muted)}details[open] summary:after{content:"â"}.detailsBody{padding:0 14px 14px;border-top:1px solid var(--line)}
+    details{border:1px solid var(--line);border-radius:16px;background:#fff;margin:10px 0;overflow:hidden}summary{padding:14px 14px;cursor:pointer;font-weight:900;list-style:none;display:flex;justify-content:space-between;gap:8px}summary::-webkit-details-marker{display:none}summary:after{content:"+";font-size:20px;color:var(--muted)}details[open] summary:after{content:"-"}.detailsBody{padding:0 14px 14px;border-top:1px solid var(--line)}
     ul{padding-left:18px;margin:8px 0}li{margin:7px 0;line-height:1.45}.check{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:11px;margin:8px 0;background:#fff}.check input{width:20px;height:20px;accent-color:var(--accent);flex:0 0 auto}.check label{line-height:1.35;font-size:14px}.check.done label{text-decoration:line-through;color:var(--muted)}
     table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--line);font-size:13px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}tr:last-child td{border-bottom:0}th{background:#f8fafc;color:#475467;font-size:12px}
     .meal{border-left:5px solid var(--accent);padding:12px;border-radius:14px;background:#fbfffd;border:1px solid var(--line);margin:10px 0}.meal b{display:block;margin-bottom:4px}.meal .time{font-size:12px;color:var(--accent2);font-weight:900;margin-bottom:4px}
@@ -86,27 +87,27 @@
       </div>
       <div class="row">
         <button class="btn secondary smallbtn" id="editBtn">Edit</button>
-        <div class="pill">ð± Phone plan</div>
+        <div class="pill">Phone Phone plan</div>
       </div>
     </div>
   </header>
 
   <nav class="tabs" aria-label="Plan tabs">
-    <button class="tab active" data-tab="today"><span>ð </span><span>Today</span></button>
-    <button class="tab" data-tab="workout"><span>ðï¸</span><span>Gym</span></button>
-    <button class="tab" data-tab="meals"><span>ð±</span><span>Meals</span></button>
-    <button class="tab" data-tab="prep"><span>ð¥</span><span>Prep</span></button>
-    <button class="tab" data-tab="track"><span>ð</span><span>Track</span></button>
-    <button class="tab" data-tab="safety"><span>ð¡ï¸</span><span>Safety</span></button>
+    <button class="tab active" data-tab="today"><span>Home</span><span>Today</span></button>
+    <button class="tab" data-tab="workout"><span>Gym</span><span>Gym</span></button>
+    <button class="tab" data-tab="meals"><span>Prep</span><span>Meals</span></button>
+    <button class="tab" data-tab="prep"><span>Food</span><span>Prep</span></button>
+    <button class="tab" data-tab="track"><span>Track</span><span>Track</span></button>
+    <button class="tab" data-tab="safety"><span>Safe</span><span>Safety</span></button>
   </nav>
 
   <main class="wrap" id="app">
     <section class="hero">
       <div class="heroCard">
         <h2 contenteditable="true" data-save="heroTitle">Shape goal: chest up, belly down, thighs + glutes better.</h2>
-        <p contenteditable="true" data-save="heroText">Work SunâWed with 20â30k steps. Gym Thu/Fri/Sat. Goal is a clean, good-looking body â not bulky, no abs obsession.</p>
+        <p contenteditable="true" data-save="heroText">Work Sun-Wed with 20-30k steps. Gym Thu/Fri/Sat. Goal is a clean, good-looking body - not bulky, no abs obsession.</p>
         <div class="stats">
-          <div class="stat"><b contenteditable="true" data-save="stat1">68â72 kg</b><span>Current weight</span></div>
+          <div class="stat"><b contenteditable="true" data-save="stat1">68-72 kg</b><span>Current weight</span></div>
           <div class="stat"><b contenteditable="true" data-save="stat2">34 in</b><span>Waist</span></div>
           <div class="stat"><b contenteditable="true" data-save="stat3">37.5 in</b><span>Hip/glutes</span></div>
           <div class="stat"><b contenteditable="true" data-save="stat4">21 in</b><span>Thigh</span></div>
@@ -118,7 +119,7 @@
       <div class="card">
         <div class="row">
           <div>
-            <h3>Todayâs Plan</h3>
+            <h3>Today's Plan</h3>
             <div class="muted" id="todayDesc">Based on your weekly schedule.</div>
           </div>
           <span class="badge" id="todayBadge">Today</span>
@@ -128,9 +129,9 @@
 
       <div class="card">
         <h3>Daily non-negotiables</h3>
-        <div class="check"><input type="checkbox" data-daily="water"><label>Water 3â4L on work days / 2.5â3L on gym days</label></div>
+        <div class="check"><input type="checkbox" data-daily="water"><label>Water 3-4L on work days / 2.5-3L on gym days</label></div>
         <div class="check"><input type="checkbox" data-daily="protein"><label>Protein in every main meal</label></div>
-        <div class="check"><input type="checkbox" data-daily="dinner"><label>Dinner lighter than lunch â 2 to 3 roti, not 4 daily</label></div>
+        <div class="check"><input type="checkbox" data-daily="dinner"><label>Dinner lighter than lunch - 2 to 3 roti, not 4 daily</label></div>
         <div class="check"><input type="checkbox" data-daily="back"><label>Back pain rule: if pain reaches 5/10, stop that exercise</label></div>
       </div>
 
@@ -158,26 +159,26 @@
       </div>
 
       <div class="card">
-        <h3>Thursday â Chest / Shoulders / Triceps</h3>
-        <div class="muted">Goal: better chest and T-shirt shape. Keep ribs down; donât over-arch lower back.</div>
+        <h3>Thursday - Chest / Shoulders / Triceps</h3>
+        <div class="muted">Goal: better chest and T-shirt shape. Keep ribs down; don't over-arch lower back.</div>
         <div id="pushList"></div>
       </div>
 
       <div class="card">
-        <h3>Friday â Thighs + Glutes</h3>
+        <h3>Friday - Thighs + Glutes</h3>
         <div class="muted">Back-safe leg day. No ego lifting. Shape over heavy weight.</div>
         <div id="legsList"></div>
       </div>
 
       <div class="card">
-        <h3>Saturday â Back / Biceps / Posture</h3>
+        <h3>Saturday - Back / Biceps / Posture</h3>
         <div class="muted">Goal: wider back, better posture, smaller-looking waist.</div>
         <div id="pullList"></div>
       </div>
 
       <div class="card">
         <h3>Progression rule</h3>
-        <div class="greenNote">When you hit the top reps on all sets with clean form, add a little weight next time. Stop most sets with 1â2 reps left. No max lifting while lower back is not 100%.</div>
+        <div class="greenNote">When you hit the top reps on all sets with clean form, add a little weight next time. Stop most sets with 1-2 reps left. No max lifting while lower back is not 100%.</div>
       </div>
     </section>
 
@@ -185,30 +186,30 @@
       <div class="card">
         <h3>Targets</h3>
         <div class="grid two">
-          <div class="greenNote"><b>Protein</b><br>130â145g/day</div>
-          <div class="greenNote"><b>Calories</b><br>Work days 2500â2700<br>Gym days 2400â2600</div>
+          <div class="greenNote"><b>Protein</b><br>130-145g/day</div>
+          <div class="greenNote"><b>Calories</b><br>Work days 2500-2700<br>Gym days 2400-2600</div>
         </div>
       </div>
 
       <div class="card">
-        <h3>Work days â Sun to Wed</h3>
-        <div class="meal"><div class="time">Morning</div><b>Fresh smoothie</b>300 ml 2% milk + banana + 1 scoop whey + 30g oats + 1 tbsp peanut butter + cinnamon. Optional 1â2 dates.</div>
+        <h3>Work days - Sun to Wed</h3>
+        <div class="meal"><div class="time">Morning</div><b>Fresh smoothie</b>300 ml 2% milk + banana + 1 scoop whey + 30g oats + 1 tbsp peanut butter + cinnamon. Optional 1-2 dates.</div>
         <div class="meal"><div class="time">10 AM</div><b>Quick snack</b>Banana/apple + small roasted chana OR Greek yogurt OR 2 boiled eggs.</div>
         <div class="meal"><div class="time">11 AM break</div><b>Main packed meal</b>3 roti or rice + protein curry + sabji + fresh salad + curd/Greek yogurt separately.</div>
         <div class="meal"><div class="time">2:30 PM break</div><b>Second meal</b>Greek yogurt + fruit OR 2 boiled eggs + fruit OR oats + milk + whey OR whey + banana.</div>
         <div class="meal"><div class="time">After work</div><b>Small only</b>Tea/coffee + fruit OR whey OR 1 peanut butter toast.</div>
-        <div class="meal"><div class="time">8:30 PM dinner</div><b>Lighter dinner</b>2â3 roti + sabji + protein: dal/paneer/tofu/soya/eggs/chicken. Avoid 4 roti daily.</div>
+        <div class="meal"><div class="time">8:30 PM dinner</div><b>Lighter dinner</b>2-3 roti + sabji + protein: dal/paneer/tofu/soya/eggs/chicken. Avoid 4 roti daily.</div>
       </div>
 
       <div class="card">
-        <h3>Gym/off days â Thu to Sat</h3>
-        <div class="meal"><div class="time">7:45â8:00 AM</div><b>Breakfast</b>Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.</div>
+        <h3>Gym/off days - Thu to Sat</h3>
+        <div class="meal"><div class="time">7:45-8:00 AM</div><b>Breakfast</b>Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.</div>
         <div class="meal"><div class="time">10:00 AM</div><b>Pre-workout</b>Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.</div>
-        <div class="meal"><div class="time">10:45 AMâ12:15 PM</div><b>Gym</b>Water. Add electrolyte/pinch of salt if sweating a lot.</div>
+        <div class="meal"><div class="time">10:45 AM-12:15 PM</div><b>Gym</b>Water. Add electrolyte/pinch of salt if sweating a lot.</div>
         <div class="meal"><div class="time">12:30 PM</div><b>Post-workout</b>1 scoop whey with water + banana/dates if lunch is not soon.</div>
-        <div class="meal"><div class="time">1:15â1:45 PM</div><b>Big clean lunch</b>3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.</div>
+        <div class="meal"><div class="time">1:15-1:45 PM</div><b>Big clean lunch</b>3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.</div>
         <div class="meal"><div class="time">4:30 PM</div><b>Snack</b>Greek yogurt + fruit OR 2 boiled eggs + apple OR roasted chana + fruit.</div>
-        <div class="meal"><div class="time">7:30â8:15 PM</div><b>Dinner</b>2 roti + protein + sabji + small salad. Keep it clean for flat belly.</div>
+        <div class="meal"><div class="time">7:30-8:15 PM</div><b>Dinner</b>2 roti + protein + sabji + small salad. Keep it clean for flat belly.</div>
       </div>
 
       <div class="card">
@@ -216,12 +217,12 @@
         <table>
           <tr><th>Food</th><th>Use</th></tr>
           <tr><td>Whey</td><td>1 scoop after gym or in smoothie</td></tr>
-          <tr><td>Eggs</td><td>2â3 eggs as snack/breakfast</td></tr>
+          <tr><td>Eggs</td><td>2-3 eggs as snack/breakfast</td></tr>
           <tr><td>Greek yogurt</td><td>High-protein snack</td></tr>
           <tr><td>Paneer / tofu</td><td>Main curry protein</td></tr>
           <tr><td>Soya chunks</td><td>Cheap high-protein meal prep</td></tr>
           <tr><td>Dal / chana / rajma</td><td>Good, but control portion if gas</td></tr>
-          <tr><td>Chicken</td><td>Optional 1â2 days/week</td></tr>
+          <tr><td>Chicken</td><td>Optional 1-2 days/week</td></tr>
         </table>
       </div>
     </section>
@@ -239,8 +240,8 @@
 
       <div class="card">
         <h3>4-day packing plan</h3>
-        <details open><summary>Sunday + Monday â fridge</summary><div class="detailsBody"><ul><li>11 AM: 3 roti/rice + soya/paneer/dal + sabji</li><li>2:30 PM: Greek yogurt + fruit OR 2 boiled eggs + fruit</li><li>Fresh: salad, smoothie, fruit</li></ul></div></details>
-        <details><summary>Tuesday + Wednesday â freezer</summary><div class="detailsBody"><ul><li>Freeze cooked meal boxes on Saturday after cooling.</li><li>Monday night: move Tuesday box to fridge.</li><li>Tuesday night: move Wednesday box to fridge.</li><li>Keep yogurt/curd, fruit, salad fresh.</li></ul></div></details>
+        <details open><summary>Sunday + Monday - fridge</summary><div class="detailsBody"><ul><li>11 AM: 3 roti/rice + soya/paneer/dal + sabji</li><li>2:30 PM: Greek yogurt + fruit OR 2 boiled eggs + fruit</li><li>Fresh: salad, smoothie, fruit</li></ul></div></details>
+        <details><summary>Tuesday + Wednesday - freezer</summary><div class="detailsBody"><ul><li>Freeze cooked meal boxes on Saturday after cooling.</li><li>Monday night: move Tuesday box to fridge.</li><li>Tuesday night: move Wednesday box to fridge.</li><li>Keep yogurt/curd, fruit, salad fresh.</li></ul></div></details>
       </div>
 
       <div class="card">
@@ -276,7 +277,7 @@
           <div class="field"><label>Hip/glutes in</label><input type="number" step="0.1" id="mHip" placeholder="37.5"></div>
           <div class="field"><label>Thigh in</label><input type="number" step="0.1" id="mThigh" placeholder="21"></div>
           <div class="field"><label>Biceps in</label><input type="number" step="0.1" id="mBiceps" placeholder="13"></div>
-          <div class="field"><label>Back pain 0â10</label><input type="number" min="0" max="10" step="1" id="mPain" placeholder="1"></div>
+          <div class="field"><label>Back pain 0-10</label><input type="number" min="0" max="10" step="1" id="mPain" placeholder="1"></div>
         </div>
         <div class="field" style="margin-top:10px"><label>Notes</label><textarea id="mNotes" placeholder="Energy, digestion, strength, photos taken..."></textarea></div>
         <div class="row wraprow" style="margin-top:12px">
@@ -291,11 +292,11 @@
         <h3>Body goal direction</h3>
         <table>
           <tr><th>Area</th><th>Now</th><th>First target</th></tr>
-          <tr><td>Waist</td><td>34</td><td>32.5â33</td></tr>
-          <tr><td>Chest</td><td>36â38</td><td>38â39+</td></tr>
-          <tr><td>Hip/glutes</td><td>37.5</td><td>38â39 shaped</td></tr>
-          <tr><td>Thigh</td><td>21</td><td>21.5â22 shaped</td></tr>
-          <tr><td>Biceps</td><td>11â13</td><td>13.5â14</td></tr>
+          <tr><td>Waist</td><td>34</td><td>32.5-33</td></tr>
+          <tr><td>Chest</td><td>36-38</td><td>38-39+</td></tr>
+          <tr><td>Hip/glutes</td><td>37.5</td><td>38-39 shaped</td></tr>
+          <tr><td>Thigh</td><td>21</td><td>21.5-22 shaped</td></tr>
+          <tr><td>Biceps</td><td>11-13</td><td>13.5-14</td></tr>
         </table>
       </div>
 
@@ -308,12 +309,12 @@
     <section class="section" id="safety">
       <div class="card">
         <h3>Back-safe rules</h3>
-        <div class="note">Lower-left back pain is usually 1â2, but sometimes 7 after bending or standing after sitting. So the plan avoids heavy barbell deadlifts and ego squats for now.</div>
+        <div class="note">Lower-left back pain is usually 1-2, but sometimes 7 after bending or standing after sitting. So the plan avoids heavy barbell deadlifts and ego squats for now.</div>
         <ul>
-          <li>Pain 0â2: continue with clean form.</li>
-          <li>Pain 3â4: reduce weight or range.</li>
+          <li>Pain 0-2: continue with clean form.</li>
+          <li>Pain 3-4: reduce weight or range.</li>
           <li>Pain 5+: stop that exercise.</li>
-          <li>No pain down leg right now â good sign, but donât ignore changes.</li>
+          <li>No pain down leg right now - good sign, but don't ignore changes.</li>
         </ul>
       </div>
 
@@ -322,8 +323,8 @@
         <ul>
           <li>Heavy deadlift: avoid for now.</li>
           <li>Barbell squat: only light/controlled if pain-free; machines are safer for now.</li>
-          <li>Leg press: donât let lower back round.</li>
-          <li>Hip thrust: ribs down, donât over-arch.</li>
+          <li>Leg press: don't let lower back round.</li>
+          <li>Hip thrust: ribs down, don't over-arch.</li>
           <li>Back extension: optional only if pain-free.</li>
         </ul>
       </div>
@@ -334,15 +335,15 @@
           <li>Avoid cola and fried food most of the week.</li>
           <li>Keep dinner lighter than lunch.</li>
           <li>Use jeera/ajwain/ginger in chana/rajma/soya meals.</li>
-          <li>Donât mix huge raw salad with late heavy dinner.</li>
-          <li>Walk 5â10 min after dinner when possible.</li>
+          <li>Don't mix huge raw salad with late heavy dinner.</li>
+          <li>Walk 5-10 min after dinner when possible.</li>
         </ul>
       </div>
 
       <div class="card">
         <h3>Settings</h3>
         <div class="row wraprow">
-          <button class="btn secondary" id="resetChecks">Reset todayâs checks</button>
+          <button class="btn secondary" id="resetChecks">Reset today's checks</button>
           <button class="btn danger" id="resetAll">Reset all local data</button>
           <button class="btn secondary" onclick="window.print()">Print / Save as PDF</button>
         </div>
@@ -360,13 +361,13 @@ function save(){localStorage.setItem(STORE,JSON.stringify(state));}
 function toast(msg='Saved'){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
 
 const lists={
- warmup:['Treadmill walk â 5 min','Cat-cow â 10 reps','Hip hinge practice â 10 reps','Glute bridge â 2 x 12','Dead bug â 2 x 8 each side','Band pull-aparts or face pulls â 2 x 15'],
- push:['Machine Chest Press â 4 x 8â12','Incline Dumbbell Press â 4 x 8â12','Pec Deck / Cable Fly â 3 x 12â15','Seated Shoulder Press Machine â 3 x 8â12','Dumbbell Lateral Raises â 4 x 12â20','Rope Triceps Pushdown â 3 x 10â15','Overhead Cable Triceps Extension â 2 x 12â15','Plank â 3 x 30â60 sec','Cable Pallof Press â 3 x 10 each side'],
- legs:['Leg Press â 4 x 10â15','Hip Thrust Machine / Smith Hip Thrust â 4 x 8â12','Seated or Lying Leg Curl â 4 x 10â15','Bulgarian Split Squat OR Walking Lunges â 3 x 8â10 each leg','Leg Extension â 3 x 12â15','Cable Kickback â 3 x 12â15 each leg','Hip Abductor Machine â 3 x 15â25','Standing Calf Raise â 4 x 12â20','Side Plank â 3 x 30 sec each side'],
- pull:['Lat Pulldown â 4 x 8â12','Chest-Supported Row Machine â 4 x 8â12','Seated Cable Row â 3 x 10â12','Face Pulls â 4 x 15â20','Rear Delt Fly Machine â 3 x 12â20','Back Extension â optional, only if pain-free â 2 x 12 bodyweight','Dumbbell Curl â 3 x 10â12','Hammer Curl â 3 x 10â12','Cable Glute Kickback OR Abductor â 2 x 20 light','Dead bug â 3 x 8 each side'],
- prepCook:['Soya chunks curry â 2 portions','Paneer curry/bhurji â 2 portions','Dal/chana/rajma â 2 portions','Sabji â 4 portions','Rice â 2 portions','Roti â 8â12 rotis','Boiled eggs â 6â8 eggs','Dry oats jars â oats + cinnamon + chia only'],
+ warmup:['Treadmill walk - 5 min','Cat-cow - 10 reps','Hip hinge practice - 10 reps','Glute bridge - 2 x 12','Dead bug - 2 x 8 each side','Band pull-aparts or face pulls - 2 x 15'],
+ push:['Machine Chest Press - 4 x 8-12','Incline Dumbbell Press - 4 x 8-12','Pec Deck / Cable Fly - 3 x 12-15','Seated Shoulder Press Machine - 3 x 8-12','Dumbbell Lateral Raises - 4 x 12-20','Rope Triceps Pushdown - 3 x 10-15','Overhead Cable Triceps Extension - 2 x 12-15','Plank - 3 x 30-60 sec','Cable Pallof Press - 3 x 10 each side'],
+ legs:['Leg Press - 4 x 10-15','Hip Thrust Machine / Smith Hip Thrust - 4 x 8-12','Seated or Lying Leg Curl - 4 x 10-15','Bulgarian Split Squat OR Walking Lunges - 3 x 8-10 each leg','Leg Extension - 3 x 12-15','Cable Kickback - 3 x 12-15 each leg','Hip Abductor Machine - 3 x 15-25','Standing Calf Raise - 4 x 12-20','Side Plank - 3 x 30 sec each side'],
+ pull:['Lat Pulldown - 4 x 8-12','Chest-Supported Row Machine - 4 x 8-12','Seated Cable Row - 3 x 10-12','Face Pulls - 4 x 15-20','Rear Delt Fly Machine - 3 x 12-20','Back Extension - optional, only if pain-free - 2 x 12 bodyweight','Dumbbell Curl - 3 x 10-12','Hammer Curl - 3 x 10-12','Cable Glute Kickback OR Abductor - 2 x 20 light','Dead bug - 3 x 8 each side'],
+ prepCook:['Soya chunks curry - 2 portions','Paneer curry/bhurji - 2 portions','Dal/chana/rajma - 2 portions','Sabji - 4 portions','Rice - 2 portions','Roti - 8-12 rotis','Boiled eggs - 6-8 eggs','Dry oats jars - oats + cinnamon + chia only'],
  safety:['Cool cooked food before sealing tightly','Sunday/Monday boxes in fridge','Tuesday/Wednesday boxes in freezer','Move frozen box to fridge night before','Use ice pack for yogurt, eggs, paneer, chicken','Reheat cooked food properly hot','Do not reheat the same box again and again'],
- grocery:['Whey protein','Eggs','Greek yogurt / homemade curd','Paneer / tofu','Soya chunks','Dal / chana / rajma','Chicken optional 1â2 days','Oats','2% milk','Bananas / apples / berries','Roti atta / rice','Salad: cucumber, tomato, onion, lettuce','Sabji vegetables','Roasted chana','Peanut butter','Nuts: almonds/walnuts','Jeera, ajwain, ginger, cinnamon','Glass containers + ice pack']
+ grocery:['Whey protein','Eggs','Greek yogurt / homemade curd','Paneer / tofu','Soya chunks','Dal / chana / rajma','Chicken optional 1-2 days','Oats','2% milk','Bananas / apples / berries','Roti atta / rice','Salad: cucumber, tomato, onion, lettuce','Sabji vegetables','Roasted chana','Peanut butter','Nuts: almonds/walnuts','Jeera, ajwain, ginger, cinnamon','Glass containers + ice pack']
 };
 function renderChecks(id, arr, keyPrefix){
  const box=$('#'+id); box.innerHTML='';
@@ -391,11 +392,11 @@ function dayPlan(){
  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
  const d=new Date(); const day=days[d.getDay()];
  let type='Work day', badge='Work', cards=[];
- if(day==='Thursday'){type='Gym day â Chest / shoulders / triceps'; badge='Gym'; cards=[['ðï¸ Thursday gym','Chest + shoulders + triceps + core. Warm up first.'],['ð½ï¸ Food timing','7:45 breakfast, 10:00 pre-workout, 12:30 whey, 1:30 lunch, 4:30 snack, 8:00 dinner.']];}
- else if(day==='Friday'){type='Gym day â Thighs + glutes'; badge='Leg day'; cards=[['ð¦µ Friday gym','Thighs + glutes. Back-safe form. No ego lifting.'],['ð Eat enough','Leg day needs carbs: smoothie/oats, banana pre, whey post, big lunch.']];}
- else if(day==='Saturday'){type='Gym + meal prep day'; badge='Prep'; cards=[['ðª Saturday gym','Back + biceps + posture + light glute pump.'],['ð¥ Meal prep','Prep Sunday/Monday for fridge and Tuesday/Wednesday for freezer.']];}
- else {cards=[['ð¶ Work day','20â30k steps. No extra cardio needed. Protect back at work.'],['ð± Packed meals','Morning smoothie, 10 AM snack, 11 AM main meal, 2:30 second meal, lighter dinner.']];}
- $('#todayLine').textContent=`${day} â¢ ${type}`; $('#todayDesc').textContent=`${day}: ${type}`; $('#todayBadge').textContent=badge;
+ if(day==='Thursday'){type='Gym day - Chest / shoulders / triceps'; badge='Gym'; cards=[['Gym Thursday gym','Chest + shoulders + triceps + core. Warm up first.'],['Meals Food timing','7:45 breakfast, 10:00 pre-workout, 12:30 whey, 1:30 lunch, 4:30 snack, 8:00 dinner.']];}
+ else if(day==='Friday'){type='Gym day - Thighs + glutes'; badge='Leg day'; cards=[['Legs Friday gym','Thighs + glutes. Back-safe form. No ego lifting.'],['Meal Eat enough','Leg day needs carbs: smoothie/oats, banana pre, whey post, big lunch.']];}
+ else if(day==='Saturday'){type='Gym + meal prep day'; badge='Prep'; cards=[['Fit Saturday gym','Back + biceps + posture + light glute pump.'],['Food Meal prep','Prep Sunday/Monday for fridge and Tuesday/Wednesday for freezer.']];}
+ else {cards=[['Steps Work day','20-30k steps. No extra cardio needed. Protect back at work.'],['Prep Packed meals','Morning smoothie, 10 AM snack, 11 AM main meal, 2:30 second meal, lighter dinner.']];}
+ $('#todayLine').textContent=`${day} - ${type}`; $('#todayDesc').textContent=`${day}: ${type}`; $('#todayBadge').textContent=badge;
  $('#todayCards').innerHTML=cards.map(c=>`<div class="meal"><b>${c[0]}</b>${c[1]}</div>`).join('');
 }
 
@@ -450,7 +451,7 @@ function initMeasurements(){
 function renderHistory(){
  const arr=state.measurements||[]; const box=$('#measureHistory');
  if(!arr.length){box.textContent='No measurements saved yet.'; return;}
- box.innerHTML=arr.map((m,i)=>`<details ${i===0?'open':''}><summary>${m.date||'No date'} â ${m.weight?m.weight+' kg':''} ${m.waist?' â¢ waist '+m.waist:''}</summary><div class="detailsBody"><table><tr><td>Weight</td><td>${m.weight||'-'}</td></tr><tr><td>Waist</td><td>${m.waist||'-'}</td></tr><tr><td>Chest</td><td>${m.chest||'-'}</td></tr><tr><td>Hip</td><td>${m.hip||'-'}</td></tr><tr><td>Thigh</td><td>${m.thigh||'-'}</td></tr><tr><td>Biceps</td><td>${m.biceps||'-'}</td></tr><tr><td>Back pain</td><td>${m.pain||'-'}</td></tr></table>${m.notes?`<p class="muted">${m.notes.replace(/</g,'&lt;')}</p>`:''}</div></details>`).join('');
+ box.innerHTML=arr.map((m,i)=>`<details ${i===0?'open':''}><summary>${m.date||'No date'} - ${m.weight?m.weight+' kg':''} ${m.waist?' - waist '+m.waist:''}</summary><div class="detailsBody"><table><tr><td>Weight</td><td>${m.weight||'-'}</td></tr><tr><td>Waist</td><td>${m.waist||'-'}</td></tr><tr><td>Chest</td><td>${m.chest||'-'}</td></tr><tr><td>Hip</td><td>${m.hip||'-'}</td></tr><tr><td>Thigh</td><td>${m.thigh||'-'}</td></tr><tr><td>Biceps</td><td>${m.biceps||'-'}</td></tr><tr><td>Back pain</td><td>${m.pain||'-'}</td></tr></table>${m.notes?`<p class="muted">${m.notes.replace(/</g,'&lt;')}</p>`:''}</div></details>`).join('');
 }
 function initReset(){
  $('#resetChecks').addEventListener('click',()=>{const today=new Date().toISOString().slice(0,10); Object.keys(state).forEach(k=>{if(k.startsWith('daily.'+today)) delete state[k];}); save(); location.reload();});
