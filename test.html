@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <!--
-Ranveer Fitness Dashboard v2
-ASCII-clean version: no emojis/smart quotes.
-Goal: daily use under 20 seconds.
-Storage now: localStorage.
-Supabase later: connect daily logs, measurements, workout sessions, and meal box inventory.
+Ranveer Fitness Dashboard v3
+ASCII-clean version: no emojis/smart characters.
+Main change:
+- No big hero box on every page.
+- First page is dedicated to TODAY'S schedule: food + workout.
+- No food checklist.
+- Grocery checklist stays in Prep.
+- localStorage now; Supabase can be added later.
 -->
 <html lang="en">
 <head>
@@ -26,10 +29,12 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       --yellow:#b45309;
       --red:#b42318;
       --blue:#175cd3;
+      --purple:#6d28d9;
       --soft:#eaf7f1;
       --soft2:#fff7ed;
       --softRed:#fff1f3;
       --softBlue:#eff6ff;
+      --softPurple:#f5f3ff;
       --shadow:0 12px 30px rgba(16,24,40,.08);
       --radius:20px;
     }
@@ -46,13 +51,13 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
 
     button,input,textarea,select{font:inherit}
     button{cursor:pointer}
-    .wrap{max-width:940px;margin:0 auto;padding:16px}
+    .wrap{max-width:940px;margin:0 auto;padding:14px 16px}
 
     header{
       position:sticky;
       top:0;
       z-index:20;
-      background:rgba(246,247,251,.9);
+      background:rgba(246,247,251,.92);
       backdrop-filter:blur(16px);
       border-bottom:1px solid rgba(230,232,239,.85);
     }
@@ -82,7 +87,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
     }
 
     h1{font-size:18px;line-height:1.05;margin:0}
-    .sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+    .sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:245px}
 
     .topActions{display:flex;gap:8px;align-items:center}
     .pill{
@@ -97,33 +102,6 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       align-items:center;
       white-space:nowrap;
     }
-
-    .hero{padding:14px 0 8px}
-    .heroCard{
-      background:linear-gradient(135deg,#0f513c,#2f946f);
-      color:#fff;
-      border-radius:26px;
-      padding:20px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .heroCard:after{
-      content:"";
-      position:absolute;
-      right:-55px;
-      top:-75px;
-      width:180px;
-      height:180px;
-      border-radius:50%;
-      background:rgba(255,255,255,.12);
-    }
-    .heroCard h2{margin:0 0 8px;font-size:24px;line-height:1.08;letter-spacing:-.4px}
-    .heroCard p{margin:0;color:rgba(255,255,255,.86);font-size:14px;line-height:1.45}
-    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
-    .stat{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:10px}
-    .stat b{display:block;font-size:18px}
-    .stat span{font-size:12px;color:rgba(255,255,255,.78)}
 
     .tabs{
       position:fixed;
@@ -168,6 +146,8 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       padding:16px;
       margin:12px 0;
     }
+    .card.compact{padding:14px}
+    .card h2{margin:0 0 6px;font-size:24px;line-height:1.08;letter-spacing:-.45px}
     .card h3{margin:0 0 10px;font-size:18px;letter-spacing:-.2px}
     .card h4{margin:12px 0 8px;font-size:15px}
     .muted{color:var(--muted);font-size:13px;line-height:1.45}
@@ -192,6 +172,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
     .badge.warn{background:var(--soft2);color:var(--yellow)}
     .badge.danger{background:var(--softRed);color:var(--red)}
     .badge.blue{background:var(--softBlue);color:var(--blue)}
+    .badge.purple{background:var(--softPurple);color:var(--purple)}
 
     .btn{
       border:0;
@@ -206,15 +187,98 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
     .btn.danger{background:var(--red)}
     .btn.warn{background:var(--yellow)}
     .btn.blue{background:var(--blue)}
+    .btn.purple{background:var(--purple)}
     .btn.smallbtn{padding:8px 10px;font-size:12px;border-radius:12px}
     .btn.full{width:100%;justify-content:center}
+
+    .todayHero{
+      background:linear-gradient(135deg,#0f513c,#2f946f);
+      color:#fff;
+      border-radius:26px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+      margin:2px 0 12px;
+    }
+    .todayHero:after{
+      content:"";
+      position:absolute;
+      right:-55px;
+      top:-80px;
+      width:180px;
+      height:180px;
+      border-radius:50%;
+      background:rgba(255,255,255,.12);
+    }
+    .todayHero .content{position:relative;z-index:1}
+    .todayHero h2{margin:0 0 6px;font-size:25px;line-height:1.08;letter-spacing:-.45px}
+    .todayHero p{margin:0;color:rgba(255,255,255,.86);font-size:14px;line-height:1.45}
+    .todayMeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .todayMeta span{
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:12px;
+      font-weight:850;
+      color:#fff;
+    }
+
+    .timeline{
+      position:relative;
+      margin-top:8px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:17px;
+      top:12px;
+      bottom:12px;
+      width:2px;
+      background:#d8eadf;
+    }
+    .timeItem{
+      position:relative;
+      display:grid;
+      grid-template-columns:42px 1fr;
+      gap:10px;
+      margin:10px 0;
+    }
+    .dot{
+      width:36px;
+      height:36px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:var(--soft);
+      border:1px solid #b7ead2;
+      color:var(--accent2);
+      font-weight:950;
+      z-index:1;
+    }
+    .dot.blue{background:var(--softBlue);border-color:#bfdbfe;color:var(--blue)}
+    .dot.warn{background:var(--soft2);border-color:#fed7aa;color:#7c2d12}
+    .dot.purple{background:var(--softPurple);border-color:#ddd6fe;color:var(--purple)}
+    .timeCard{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+    .timeCard .time{font-size:12px;font-weight:950;color:var(--accent2);margin-bottom:3px}
+    .timeCard .time.blueText{color:var(--blue)}
+    .timeCard .time.warnText{color:var(--yellow)}
+    .timeCard b{display:block;margin-bottom:3px;font-size:14px}
+    .timeCard p{margin:0;color:var(--muted);font-size:13px;line-height:1.42}
+    .timeCard .inlineBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 
     .quickGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .quickBtn{
       border:1px solid var(--line);
       background:#fff;
       border-radius:18px;
-      min-height:92px;
+      min-height:88px;
       padding:12px 10px;
       text-align:left;
       box-shadow:0 8px 18px rgba(16,24,40,.04);
@@ -259,17 +323,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
     .yellowNote{background:var(--soft2);border-color:#fed7aa;color:#7c2d12}
     .redNote{background:var(--softRed);border-color:#fecdd3;color:var(--red)}
     .blueNote{background:var(--softBlue);border-color:#bfdbfe;color:#1e3a8a}
-
-    .meal{
-      border-left:5px solid var(--accent);
-      padding:12px;
-      border-radius:14px;
-      background:#fbfffd;
-      border:1px solid var(--line);
-      margin:10px 0;
-    }
-    .meal b{display:block;margin-bottom:4px}
-    .meal .time{font-size:12px;color:var(--accent2);font-weight:900;margin-bottom:4px}
+    .purpleNote{background:var(--softPurple);border-color:#ddd6fe;color:#4c1d95}
 
     .miniProgress{height:10px;background:#edf0f5;border-radius:999px;overflow:hidden}
     .miniProgress > div{height:100%;background:linear-gradient(90deg,var(--accent),#68b08f);width:0%;transition:.2s}
@@ -318,6 +372,8 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
     .check input{width:20px;height:20px;accent-color:var(--accent);flex:0 0 auto}
     .check label{line-height:1.35;font-size:14px}
     .check.done label{text-decoration:line-through;color:var(--muted)}
+
+    .listTools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 
     table{
       width:100%;
@@ -392,8 +448,6 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
     .buttonBar.threeBtns{grid-template-columns:repeat(3,1fr)}
     .buttonBar .btn{padding:12px 10px}
 
-    .printOnly{display:none}
-
     @media(min-width:760px){
       body{padding-bottom:20px}
       .wrap{padding-top:8px}
@@ -409,13 +463,12 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
         box-shadow:var(--shadow);
         grid-template-columns:repeat(6,1fr);
       }
-      .stats{grid-template-columns:repeat(4,1fr)}
       .card{padding:18px}
       .tab{font-size:12px}
       .sub{max-width:420px}
     }
 
-    @media(max-width:520px){
+    @media(max-width:560px){
       .quickGrid,.painGrid,.three{grid-template-columns:1fr}
       .inputGrid,.two{grid-template-columns:1fr}
       .buttonBar.threeBtns{grid-template-columns:1fr}
@@ -423,7 +476,6 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
 
     @media(max-width:420px){
       .wrap{padding:12px}
-      .heroCard h2{font-size:22px}
       .card{border-radius:18px;padding:14px}
       .topbar{padding:10px 12px}
       .pill{display:none}
@@ -431,6 +483,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       .tab{font-size:10px;padding:7px 2px}
       .tab b{font-size:12px}
       .buttonBar{grid-template-columns:1fr}
+      .todayHero h2{font-size:23px}
     }
 
     @media print{
@@ -438,8 +491,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       body{background:#fff;padding:0}
       .wrap{max-width:none}
       .section{display:block!important}
-      .card,.heroCard{box-shadow:none;break-inside:avoid}
-      .printOnly{display:block}
+      .card,.todayHero{box-shadow:none;break-inside:avoid}
     }
   </style>
 </head>
@@ -451,66 +503,66 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
         <div class="logo">RF</div>
         <div>
           <h1>Ranveer Fitness Dashboard</h1>
-          <div class="sub" id="todayLine">Loading today...</div>
+          <div class="sub" id="topLine">Loading today...</div>
         </div>
       </div>
 
       <div class="topActions">
         <button class="btn secondary smallbtn" id="editBtn">Edit</button>
-        <div class="pill">20 sec daily plan</div>
+        <div class="pill">Today first</div>
       </div>
     </div>
   </header>
 
   <nav class="tabs" aria-label="Plan tabs">
-    <button class="tab active" data-tab="today"><b>Home</b><span>Today</span></button>
-    <button class="tab" data-tab="workout"><b>Gym</b><span>Workout</span></button>
-    <button class="tab" data-tab="meals"><b>Meals</b><span>Food</span></button>
-    <button class="tab" data-tab="prep"><b>Prep</b><span>Boxes</span></button>
+    <button class="tab active" data-tab="today"><b>Today</b><span>Plan</span></button>
+    <button class="tab" data-tab="workout"><b>Gym</b><span>Start</span></button>
+    <button class="tab" data-tab="meals"><b>Meals</b><span>Guide</span></button>
+    <button class="tab" data-tab="prep"><b>Prep</b><span>Grocery</span></button>
     <button class="tab" data-tab="track"><b>Track</b><span>Weekly</span></button>
     <button class="tab" data-tab="safety"><b>Safe</b><span>Back</span></button>
   </nav>
 
   <main class="wrap" id="app">
-    <section class="hero">
-      <div class="heroCard">
-        <h2 data-edit data-save="heroTitle">Chest up, belly down, thighs and glutes better.</h2>
-        <p data-edit data-save="heroText">Work Sun-Wed with high steps. Gym Thu/Fri/Sat. Goal is a clean, good-looking body - not bulky, no abs obsession.</p>
 
-        <div class="stats">
-          <div class="stat"><b data-edit data-save="statWeight">68-72 kg</b><span>Weight</span></div>
-          <div class="stat"><b data-edit data-save="statWaist">34 in</b><span>Waist</span></div>
-          <div class="stat"><b data-edit data-save="statHip">37.5 in</b><span>Hip/glutes</span></div>
-          <div class="stat"><b data-edit data-save="statThigh">21 in</b><span>Thigh</span></div>
+    <!-- TODAY PAGE: dedicated schedule page -->
+    <section class="section active" id="today">
+      <div class="todayHero">
+        <div class="content">
+          <h2 id="todayTitle">Today</h2>
+          <p id="todaySubtitle">Food + workout schedule for today.</p>
+          <div class="todayMeta">
+            <span id="todayTypePill">Today</span>
+            <span id="todayWorkoutPill">Workout</span>
+            <span id="todayFoodPill">Food plan</span>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section class="section active" id="today">
-      <div class="card">
+      <div class="card compact">
         <div class="row">
           <div>
-            <h3>Today at a glance</h3>
-            <div class="muted" id="todayDesc">Based on your weekly schedule.</div>
+            <h3>Today schedule</h3>
+            <div class="muted">Follow this timeline. No food checklist needed.</div>
           </div>
           <span class="badge" id="todayBadge">Today</span>
         </div>
 
-        <div id="todayMainCards"></div>
+        <div class="timeline" id="todayTimeline"></div>
       </div>
 
-      <div class="card">
+      <div class="card compact">
         <h3>3 quick taps</h3>
-        <div class="muted">No long ticking. Tap only the main things.</div>
+        <div class="muted">Only track the big things. Daily use should take under 20 seconds.</div>
 
         <div class="quickGrid" style="margin-top:12px">
           <button class="quickBtn" data-quick="meals">
             <strong>Meals on track</strong>
-            <span>Smoothie, packed food, protein, light dinner.</span>
+            <span>Good enough food day. No need to tick every meal.</span>
           </button>
           <button class="quickBtn" data-quick="activity">
-            <strong>Gym / steps done</strong>
-            <span>Gym day: workout. Work day: steps are enough.</span>
+            <strong>Workout / steps done</strong>
+            <span>Gym day: workout. Work day: steps count.</span>
           </button>
           <button class="quickBtn" data-quick="recovery">
             <strong>Recovery okay</strong>
@@ -527,7 +579,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
         </div>
       </div>
 
-      <div class="card">
+      <div class="card compact">
         <h3>Back pain check</h3>
         <div class="painGrid">
           <button class="painBtn green" data-pain="green">0-2<small>Normal</small></button>
@@ -537,11 +589,11 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
         <div id="painAdvice" class="infoBox greenNote" style="margin-top:12px">Select your back pain level for today's safe plan.</div>
       </div>
 
-      <div class="card">
+      <div class="card compact">
         <div class="row">
           <div>
             <h3>Meal boxes left</h3>
-            <div class="muted">Useful for Sun-Wed work meal prep.</div>
+            <div class="muted">For Sun-Wed work meal prep.</div>
           </div>
           <div class="bigNumber" id="boxCountHome">0</div>
         </div>
@@ -553,13 +605,14 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
         </div>
       </div>
 
-      <div class="card">
+      <div class="card compact">
         <h3>Quick notes</h3>
         <p class="small editHint">Edit mode is ON. Tap editable text and change it. It saves on this phone.</p>
         <div class="field"><textarea id="quickNotes" placeholder="Energy, pain, digestion, gym notes..."></textarea></div>
       </div>
     </section>
 
+    <!-- WORKOUT PAGE -->
     <section class="section" id="workout">
       <div class="card">
         <div class="row wraprow">
@@ -644,16 +697,11 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       </div>
     </section>
 
+    <!-- MEALS GUIDE PAGE: no checklist -->
     <section class="section" id="meals">
       <div class="card">
-        <div class="row">
-          <div>
-            <h3>Today's meals</h3>
-            <div class="muted" id="mealTypeLine">Smart meals based on the day.</div>
-          </div>
-          <span class="badge" id="mealBadge">Meals</span>
-        </div>
-        <div id="todayMeals"></div>
+        <h3>Meal guide</h3>
+        <div class="muted">This is only a guide. The actual daily food timing is on the Today page.</div>
       </div>
 
       <div class="card">
@@ -706,6 +754,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       </div>
     </section>
 
+    <!-- PREP PAGE: grocery checklist stays -->
     <section class="section" id="prep">
       <div class="card">
         <h3>Meal box inventory</h3>
@@ -733,6 +782,16 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       </div>
 
       <div class="card">
+        <h3>Grocery checklist</h3>
+        <div class="listTools">
+          <button class="btn secondary smallbtn" id="selectAllGrocery">Select all</button>
+          <button class="btn secondary smallbtn" id="clearGrocery">Clear</button>
+          <button class="btn secondary smallbtn" id="copyGrocery">Copy list</button>
+        </div>
+        <div id="groceryList"></div>
+      </div>
+
+      <div class="card">
         <h3>Saturday meal-prep rule</h3>
         <div class="infoBox yellowNote"><b>Best system:</b> Sunday + Monday meals in fridge. Tuesday + Wednesday meals in freezer. Move frozen meal to fridge the night before. Keep salad, smoothie, fruit, yogurt fresh.</div>
       </div>
@@ -742,7 +801,18 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
 
         <details>
           <summary>Cook on Saturday</summary>
-          <div class="detailsBody"><div id="prepCookList"></div></div>
+          <div class="detailsBody">
+            <ul>
+              <li>Soya chunks curry - 2 portions</li>
+              <li>Paneer curry/bhurji - 2 portions</li>
+              <li>Dal/chana/rajma - 2 portions</li>
+              <li>Sabji - 4 portions</li>
+              <li>Rice - 2 portions</li>
+              <li>Roti - 8-12 rotis</li>
+              <li>Boiled eggs - 6-8 eggs</li>
+              <li>Dry oats jars - oats + cinnamon + chia only</li>
+            </ul>
+          </div>
         </details>
 
         <details>
@@ -771,18 +841,34 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
         </details>
 
         <details>
-          <summary>Food safety checklist</summary>
-          <div class="detailsBody"><div id="safetyList"></div></div>
-        </details>
-
-        <details>
-          <summary>Grocery checklist</summary>
-          <div class="detailsBody"><div id="groceryList"></div></div>
+          <summary>Food safety</summary>
+          <div class="detailsBody">
+            <ul>
+              <li>Cool cooked food before sealing tightly.</li>
+              <li>Sunday/Monday boxes in fridge.</li>
+              <li>Tuesday/Wednesday boxes in freezer.</li>
+              <li>Move frozen box to fridge night before.</li>
+              <li>Use ice pack for yogurt, eggs, paneer, chicken.</li>
+              <li>Reheat cooked food properly hot.</li>
+              <li>Do not reheat the same box again and again.</li>
+            </ul>
+          </div>
         </details>
       </div>
     </section>
 
+    <!-- TRACK PAGE -->
     <section class="section" id="track">
+      <div class="card">
+        <div class="row">
+          <div>
+            <h3>Body goal</h3>
+            <div class="muted" data-edit data-save="bodyGoal">Chest up, belly down, thighs and glutes shaped. Good-looking body, not bulky.</div>
+          </div>
+          <span class="badge purple">Goal</span>
+        </div>
+      </div>
+
       <div class="card">
         <div class="row">
           <div>
@@ -841,6 +927,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       </div>
     </section>
 
+    <!-- SAFETY PAGE -->
     <section class="section" id="safety">
       <div class="card">
         <h3>Back-safe rules</h3>
@@ -878,7 +965,7 @@ Supabase later: connect daily logs, measurements, workout sessions, and meal box
       <div class="card">
         <h3>Supabase later</h3>
         <div class="infoBox blueNote">
-          This version uses localStorage only. Later you can connect Supabase tables for daily_logs, measurements, workout_sessions, and meal_inventory. The app logic is already separated enough to connect it later.
+          This version uses localStorage only. Later you can connect Supabase tables for daily_logs, measurements, workout_sessions, and meal_inventory. Grocery checklist can also be stored per user later.
         </div>
       </div>
 
@@ -902,9 +989,10 @@ Supabase later idea:
 - measurements: user_id, measure_date, weight, waist, chest, hip, thigh, biceps, pain, notes
 - meal_inventory: user_id, box_count, updated_at
 - workout_sessions: user_id, session_date, workout_type, current_index, done_map, skipped_map
+- grocery_items: user_id, item_name, checked, sort_order
 */
 
-const STORE = 'ranveerFitnessDashboard.v2';
+const STORE = 'ranveerFitnessDashboard.v3';
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
 
@@ -992,46 +1080,44 @@ const workoutData = {
   ]
 };
 
-const mealTemplates = {
+const schedules = {
   work: [
-    {time:'Morning', title:'Fresh smoothie', text:'300 ml 2% milk + banana + 1 scoop whey + 30g oats + 1 tbsp peanut butter + cinnamon. Optional 1-2 dates.'},
-    {time:'10 AM', title:'Quick snack', text:'Banana/apple + small roasted chana OR Greek yogurt OR 2 boiled eggs.'},
-    {time:'11 AM break', title:'Main packed meal', text:'3 roti or rice + protein curry + sabji + fresh salad + curd/Greek yogurt separately.'},
-    {time:'2:30 PM break', title:'Second meal', text:'Greek yogurt + fruit OR 2 boiled eggs + fruit OR oats + milk + whey OR whey + banana.'},
-    {time:'After work', title:'Small only', text:'Tea/coffee + fruit OR whey OR 1 peanut butter toast.'},
-    {time:'8:30 PM dinner', title:'Lighter dinner', text:'2-3 roti + sabji + protein: dal/paneer/tofu/soya/eggs/chicken. Avoid 4 roti daily.'}
+    {time:'Morning', title:'Fresh smoothie', text:'300 ml 2% milk + banana + 1 scoop whey + 30g oats + 1 tbsp peanut butter + cinnamon. Optional 1-2 dates.', type:'food'},
+    {time:'10 AM', title:'Quick snack', text:'Banana/apple + small roasted chana OR Greek yogurt OR 2 boiled eggs.', type:'food'},
+    {time:'11 AM break', title:'Main packed meal', text:'3 roti or rice + protein curry + sabji + fresh salad + curd/Greek yogurt separately.', type:'food'},
+    {time:'2:30 PM break', title:'Second meal', text:'Greek yogurt + fruit OR 2 boiled eggs + fruit OR oats + milk + whey OR whey + banana.', type:'food'},
+    {time:'Work shift', title:'Activity', text:'Your work steps are enough cardio today. Protect back while bending/lifting.', type:'work'},
+    {time:'After work', title:'Small only', text:'Tea/coffee + fruit OR whey OR 1 peanut butter toast.', type:'food'},
+    {time:'8:30 PM dinner', title:'Lighter dinner', text:'2-3 roti + sabji + protein. Avoid 4 roti daily.', type:'food'}
   ],
-  gym: [
-    {time:'7:45-8:00 AM', title:'Breakfast', text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.'},
-    {time:'10:00 AM', title:'Pre-workout', text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.'},
-    {time:'10:45 AM-12:15 PM', title:'Gym', text:'Water. Add electrolyte/pinch of salt if sweating a lot.'},
-    {time:'12:30 PM', title:'Post-workout', text:'1 scoop whey with water + banana/dates if lunch is not soon.'},
-    {time:'1:15-1:45 PM', title:'Big clean lunch', text:'3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.'},
-    {time:'4:30 PM', title:'Snack', text:'Greek yogurt + fruit OR 2 boiled eggs + apple OR roasted chana + fruit.'},
-    {time:'7:30-8:15 PM', title:'Dinner', text:'2 roti + protein + sabji + small salad. Keep it clean for flat belly.'}
+  chest: [
+    {time:'7:45-8:00 AM', title:'Breakfast', text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.', type:'food'},
+    {time:'10:00 AM', title:'Pre-workout', text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.', type:'food'},
+    {time:'10:45 AM-12:15 PM', title:'Gym: Chest day', text:'Chest + shoulders + triceps + core. Start workout mode from here.', type:'gym', workout:'push'},
+    {time:'12:30 PM', title:'Post-workout', text:'1 scoop whey with water + banana/dates if lunch is not soon.', type:'food'},
+    {time:'1:15-1:45 PM', title:'Big clean lunch', text:'3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.', type:'food'},
+    {time:'4:30 PM', title:'Snack', text:'Greek yogurt + fruit OR 2 boiled eggs + apple OR roasted chana + fruit.', type:'food'},
+    {time:'7:30-8:15 PM', title:'Dinner', text:'2 roti + protein + sabji + small salad. Keep it clean for flat belly.', type:'food'}
+  ],
+  legs: [
+    {time:'7:45-8:00 AM', title:'Breakfast', text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.', type:'food'},
+    {time:'10:00 AM', title:'Pre-workout', text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.', type:'food'},
+    {time:'10:45 AM-12:15 PM', title:'Gym: Thighs + glutes', text:'Legs and glutes. Shape over heavy weight. Start workout mode from here.', type:'gym', workout:'legs'},
+    {time:'12:30 PM', title:'Post-workout', text:'1 scoop whey with water + banana/dates if lunch is not soon.', type:'food'},
+    {time:'1:15-1:45 PM', title:'Big clean lunch', text:'Leg day needs carbs: 3 roti/rice + protein + sabji + salad.', type:'food'},
+    {time:'4:30 PM', title:'Snack', text:'Greek yogurt + fruit OR 2 boiled eggs + apple OR roasted chana + fruit.', type:'food'},
+    {time:'7:30-8:15 PM', title:'Dinner', text:'2 roti + protein + sabji + small salad.', type:'food'}
+  ],
+  back: [
+    {time:'7:45-8:00 AM', title:'Breakfast', text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.', type:'food'},
+    {time:'10:00 AM', title:'Pre-workout', text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.', type:'food'},
+    {time:'10:45 AM-12:15 PM', title:'Gym: Back + biceps', text:'Back, biceps, posture, light glute pump. Start workout mode from here.', type:'gym', workout:'pull'},
+    {time:'12:30 PM', title:'Post-workout', text:'1 scoop whey with water + banana/dates if lunch is not soon.', type:'food'},
+    {time:'1:15-1:45 PM', title:'Big clean lunch', text:'3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.', type:'food'},
+    {time:'Afternoon', title:'Meal prep reminder', text:'Cook and pack Sun-Wed meals. Reset meal boxes to 8 when done.', type:'prep'},
+    {time:'7:30-8:15 PM', title:'Dinner', text:'2 roti + protein + sabji + small salad.', type:'food'}
   ]
 };
-
-const prepCook = [
-  'Soya chunks curry - 2 portions',
-  'Paneer curry/bhurji - 2 portions',
-  'Dal/chana/rajma - 2 portions',
-  'Sabji - 4 portions',
-  'Rice - 2 portions',
-  'Roti - 8-12 rotis',
-  'Boiled eggs - 6-8 eggs',
-  'Dry oats jars - oats + cinnamon + chia only'
-];
-
-const foodSafety = [
-  'Cool cooked food before sealing tightly',
-  'Sunday/Monday boxes in fridge',
-  'Tuesday/Wednesday boxes in freezer',
-  'Move frozen box to fridge night before',
-  'Use ice pack for yogurt, eggs, paneer, chicken',
-  'Reheat cooked food properly hot',
-  'Do not reheat the same box again and again'
-];
 
 const groceries = [
   'Whey protein',
@@ -1063,13 +1149,13 @@ function dayInfo(){
     return {
       day,
       badge:'Chest',
-      type:'Gym day - Chest / shoulders / triceps',
+      type:'Gym day',
+      title:'Thursday - Chest day',
+      subtitle:'Chest, shoulders, triceps, core + gym day meals.',
       workout:'push',
-      meals:'gym',
-      cards:[
-        ['Gym focus','Chest + shoulders + triceps + core. Use warm-up first.'],
-        ['Food focus','Pre-workout carbs, whey after gym, big clean lunch.']
-      ]
+      schedule:'chest',
+      workoutText:'Chest workout',
+      foodText:'Gym meals'
     };
   }
 
@@ -1077,13 +1163,13 @@ function dayInfo(){
     return {
       day,
       badge:'Leg day',
-      type:'Gym day - Thighs + glutes',
+      type:'Gym day',
+      title:'Friday - Thighs + glutes',
+      subtitle:'Back-safe leg/glute day. Eat enough carbs, no ego lifting.',
       workout:'legs',
-      meals:'gym',
-      cards:[
-        ['Gym focus','Thighs + glutes. Back-safe form. Shape over heavy weight.'],
-        ['Food focus','Leg day needs carbs. Do not train hungry.']
-      ]
+      schedule:'legs',
+      workoutText:'Leg/glute workout',
+      foodText:'Gym meals'
     };
   }
 
@@ -1091,13 +1177,13 @@ function dayInfo(){
     return {
       day,
       badge:'Prep',
-      type:'Gym + meal prep day',
+      type:'Gym + prep day',
+      title:'Saturday - Back + meal prep',
+      subtitle:'Back, biceps, posture, light glutes + prep food for work days.',
       workout:'pull',
-      meals:'gym',
-      cards:[
-        ['Gym focus','Back + biceps + posture + light glutes.'],
-        ['Prep focus','Cook and pack Sun-Wed meals. Reset boxes to 8.']
-      ]
+      schedule:'back',
+      workoutText:'Back workout',
+      foodText:'Prep day'
     };
   }
 
@@ -1105,44 +1191,53 @@ function dayInfo(){
     day,
     badge:'Work',
     type:'Work day',
+    title:day + ' - Work day',
+    subtitle:'Work steps are enough cardio. Main goal is packed meals and back safety.',
     workout:null,
-    meals:'work',
-    cards:[
-      ['Work focus','20-30k steps. No extra cardio needed. Protect back at work.'],
-      ['Food focus','Smoothie, 10 AM snack, 11 AM meal, 2:30 PM meal, lighter dinner.']
-    ]
+    schedule:'work',
+    workoutText:'Work steps',
+    foodText:'Work meals'
   };
 }
 
-function mealHTML(meals){
-  return meals.map(m => `
-    <div class="meal">
-      <div class="time">${esc(m.time)}</div>
-      <b>${esc(m.title)}</b>
-      ${esc(m.text)}
-    </div>
-  `).join('');
+function iconForType(type){
+  if(type === 'gym') return {letter:'G', cls:'blue', timeCls:'blueText'};
+  if(type === 'prep') return {letter:'P', cls:'purple', timeCls:'blueText'};
+  if(type === 'work') return {letter:'W', cls:'warn', timeCls:'warnText'};
+  return {letter:'F', cls:'', timeCls:''};
 }
 
 function renderToday(){
   const info = dayInfo();
 
-  $('#todayLine').textContent = `${info.day} - ${info.type}`;
-  $('#todayDesc').textContent = `${info.day}: ${info.type}`;
+  $('#topLine').textContent = `${info.day} - ${info.type}`;
+  $('#todayTitle').textContent = info.title;
+  $('#todaySubtitle').textContent = info.subtitle;
+  $('#todayTypePill').textContent = info.type;
+  $('#todayWorkoutPill').textContent = info.workoutText;
+  $('#todayFoodPill').textContent = info.foodText;
   $('#todayBadge').textContent = info.badge;
-  $('#mealTypeLine').textContent = `${info.day}: ${info.meals === 'gym' ? 'Gym/off day meal timing' : 'Work day meal timing'}`;
-  $('#mealBadge').textContent = info.meals === 'gym' ? 'Gym meals' : 'Work meals';
 
-  $('#todayMainCards').innerHTML = info.cards.map(c => `
-    <div class="meal">
-      <b>${esc(c[0])}</b>
-      ${esc(c[1])}
-    </div>
-  `).join('');
+  const items = schedules[info.schedule] || schedules.work;
 
-  $('#todayMeals').innerHTML = mealHTML(mealTemplates[info.meals]);
-  $('#workMealsList').innerHTML = mealHTML(mealTemplates.work);
-  $('#gymMealsList').innerHTML = mealHTML(mealTemplates.gym);
+  $('#todayTimeline').innerHTML = items.map(item => {
+    const icon = iconForType(item.type);
+    const startBtn = item.type === 'gym'
+      ? `<div class="inlineBtns"><button class="btn blue smallbtn" data-start-workout="${esc(item.workout)}">Start workout</button></div>`
+      : '';
+
+    return `
+      <div class="timeItem">
+        <div class="dot ${icon.cls}">${icon.letter}</div>
+        <div class="timeCard">
+          <div class="time ${icon.timeCls}">${esc(item.time)}</div>
+          <b>${esc(item.title)}</b>
+          <p>${esc(item.text)}</p>
+          ${startBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
 
   const weekly = $('#weeklyAdvice');
   if(info.day === 'Friday'){
@@ -1152,15 +1247,45 @@ function renderToday(){
     weekly.className = 'infoBox blueNote';
     weekly.textContent = 'Best weekly check-in: Friday morning before food, after washroom. Daily measuring is not needed.';
   }
+
+  $$('#todayTimeline [data-start-workout]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const workout = btn.dataset.startWorkout || 'push';
+      $('#workoutSelect').value = workout;
+      renderWorkout();
+      switchTab('workout');
+    });
+  });
+}
+
+function mealCardHTML(items){
+  return items.map(m => `
+    <div class="timeItem">
+      <div class="dot">F</div>
+      <div class="timeCard">
+        <div class="time">${esc(m.time)}</div>
+        <b>${esc(m.title)}</b>
+        <p>${esc(m.text)}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMealsGuide(){
+  $('#workMealsList').innerHTML = `<div class="timeline">${mealCardHTML(schedules.work.filter(x => x.type === 'food'))}</div>`;
+  const gymMeals = schedules.chest.filter(x => x.type === 'food');
+  $('#gymMealsList').innerHTML = `<div class="timeline">${mealCardHTML(gymMeals)}</div>`;
 }
 
 function renderSimpleList(id, arr, prefix){
   const box = $('#'+id);
   box.innerHTML = '';
+
   arr.forEach((item, i) => {
     const txt = typeof item === 'string' ? item : `${item.name} - ${item.sets}`;
     const key = `${prefix}.${i}`;
     const savedLabel = state['label.'+key] || txt;
+
     const div = document.createElement('div');
     div.className = 'check' + (state[key] ? ' done' : '');
     div.innerHTML = `<input type="checkbox" ${state[key] ? 'checked' : ''} data-listkey="${esc(key)}"><label data-edit data-save="label.${esc(key)}">${esc(savedLabel)}</label>`;
@@ -1173,8 +1298,6 @@ function renderLists(){
   renderSimpleList('pushList', workoutData.push, 'pushRef');
   renderSimpleList('legsList', workoutData.legs, 'legsRef');
   renderSimpleList('pullList', workoutData.pull, 'pullRef');
-  renderSimpleList('prepCookList', prepCook, 'prepCook');
-  renderSimpleList('safetyList', foodSafety, 'foodSafety');
   renderSimpleList('groceryList', groceries, 'grocery');
 }
 
@@ -1204,17 +1327,15 @@ function initEditable(){
   });
 }
 
+function switchTab(tabId){
+  $$('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  $$('.section').forEach(s => s.classList.toggle('active', s.id === tabId));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
 function initTabs(){
   $$('.tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      $$('.tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      $$('.section').forEach(s => s.classList.remove('active'));
-      $('#'+btn.dataset.tab).classList.add('active');
-
-      window.scrollTo({top:0, behavior:'smooth'});
-    });
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 }
 
@@ -1353,6 +1474,34 @@ function initListChecks(){
       state[key] = input.checked;
       input.closest('.check').classList.toggle('done', input.checked);
       save();
+    }
+  });
+}
+
+function initGroceryTools(){
+  $('#selectAllGrocery').addEventListener('click', () => {
+    groceries.forEach((_, i) => state['grocery.'+i] = true);
+    save();
+    renderSimpleList('groceryList', groceries, 'grocery');
+    initEditable();
+    toast('Grocery selected');
+  });
+
+  $('#clearGrocery').addEventListener('click', () => {
+    groceries.forEach((_, i) => state['grocery.'+i] = false);
+    save();
+    renderSimpleList('groceryList', groceries, 'grocery');
+    initEditable();
+    toast('Grocery cleared');
+  });
+
+  $('#copyGrocery').addEventListener('click', async () => {
+    const text = groceries.map(x => '- ' + x).join('\n');
+    try{
+      await navigator.clipboard.writeText(text);
+      toast('Grocery list copied');
+    }catch(err){
+      alert(text);
     }
   });
 }
@@ -1505,6 +1654,7 @@ function initTimer(){
       stopTimer();
       timerDefault = Number(btn.dataset.timer);
       timerSeconds = timerDefault;
+      $('#startTimer').textContent = 'Start';
       renderTimer();
     });
   });
@@ -1660,6 +1810,7 @@ function initReset(){
 
 function boot(){
   renderToday();
+  renderMealsGuide();
   renderLists();
   initEditable();
   initTabs();
@@ -1668,6 +1819,7 @@ function boot(){
   initBoxes();
   initPrepQuick();
   initListChecks();
+  initGroceryTools();
   initWorkout();
   initTimer();
   initNotes();
