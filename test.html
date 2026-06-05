@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <!--
-Ranveer Fitness Dashboard v3
+Ranveer Fitness Dashboard v4
 ASCII-clean version: no emojis/smart characters.
-Main change:
-- No big hero box on every page.
-- First page is dedicated to TODAY'S schedule: food + workout.
-- No food checklist.
-- Grocery checklist stays in Prep.
+
+Main changes from v3:
+- Removed meal box inventory / ate-one tracking.
+- Back pain moved to Gym page after workout.
+- Improved Gym page with exercise logging.
+- Export data for ChatGPT.
+- Import next-week plan JSON from ChatGPT later.
 - localStorage now; Supabase can be added later.
 -->
 <html lang="en">
@@ -273,12 +275,12 @@ Main change:
     .timeCard p{margin:0;color:var(--muted);font-size:13px;line-height:1.42}
     .timeCard .inlineBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 
-    .quickGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .quickGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     .quickBtn{
       border:1px solid var(--line);
       background:#fff;
       border-radius:18px;
-      min-height:88px;
+      min-height:86px;
       padding:12px 10px;
       text-align:left;
       box-shadow:0 8px 18px rgba(16,24,40,.04);
@@ -311,6 +313,18 @@ Main change:
     .painBtn.yellow.active{background:var(--soft2);border-color:#fed7aa;color:#7c2d12}
     .painBtn.red.active{background:var(--softRed);border-color:#fecdd3;color:var(--red)}
 
+    .selectGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .selectBtn{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:12px 10px;
+      text-align:center;
+      font-weight:900;
+      color:var(--ink);
+    }
+    .selectBtn.active{background:var(--softBlue);border-color:#bfdbfe;color:var(--blue)}
+
     .infoBox{
       border-radius:16px;
       padding:12px;
@@ -327,13 +341,6 @@ Main change:
 
     .miniProgress{height:10px;background:#edf0f5;border-radius:999px;overflow:hidden}
     .miniProgress > div{height:100%;background:linear-gradient(90deg,var(--accent),#68b08f);width:0%;transition:.2s}
-
-    .bigNumber{
-      font-size:42px;
-      line-height:1;
-      font-weight:950;
-      letter-spacing:-1.4px;
-    }
 
     details{
       border:1px solid var(--line);
@@ -469,7 +476,7 @@ Main change:
     }
 
     @media(max-width:560px){
-      .quickGrid,.painGrid,.three{grid-template-columns:1fr}
+      .quickGrid,.painGrid,.three,.selectGrid{grid-template-columns:1fr}
       .inputGrid,.two{grid-template-columns:1fr}
       .buttonBar.threeBtns{grid-template-columns:1fr}
     }
@@ -509,23 +516,23 @@ Main change:
 
       <div class="topActions">
         <button class="btn secondary smallbtn" id="editBtn">Edit</button>
-        <div class="pill">Today first</div>
+        <div class="pill">Export ready</div>
       </div>
     </div>
   </header>
 
   <nav class="tabs" aria-label="Plan tabs">
     <button class="tab active" data-tab="today"><b>Today</b><span>Plan</span></button>
-    <button class="tab" data-tab="workout"><b>Gym</b><span>Start</span></button>
+    <button class="tab" data-tab="workout"><b>Gym</b><span>Log</span></button>
     <button class="tab" data-tab="meals"><b>Meals</b><span>Guide</span></button>
     <button class="tab" data-tab="prep"><b>Prep</b><span>Grocery</span></button>
-    <button class="tab" data-tab="track"><b>Track</b><span>Weekly</span></button>
+    <button class="tab" data-tab="track"><b>Track</b><span>Export</span></button>
     <button class="tab" data-tab="safety"><b>Safe</b><span>Back</span></button>
   </nav>
 
   <main class="wrap" id="app">
 
-    <!-- TODAY PAGE: dedicated schedule page -->
+    <!-- TODAY PAGE -->
     <section class="section active" id="today">
       <div class="todayHero">
         <div class="content">
@@ -552,8 +559,8 @@ Main change:
       </div>
 
       <div class="card compact">
-        <h3>3 quick taps</h3>
-        <div class="muted">Only track the big things. Daily use should take under 20 seconds.</div>
+        <h3>2 quick taps</h3>
+        <div class="muted">Only track the big things. Back pain is logged on Gym page after workout.</div>
 
         <div class="quickGrid" style="margin-top:12px">
           <button class="quickBtn" data-quick="meals">
@@ -563,10 +570,6 @@ Main change:
           <button class="quickBtn" data-quick="activity">
             <strong>Workout / steps done</strong>
             <span>Gym day: workout. Work day: steps count.</span>
-          </button>
-          <button class="quickBtn" data-quick="recovery">
-            <strong>Recovery okay</strong>
-            <span>Water, sleep effort, back not angry.</span>
           </button>
         </div>
 
@@ -580,35 +583,9 @@ Main change:
       </div>
 
       <div class="card compact">
-        <h3>Back pain check</h3>
-        <div class="painGrid">
-          <button class="painBtn green" data-pain="green">0-2<small>Normal</small></button>
-          <button class="painBtn yellow" data-pain="yellow">3-4<small>Careful</small></button>
-          <button class="painBtn red" data-pain="red">5+<small>Stop/modify</small></button>
-        </div>
-        <div id="painAdvice" class="infoBox greenNote" style="margin-top:12px">Select your back pain level for today's safe plan.</div>
-      </div>
-
-      <div class="card compact">
-        <div class="row">
-          <div>
-            <h3>Meal boxes left</h3>
-            <div class="muted">For Sun-Wed work meal prep.</div>
-          </div>
-          <div class="bigNumber" id="boxCountHome">0</div>
-        </div>
-
-        <div class="buttonBar threeBtns">
-          <button class="btn secondary" id="ateBoxHome">Ate one</button>
-          <button class="btn secondary" id="addBoxHome">Add box</button>
-          <button class="btn" id="resetBoxesHome">Reset to 8</button>
-        </div>
-      </div>
-
-      <div class="card compact">
         <h3>Quick notes</h3>
         <p class="small editHint">Edit mode is ON. Tap editable text and change it. It saves on this phone.</p>
-        <div class="field"><textarea id="quickNotes" placeholder="Energy, pain, digestion, gym notes..."></textarea></div>
+        <div class="field"><textarea id="quickNotes" placeholder="Energy, digestion, work stress, meal notes..."></textarea></div>
       </div>
     </section>
 
@@ -617,8 +594,8 @@ Main change:
       <div class="card">
         <div class="row wraprow">
           <div>
-            <h3>Workout mode</h3>
-            <div class="muted">Use this at the gym. One exercise at a time.</div>
+            <h3>Gym session</h3>
+            <div class="muted">Log real weights/reps so next week's plan can be improved.</div>
           </div>
           <select id="workoutSelect" style="border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff">
             <option value="today">Today's workout</option>
@@ -626,6 +603,12 @@ Main change:
             <option value="legs">Friday - Legs</option>
             <option value="pull">Saturday - Back</option>
           </select>
+        </div>
+
+        <div class="buttonBar threeBtns">
+          <button class="btn" id="startTodayWorkout">Start today's workout</button>
+          <button class="btn secondary" id="resetWorkoutToday">Reset this workout</button>
+          <button class="btn blue" id="exportChatGPTTop">Export for ChatGPT</button>
         </div>
 
         <div class="workoutPlayer" style="margin-top:12px">
@@ -646,10 +629,34 @@ Main change:
           <div class="exerciseMeta" id="exerciseSets"></div>
           <p class="muted" id="exerciseCue"></p>
 
+          <div class="inputGrid" style="margin-top:12px">
+            <div class="field">
+              <label>Weight used</label>
+              <input id="exWeight" placeholder="e.g. 40 lb / 20 kg">
+            </div>
+            <div class="field">
+              <label>Reps done</label>
+              <input id="exReps" placeholder="e.g. 12, 10, 9">
+            </div>
+            <div class="field">
+              <label>Difficulty 1-10</label>
+              <input id="exRpe" type="number" min="1" max="10" step="1" placeholder="7">
+            </div>
+            <div class="field">
+              <label>Pain during 0-10</label>
+              <input id="exPain" type="number" min="0" max="10" step="1" placeholder="0">
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px">
+            <label>Exercise notes</label>
+            <textarea id="exNotes" placeholder="Easy, hard, back felt tight, increase next week, machine busy..."></textarea>
+          </div>
+
           <div class="buttonBar">
             <button class="btn secondary" id="prevExercise">Previous</button>
             <button class="btn secondary" id="skipExercise">Skip</button>
-            <button class="btn" id="doneExercise">Done exercise</button>
+            <button class="btn" id="doneExercise">Save + done</button>
             <button class="btn blue" id="nextExercise">Next</button>
           </div>
         </div>
@@ -672,6 +679,44 @@ Main change:
       </div>
 
       <div class="card">
+        <h3>After workout check-in</h3>
+        <div class="muted">Do this after the workout. This is the back pain data I need for next week's plan.</div>
+
+        <h4>Back pain after workout</h4>
+        <div class="painGrid">
+          <button class="painBtn green" data-after-pain="green">0-2<small>Normal</small></button>
+          <button class="painBtn yellow" data-after-pain="yellow">3-4<small>Careful</small></button>
+          <button class="painBtn red" data-after-pain="red">5+<small>Bad</small></button>
+        </div>
+        <div id="afterPainAdvice" class="infoBox greenNote" style="margin-top:12px">Select back pain level after workout.</div>
+
+        <h4>Energy after workout</h4>
+        <div class="selectGrid">
+          <button class="selectBtn" data-energy="good">Good</button>
+          <button class="selectBtn" data-energy="okay">Okay</button>
+          <button class="selectBtn" data-energy="low">Low</button>
+        </div>
+
+        <div class="inputGrid" style="margin-top:12px">
+          <div class="field">
+            <label>Overall workout difficulty 1-10</label>
+            <input id="sessionDifficulty" type="number" min="1" max="10" step="1" placeholder="7">
+          </div>
+          <div class="field">
+            <label>Pump / feeling</label>
+            <input id="sessionPump" placeholder="good chest pump, legs tired...">
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:10px">
+          <label>Workout notes for ChatGPT</label>
+          <textarea id="sessionNotes" placeholder="What felt good, what hurt, what machines were busy, what to change next week..."></textarea>
+        </div>
+
+        <button class="btn full" id="saveSessionCheckin" style="margin-top:12px">Save workout check-in</button>
+      </div>
+
+      <div class="card">
         <h3>Full workout reference</h3>
         <details>
           <summary>12-minute warm-up</summary>
@@ -690,14 +735,9 @@ Main change:
           <div class="detailsBody"><div id="pullList"></div></div>
         </details>
       </div>
-
-      <div class="card">
-        <h3>Progression rule</h3>
-        <div class="infoBox greenNote">When you hit the top reps on all sets with clean form, add a little weight next time. Stop most sets with 1-2 reps left. No max lifting while lower back is not 100%.</div>
-      </div>
     </section>
 
-    <!-- MEALS GUIDE PAGE: no checklist -->
+    <!-- MEALS PAGE -->
     <section class="section" id="meals">
       <div class="card">
         <h3>Meal guide</h3>
@@ -754,25 +794,8 @@ Main change:
       </div>
     </section>
 
-    <!-- PREP PAGE: grocery checklist stays -->
+    <!-- PREP PAGE -->
     <section class="section" id="prep">
-      <div class="card">
-        <h3>Meal box inventory</h3>
-        <div class="row">
-          <div>
-            <div class="bigNumber" id="boxCountPrep">0</div>
-            <div class="muted">Cooked meal boxes available</div>
-          </div>
-          <span class="badge" id="boxStatus">Low</span>
-        </div>
-
-        <div class="buttonBar threeBtns">
-          <button class="btn secondary" id="ateBoxPrep">Ate one</button>
-          <button class="btn secondary" id="addBoxPrep">Add box</button>
-          <button class="btn" id="resetBoxesPrep">Reset to 8</button>
-        </div>
-      </div>
-
       <div class="card">
         <h3>Saturday prep - only 4 ticks</h3>
         <div class="check"><input type="checkbox" data-prepquick="cook"><label>Cooked meals ready</label></div>
@@ -816,18 +839,6 @@ Main change:
         </details>
 
         <details>
-          <summary>4-day packing plan</summary>
-          <div class="detailsBody">
-            <ul>
-              <li>Sunday + Monday: fridge boxes.</li>
-              <li>Tuesday + Wednesday: freezer boxes.</li>
-              <li>Move frozen box to fridge the night before.</li>
-              <li>Keep yogurt, curd, fruit, salad fresh.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details>
           <summary>Fresh only / better fresh</summary>
           <div class="detailsBody">
             <ul>
@@ -857,7 +868,7 @@ Main change:
       </div>
     </section>
 
-    <!-- TRACK PAGE -->
+    <!-- TRACK + EXPORT PAGE -->
     <section class="section" id="track">
       <div class="card">
         <div class="row">
@@ -900,9 +911,31 @@ Main change:
 
         <div class="row wraprow" style="margin-top:12px">
           <button class="btn" id="saveMeasure">Save measurement</button>
-          <button class="btn secondary" id="exportData">Export backup</button>
-          <button class="btn secondary" id="importDataBtn">Import backup</button>
-          <input type="file" id="importFile" accept="application/json" class="hidden">
+          <button class="btn secondary" id="exportBackup">Export backup</button>
+          <button class="btn secondary" id="importBackupBtn">Import backup</button>
+          <input type="file" id="importBackupFile" accept="application/json" class="hidden">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Export for ChatGPT</h3>
+        <div class="infoBox blueNote">
+          Use this at the end of the week. Send the exported JSON file to ChatGPT and ask: "Make my next week plan based on this data."
+        </div>
+        <div class="buttonBar">
+          <button class="btn blue" id="exportChatGPT">Export data for ChatGPT</button>
+          <button class="btn secondary" id="copyChatGPTSummary">Copy summary text</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Import next week plan</h3>
+        <div id="planStatus" class="infoBox purpleNote">No imported next-week plan yet.</div>
+        <div class="buttonBar">
+          <button class="btn purple" id="importPlanBtn">Import plan JSON</button>
+          <button class="btn secondary" id="downloadSamplePlan">Sample plan format</button>
+          <button class="btn danger" id="clearImportedPlan">Clear imported plan</button>
+          <input type="file" id="importPlanFile" accept="application/json" class="hidden">
         </div>
       </div>
 
@@ -965,7 +998,7 @@ Main change:
       <div class="card">
         <h3>Supabase later</h3>
         <div class="infoBox blueNote">
-          This version uses localStorage only. Later you can connect Supabase tables for daily_logs, measurements, workout_sessions, and meal_inventory. Grocery checklist can also be stored per user later.
+          This version uses localStorage only. Later you can connect Supabase tables for daily_logs, measurements, workout_sessions, exercise_logs, grocery_items, and imported_plans.
         </div>
       </div>
 
@@ -985,14 +1018,15 @@ Main change:
 <script>
 /*
 Supabase later idea:
-- daily_logs: user_id, log_date, meals_done, activity_done, recovery_done, pain_level, notes
+- daily_logs: user_id, log_date, meals_done, activity_done, notes
 - measurements: user_id, measure_date, weight, waist, chest, hip, thigh, biceps, pain, notes
-- meal_inventory: user_id, box_count, updated_at
-- workout_sessions: user_id, session_date, workout_type, current_index, done_map, skipped_map
+- workout_sessions: user_id, session_date, workout_type, current_index, session_checkin
+- exercise_logs: session_id, exercise_index, exercise_name, weight, reps, rpe, pain, notes, done, skipped
 - grocery_items: user_id, item_name, checked, sort_order
+- imported_plans: user_id, start_date, end_date, plan_json
 */
 
-const STORE = 'ranveerFitnessDashboard.v3';
+const STORE = 'ranveerFitnessDashboard.v4';
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
 
@@ -1035,7 +1069,16 @@ function esc(v){
   }[s]));
 }
 
-const workoutData = {
+function downloadJSON(obj, filename){
+  const blob = new Blob([JSON.stringify(obj,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+const defaultWorkoutData = {
   warmup: [
     {name:'Treadmill walk', sets:'5 min', cue:'Easy pace. Wake up the body.'},
     {name:'Cat-cow', sets:'10 reps', cue:'Move slowly. Do not force range.'},
@@ -1080,7 +1123,7 @@ const workoutData = {
   ]
 };
 
-const schedules = {
+const defaultSchedules = {
   work: [
     {time:'Morning', title:'Fresh smoothie', text:'300 ml 2% milk + banana + 1 scoop whey + 30g oats + 1 tbsp peanut butter + cinnamon. Optional 1-2 dates.', type:'food'},
     {time:'10 AM', title:'Quick snack', text:'Banana/apple + small roasted chana OR Greek yogurt OR 2 boiled eggs.', type:'food'},
@@ -1114,7 +1157,7 @@ const schedules = {
     {time:'10:45 AM-12:15 PM', title:'Gym: Back + biceps', text:'Back, biceps, posture, light glute pump. Start workout mode from here.', type:'gym', workout:'pull'},
     {time:'12:30 PM', title:'Post-workout', text:'1 scoop whey with water + banana/dates if lunch is not soon.', type:'food'},
     {time:'1:15-1:45 PM', title:'Big clean lunch', text:'3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.', type:'food'},
-    {time:'Afternoon', title:'Meal prep reminder', text:'Cook and pack Sun-Wed meals. Reset meal boxes to 8 when done.', type:'prep'},
+    {time:'Afternoon', title:'Meal prep reminder', text:'Cook and pack Sun-Wed meals.', type:'prep'},
     {time:'7:30-8:15 PM', title:'Dinner', text:'2 roti + protein + sabji + small salad.', type:'food'}
   ]
 };
@@ -1140,63 +1183,64 @@ const groceries = [
   'Glass containers + ice pack'
 ];
 
+function activePlan(){
+  return state.nextWeekPlan || null;
+}
+
+function workoutData(type){
+  const plan = activePlan();
+  if(plan && plan.workouts && Array.isArray(plan.workouts[type])){
+    return plan.workouts[type];
+  }
+  return defaultWorkoutData[type] || defaultWorkoutData.push;
+}
+
+function daySchedule(day, key){
+  const plan = activePlan();
+  if(plan && plan.daily_schedule && Array.isArray(plan.daily_schedule[day])){
+    return plan.daily_schedule[day];
+  }
+  return defaultSchedules[key] || defaultSchedules.work;
+}
+
 function dayInfo(){
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const d = new Date();
   const day = days[d.getDay()];
+  const imported = !!activePlan();
 
   if(day === 'Thursday'){
     return {
-      day,
-      badge:'Chest',
-      type:'Gym day',
+      day, badge: imported ? 'Imported' : 'Chest', type:'Gym day',
       title:'Thursday - Chest day',
-      subtitle:'Chest, shoulders, triceps, core + gym day meals.',
-      workout:'push',
-      schedule:'chest',
-      workoutText:'Chest workout',
-      foodText:'Gym meals'
+      subtitle: imported ? 'Imported plan is active.' : 'Chest, shoulders, triceps, core + gym day meals.',
+      workout:'push', schedule:'chest', workoutText:'Chest workout', foodText:'Gym meals'
     };
   }
 
   if(day === 'Friday'){
     return {
-      day,
-      badge:'Leg day',
-      type:'Gym day',
+      day, badge: imported ? 'Imported' : 'Leg day', type:'Gym day',
       title:'Friday - Thighs + glutes',
-      subtitle:'Back-safe leg/glute day. Eat enough carbs, no ego lifting.',
-      workout:'legs',
-      schedule:'legs',
-      workoutText:'Leg/glute workout',
-      foodText:'Gym meals'
+      subtitle: imported ? 'Imported plan is active.' : 'Back-safe leg/glute day. Eat enough carbs, no ego lifting.',
+      workout:'legs', schedule:'legs', workoutText:'Leg/glute workout', foodText:'Gym meals'
     };
   }
 
   if(day === 'Saturday'){
     return {
-      day,
-      badge:'Prep',
-      type:'Gym + prep day',
+      day, badge: imported ? 'Imported' : 'Prep', type:'Gym + prep day',
       title:'Saturday - Back + meal prep',
-      subtitle:'Back, biceps, posture, light glutes + prep food for work days.',
-      workout:'pull',
-      schedule:'back',
-      workoutText:'Back workout',
-      foodText:'Prep day'
+      subtitle: imported ? 'Imported plan is active.' : 'Back, biceps, posture, light glutes + prep food for work days.',
+      workout:'pull', schedule:'back', workoutText:'Back workout', foodText:'Prep day'
     };
   }
 
   return {
-    day,
-    badge:'Work',
-    type:'Work day',
-    title:day + ' - Work day',
-    subtitle:'Work steps are enough cardio. Main goal is packed meals and back safety.',
-    workout:null,
-    schedule:'work',
-    workoutText:'Work steps',
-    foodText:'Work meals'
+    day, badge: imported ? 'Imported' : 'Work', type:'Work day',
+    title: day + ' - Work day',
+    subtitle: imported ? 'Imported plan is active.' : 'Work steps are enough cardio. Main goal is packed meals and back safety.',
+    workout:null, schedule:'work', workoutText:'Work steps', foodText:'Work meals'
   };
 }
 
@@ -1209,21 +1253,22 @@ function iconForType(type){
 
 function renderToday(){
   const info = dayInfo();
+  const plan = activePlan();
 
   $('#topLine').textContent = `${info.day} - ${info.type}`;
   $('#todayTitle').textContent = info.title;
   $('#todaySubtitle').textContent = info.subtitle;
   $('#todayTypePill').textContent = info.type;
   $('#todayWorkoutPill').textContent = info.workoutText;
-  $('#todayFoodPill').textContent = info.foodText;
+  $('#todayFoodPill').textContent = plan ? 'Imported plan' : info.foodText;
   $('#todayBadge').textContent = info.badge;
 
-  const items = schedules[info.schedule] || schedules.work;
+  const items = daySchedule(info.day, info.schedule);
 
   $('#todayTimeline').innerHTML = items.map(item => {
     const icon = iconForType(item.type);
     const startBtn = item.type === 'gym'
-      ? `<div class="inlineBtns"><button class="btn blue smallbtn" data-start-workout="${esc(item.workout)}">Start workout</button></div>`
+      ? `<div class="inlineBtns"><button class="btn blue smallbtn" data-start-workout="${esc(item.workout || info.workout || 'push')}">Start workout</button></div>`
       : '';
 
     return `
@@ -1272,8 +1317,8 @@ function mealCardHTML(items){
 }
 
 function renderMealsGuide(){
-  $('#workMealsList').innerHTML = `<div class="timeline">${mealCardHTML(schedules.work.filter(x => x.type === 'food'))}</div>`;
-  const gymMeals = schedules.chest.filter(x => x.type === 'food');
+  $('#workMealsList').innerHTML = `<div class="timeline">${mealCardHTML(defaultSchedules.work.filter(x => x.type === 'food'))}</div>`;
+  const gymMeals = defaultSchedules.chest.filter(x => x.type === 'food');
   $('#gymMealsList').innerHTML = `<div class="timeline">${mealCardHTML(gymMeals)}</div>`;
 }
 
@@ -1294,10 +1339,10 @@ function renderSimpleList(id, arr, prefix){
 }
 
 function renderLists(){
-  renderSimpleList('warmupList', workoutData.warmup, 'warmup');
-  renderSimpleList('pushList', workoutData.push, 'pushRef');
-  renderSimpleList('legsList', workoutData.legs, 'legsRef');
-  renderSimpleList('pullList', workoutData.pull, 'pullRef');
+  renderSimpleList('warmupList', defaultWorkoutData.warmup, 'warmup');
+  renderSimpleList('pushList', workoutData('push'), 'pushRef');
+  renderSimpleList('legsList', workoutData('legs'), 'legsRef');
+  renderSimpleList('pullList', workoutData('pull'), 'pullRef');
   renderSimpleList('groceryList', groceries, 'grocery');
 }
 
@@ -1341,7 +1386,7 @@ function initTabs(){
 
 function updateQuickButtons(){
   const log = getTodayLog();
-  const keys = ['meals','activity','recovery'];
+  const keys = ['meals','activity'];
   let done = 0;
 
   keys.forEach(k => {
@@ -1370,84 +1415,6 @@ function initQuickButtons(){
   });
 
   updateQuickButtons();
-}
-
-function renderPain(){
-  const log = getTodayLog();
-  const level = log.painLevel || '';
-
-  $$('.painBtn').forEach(btn => btn.classList.toggle('active', btn.dataset.pain === level));
-
-  const box = $('#painAdvice');
-
-  if(level === 'green'){
-    box.className = 'infoBox greenNote';
-    box.textContent = 'Good. Train normally but keep clean form. Stop most sets with 1-2 reps left.';
-  }else if(level === 'yellow'){
-    box.className = 'infoBox yellowNote';
-    box.textContent = 'Careful day. Reduce weight, reduce range, avoid ego lifting, and skip any exercise that increases pain.';
-  }else if(level === 'red'){
-    box.className = 'infoBox redNote';
-    box.textContent = 'Do not do heavy leg press, squat, deadlift, or hard hip thrust today. Use walking, light machines, mobility, or rest.';
-  }else{
-    box.className = 'infoBox greenNote';
-    box.textContent = 'Select your back pain level for today\'s safe plan.';
-  }
-}
-
-function initPain(){
-  $$('.painBtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const log = getTodayLog();
-      log.painLevel = btn.dataset.pain;
-      save();
-      renderPain();
-      toast('Pain status saved');
-    });
-  });
-
-  renderPain();
-}
-
-function updateBoxes(){
-  if(typeof state.boxCount !== 'number') state.boxCount = 0;
-
-  $('#boxCountHome').textContent = state.boxCount;
-  $('#boxCountPrep').textContent = state.boxCount;
-
-  const status = $('#boxStatus');
-  if(state.boxCount >= 6){
-    status.textContent = 'Good';
-    status.className = 'badge';
-  }else if(state.boxCount >= 3){
-    status.textContent = 'Medium';
-    status.className = 'badge warn';
-  }else{
-    status.textContent = 'Low';
-    status.className = 'badge danger';
-  }
-
-  save();
-}
-
-function changeBoxes(amount){
-  if(typeof state.boxCount !== 'number') state.boxCount = 0;
-  state.boxCount = Math.max(0, state.boxCount + amount);
-  updateBoxes();
-  toast('Boxes updated');
-}
-
-function resetBoxes(){
-  state.boxCount = 8;
-  updateBoxes();
-  toast('Boxes reset to 8');
-}
-
-function initBoxes(){
-  ['ateBoxHome','ateBoxPrep'].forEach(id => $('#'+id).addEventListener('click', () => changeBoxes(-1)));
-  ['addBoxHome','addBoxPrep'].forEach(id => $('#'+id).addEventListener('click', () => changeBoxes(1)));
-  ['resetBoxesHome','resetBoxesPrep'].forEach(id => $('#'+id).addEventListener('click', resetBoxes));
-  updateBoxes();
 }
 
 function initPrepQuick(){
@@ -1526,7 +1493,7 @@ function workoutSessionKey(type){
 function getWorkoutSession(type){
   state.workouts = state.workouts || {};
   const key = workoutSessionKey(type);
-  state.workouts[key] = state.workouts[key] || {index:0, done:{}, skipped:{}};
+  state.workouts[key] = state.workouts[key] || {date:todayISO(), workout_type:type, index:0, done:{}, skipped:{}, exercise_logs:{}, checkin:{}};
   return state.workouts[key];
 }
 
@@ -1537,10 +1504,44 @@ function workoutLabel(type){
   return 'Workout';
 }
 
+function saveCurrentExerciseFields(){
+  const type = currentWorkoutType;
+  const session = getWorkoutSession(type);
+  const idx = session.index;
+  const list = workoutData(type);
+  const current = list[idx];
+
+  session.exercise_logs = session.exercise_logs || {};
+  session.exercise_logs[idx] = {
+    exercise_index: idx,
+    exercise_name: current ? current.name : '',
+    planned_sets: current ? current.sets : '',
+    weight: $('#exWeight').value.trim(),
+    reps: $('#exReps').value.trim(),
+    difficulty: $('#exRpe').value.trim(),
+    pain_during: $('#exPain').value.trim(),
+    notes: $('#exNotes').value.trim()
+  };
+  save();
+}
+
+function loadExerciseFields(){
+  const type = currentWorkoutType;
+  const session = getWorkoutSession(type);
+  const idx = session.index;
+  const log = (session.exercise_logs && session.exercise_logs[idx]) || {};
+
+  $('#exWeight').value = log.weight || '';
+  $('#exReps').value = log.reps || '';
+  $('#exRpe').value = log.difficulty || '';
+  $('#exPain').value = log.pain_during || '';
+  $('#exNotes').value = log.notes || '';
+}
+
 function renderWorkout(){
   const type = getWorkoutChoice();
   currentWorkoutType = type;
-  const list = workoutData[type] || workoutData.push;
+  const list = workoutData(type);
   const session = getWorkoutSession(type);
 
   if(session.index < 0) session.index = 0;
@@ -1548,13 +1549,13 @@ function renderWorkout(){
 
   const current = list[session.index];
   const doneCount = Object.values(session.done || {}).filter(Boolean).length;
-  const pct = Math.round((doneCount / list.length) * 100);
+  const pct = list.length ? Math.round((doneCount / list.length) * 100) : 0;
 
   $('#workoutTypeBadge').textContent = workoutLabel(type);
   $('#exerciseCounter').textContent = `Exercise ${session.index + 1} of ${list.length}`;
   $('#exerciseName').textContent = current.name;
   $('#exerciseSets').textContent = current.sets;
-  $('#exerciseCue').textContent = current.cue;
+  $('#exerciseCue').textContent = current.cue || '';
   $('#workoutPercent').textContent = pct + '%';
   $('#workoutBar').style.width = pct + '%';
 
@@ -1564,12 +1565,16 @@ function renderWorkout(){
     $('#exerciseName').textContent = current.name + ' - Skipped';
   }
 
+  loadExerciseFields();
+  loadSessionCheckin();
+  renderAfterPain();
   save();
 }
 
 function moveWorkout(delta){
+  saveCurrentExerciseFields();
   const type = currentWorkoutType;
-  const list = workoutData[type] || workoutData.push;
+  const list = workoutData(type);
   const session = getWorkoutSession(type);
   session.index = Math.min(list.length - 1, Math.max(0, session.index + delta));
   renderWorkout();
@@ -1585,19 +1590,38 @@ function initWorkout(){
 
   $('#workoutSelect').addEventListener('change', renderWorkout);
 
+  $('#startTodayWorkout').addEventListener('click', () => {
+    $('#workoutSelect').value = 'today';
+    renderWorkout();
+    toast('Workout ready');
+  });
+
+  $('#resetWorkoutToday').addEventListener('click', () => {
+    const type = getWorkoutChoice();
+    const key = workoutSessionKey(type);
+    if(confirm('Reset this workout session?')){
+      if(state.workouts) delete state.workouts[key];
+      save();
+      renderWorkout();
+      toast('Workout reset');
+    }
+  });
+
   $('#prevExercise').addEventListener('click', () => moveWorkout(-1));
   $('#nextExercise').addEventListener('click', () => moveWorkout(1));
 
   $('#doneExercise').addEventListener('click', () => {
+    saveCurrentExerciseFields();
+
     const type = currentWorkoutType;
-    const list = workoutData[type] || workoutData.push;
+    const list = workoutData(type);
     const session = getWorkoutSession(type);
     session.done = session.done || {};
     session.done[session.index] = true;
 
     if(session.index < list.length - 1){
       session.index++;
-      toast('Exercise done');
+      toast('Exercise saved');
     }else{
       toast('Workout complete');
       const log = getTodayLog();
@@ -1610,8 +1634,10 @@ function initWorkout(){
   });
 
   $('#skipExercise').addEventListener('click', () => {
+    saveCurrentExerciseFields();
+
     const type = currentWorkoutType;
-    const list = workoutData[type] || workoutData.push;
+    const list = workoutData(type);
     const session = getWorkoutSession(type);
     session.skipped = session.skipped || {};
     session.skipped[session.index] = true;
@@ -1622,6 +1648,12 @@ function initWorkout(){
 
     toast('Skipped');
     renderWorkout();
+  });
+
+  ['exWeight','exReps','exRpe','exPain','exNotes'].forEach(id => {
+    $('#'+id).addEventListener('input', () => {
+      saveCurrentExerciseFields();
+    });
   });
 
   renderWorkout();
@@ -1689,6 +1721,83 @@ function initTimer(){
   renderTimer();
 }
 
+function loadSessionCheckin(){
+  const session = getWorkoutSession(currentWorkoutType);
+  const c = session.checkin || {};
+
+  $('#sessionDifficulty').value = c.overall_difficulty || '';
+  $('#sessionPump').value = c.pump || '';
+  $('#sessionNotes').value = c.notes || '';
+
+  $$('.selectBtn[data-energy]').forEach(btn => btn.classList.toggle('active', btn.dataset.energy === c.energy));
+}
+
+function renderAfterPain(){
+  const session = getWorkoutSession(currentWorkoutType);
+  const level = session.checkin ? session.checkin.back_pain_after : '';
+
+  $$('.painBtn[data-after-pain]').forEach(btn => btn.classList.toggle('active', btn.dataset.afterPain === level));
+
+  const box = $('#afterPainAdvice');
+
+  if(level === 'green'){
+    box.className = 'infoBox greenNote';
+    box.textContent = 'Good. Next week can progress slowly if form was clean.';
+  }else if(level === 'yellow'){
+    box.className = 'infoBox yellowNote';
+    box.textContent = 'Careful. Next week should reduce risky movements or keep weight same.';
+  }else if(level === 'red'){
+    box.className = 'infoBox redNote';
+    box.textContent = 'Important. Next week plan should avoid heavy leg press, squat, deadlift, and hard hip thrust until pain settles.';
+  }else{
+    box.className = 'infoBox greenNote';
+    box.textContent = 'Select back pain level after workout.';
+  }
+}
+
+function saveSessionCheckin(){
+  const session = getWorkoutSession(currentWorkoutType);
+  session.checkin = session.checkin || {};
+  session.checkin.overall_difficulty = $('#sessionDifficulty').value.trim();
+  session.checkin.pump = $('#sessionPump').value.trim();
+  session.checkin.notes = $('#sessionNotes').value.trim();
+  session.checkin.saved_at = new Date().toISOString();
+  save();
+}
+
+function initSessionCheckin(){
+  $$('.painBtn[data-after-pain]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const session = getWorkoutSession(currentWorkoutType);
+      session.checkin = session.checkin || {};
+      session.checkin.back_pain_after = btn.dataset.afterPain;
+      save();
+      renderAfterPain();
+      toast('Back pain saved');
+    });
+  });
+
+  $$('.selectBtn[data-energy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const session = getWorkoutSession(currentWorkoutType);
+      session.checkin = session.checkin || {};
+      session.checkin.energy = btn.dataset.energy;
+      save();
+      loadSessionCheckin();
+      toast('Energy saved');
+    });
+  });
+
+  ['sessionDifficulty','sessionPump','sessionNotes'].forEach(id => {
+    $('#'+id).addEventListener('input', saveSessionCheckin);
+  });
+
+  $('#saveSessionCheckin').addEventListener('click', () => {
+    saveSessionCheckin();
+    toast('Workout check-in saved');
+  });
+}
+
 function initNotes(){
   const notes = $('#quickNotes');
   notes.value = state.quickNotes || '';
@@ -1732,18 +1841,13 @@ function initMeasurements(){
     }
   });
 
-  $('#exportData').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'ranveer-fitness-backup.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
+  $('#exportBackup').addEventListener('click', () => {
+    downloadJSON(state, 'ranveer-fitness-full-backup.json');
   });
 
-  $('#importDataBtn').addEventListener('click', () => $('#importFile').click());
+  $('#importBackupBtn').addEventListener('click', () => $('#importBackupFile').click());
 
-  $('#importFile').addEventListener('change', async e => {
+  $('#importBackupFile').addEventListener('change', async e => {
     const file = e.target.files[0];
     if(!file) return;
 
@@ -1788,6 +1892,201 @@ function renderHistory(){
   `).join('');
 }
 
+function buildChatGPTExport(){
+  saveCurrentExerciseFields();
+  saveSessionCheckin();
+
+  return {
+    app: 'Ranveer Fitness Dashboard',
+    version: 'v4',
+    exported_at: new Date().toISOString(),
+    user_profile: {
+      goal: state.bodyGoal || 'Chest up, belly down, thighs and glutes shaped. Good-looking body, not bulky.',
+      work_days: 'Sunday to Wednesday',
+      gym_days: 'Thursday, Friday, Saturday',
+      work_context: 'Warehouse work with high steps and repeated lifting. Lower-left back can flare after bending or standing after sitting.',
+      current_measurements_known: {
+        weight_kg_range: '68-72',
+        waist_in: '34',
+        chest_in: '36-38',
+        hip_glutes_in: '37.5',
+        thigh_in: '21',
+        biceps_in: '11-13'
+      }
+    },
+    current_plan_summary: {
+      today_info: dayInfo(),
+      default_schedules: defaultSchedules,
+      default_workouts: defaultWorkoutData,
+      imported_plan_active: !!state.nextWeekPlan,
+      imported_plan: state.nextWeekPlan || null
+    },
+    user_data: {
+      daily_logs: state.daily || {},
+      quick_notes: state.quickNotes || '',
+      prep_status: state.prepQuick || {},
+      grocery_checked: groceries.map((item, i) => ({item, checked: !!state['grocery.'+i]})),
+      measurements: state.measurements || [],
+      workout_sessions: state.workouts || {}
+    },
+    request_for_chatgpt: {
+      task: 'Analyze this week and create an importable next-week plan JSON for the app.',
+      priorities: [
+        'Keep daily use simple.',
+        'Improve chest, flat belly look, thighs, and glutes shape.',
+        'Do not make body too bulky.',
+        'Protect lower-left back.',
+        'Adjust exercises based on logged pain, difficulty, weight, reps, skipped exercises, and notes.'
+      ],
+      required_import_format: samplePlanObject()
+    }
+  };
+}
+
+function makeSummaryText(){
+  const exportData = buildChatGPTExport();
+  const sessions = exportData.user_data.workout_sessions;
+  const measurements = exportData.user_data.measurements;
+  const daily = exportData.user_data.daily_logs;
+
+  return [
+    'Ranveer fitness weekly data for next-week plan',
+    '',
+    'Goal: ' + exportData.user_profile.goal,
+    'Work days: Sunday to Wednesday. Gym days: Thursday, Friday, Saturday.',
+    'Back note: lower-left back can flare after bending or standing after sitting.',
+    '',
+    'Measurements saved: ' + measurements.length,
+    'Workout sessions logged: ' + Object.keys(sessions).length,
+    'Daily logs saved: ' + Object.keys(daily).length,
+    '',
+    'Please analyze the attached/exported JSON and make an importable next-week plan JSON for this app.',
+    'Use the required_import_format inside the JSON.'
+  ].join('\n');
+}
+
+function exportForChatGPT(){
+  const data = buildChatGPTExport();
+  downloadJSON(data, 'ranveer-weekly-data-for-chatgpt.json');
+  toast('ChatGPT export ready');
+}
+
+function initExportTools(){
+  $('#exportChatGPT').addEventListener('click', exportForChatGPT);
+  $('#exportChatGPTTop').addEventListener('click', exportForChatGPT);
+
+  $('#copyChatGPTSummary').addEventListener('click', async () => {
+    const text = makeSummaryText();
+    try{
+      await navigator.clipboard.writeText(text);
+      toast('Summary copied');
+    }catch(err){
+      alert(text);
+    }
+  });
+}
+
+function samplePlanObject(){
+  return {
+    next_week_plan: {
+      title: 'Ranveer Next Week Plan',
+      start_date: 'YYYY-MM-DD',
+      end_date: 'YYYY-MM-DD',
+      notes: 'Short explanation of changes for next week.',
+      daily_schedule: {
+        Sunday: [
+          {time:'Morning', title:'Fresh smoothie', text:'Plan text here', type:'food'},
+          {time:'Work shift', title:'Work activity', text:'Plan text here', type:'work'}
+        ],
+        Monday: [],
+        Tuesday: [],
+        Wednesday: [],
+        Thursday: [
+          {time:'10:45 AM-12:15 PM', title:'Gym: Chest day', text:'Start workout mode.', type:'gym', workout:'push'}
+        ],
+        Friday: [
+          {time:'10:45 AM-12:15 PM', title:'Gym: Thighs + glutes', text:'Start workout mode.', type:'gym', workout:'legs'}
+        ],
+        Saturday: [
+          {time:'10:45 AM-12:15 PM', title:'Gym: Back + biceps', text:'Start workout mode.', type:'gym', workout:'pull'}
+        ]
+      },
+      workouts: {
+        push: [
+          {name:'Machine Chest Press', sets:'4 x 8-12', cue:'Cue here'}
+        ],
+        legs: [
+          {name:'Leg Press', sets:'4 x 10-15', cue:'Cue here'}
+        ],
+        pull: [
+          {name:'Lat Pulldown', sets:'4 x 8-12', cue:'Cue here'}
+        ]
+      }
+    }
+  };
+}
+
+function updatePlanStatus(){
+  const box = $('#planStatus');
+  const plan = activePlan();
+
+  if(!plan){
+    box.className = 'infoBox purpleNote';
+    box.textContent = 'No imported next-week plan yet.';
+    return;
+  }
+
+  box.className = 'infoBox greenNote';
+  box.textContent = `${plan.title || 'Imported plan'} is active. ${plan.start_date || ''} ${plan.end_date ? 'to ' + plan.end_date : ''}`;
+}
+
+function initPlanImport(){
+  $('#downloadSamplePlan').addEventListener('click', () => {
+    downloadJSON(samplePlanObject(), 'sample-next-week-plan-format.json');
+  });
+
+  $('#importPlanBtn').addEventListener('click', () => $('#importPlanFile').click());
+
+  $('#importPlanFile').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    try{
+      const data = JSON.parse(await file.text());
+      const plan = data.next_week_plan || data.plan || data;
+
+      if(!plan || typeof plan !== 'object'){
+        alert('Plan file not valid.');
+        return;
+      }
+
+      state.nextWeekPlan = plan;
+      save();
+      updatePlanStatus();
+      renderToday();
+      renderLists();
+      renderWorkout();
+      toast('Next week plan imported');
+    }catch(err){
+      alert('Plan file not valid JSON.');
+    }
+  });
+
+  $('#clearImportedPlan').addEventListener('click', () => {
+    if(confirm('Clear imported next-week plan?')){
+      delete state.nextWeekPlan;
+      save();
+      updatePlanStatus();
+      renderToday();
+      renderLists();
+      renderWorkout();
+      toast('Imported plan cleared');
+    }
+  });
+
+  updatePlanStatus();
+}
+
 function initReset(){
   $('#resetToday').addEventListener('click', () => {
     const d = todayISO();
@@ -1795,13 +2094,12 @@ function initReset(){
       state.daily[d] = {};
       save();
       updateQuickButtons();
-      renderPain();
       toast('Today reset');
     }
   });
 
   $('#resetAll').addEventListener('click', () => {
-    if(confirm('Reset all saved edits, checks, notes, and measurements on this phone?')){
+    if(confirm('Reset all saved edits, checks, notes, workouts, plans, and measurements on this phone?')){
       localStorage.removeItem(STORE);
       location.reload();
     }
@@ -1815,15 +2113,16 @@ function boot(){
   initEditable();
   initTabs();
   initQuickButtons();
-  initPain();
-  initBoxes();
   initPrepQuick();
   initListChecks();
   initGroceryTools();
   initWorkout();
   initTimer();
+  initSessionCheckin();
   initNotes();
   initMeasurements();
+  initExportTools();
+  initPlanImport();
   initReset();
 }
 
