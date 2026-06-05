@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Fitness Dashboard v9
+Fitness Dashboard v10
 Generic user version.
 ASCII-clean version: no emojis/smart characters.
 
@@ -657,17 +657,17 @@ Main features:
     <section class="section" id="meals">
       <div class="card">
         <h3>Meal guide</h3>
-        <div class="muted">This is a default guide. A pasted plan can replace the daily schedule.</div>
+        <div class="muted">No fixed meal plan is included in this public version. Paste a ChatGPT plan to show timed meals here.</div>
       </div>
 
       <div class="card">
         <h3>No time? Eat this</h3>
         <div class="grid">
-          <div class="infoBox blueNote"><b>Option 1:</b> Whey + banana</div>
-          <div class="infoBox blueNote"><b>Option 2:</b> Greek yogurt + fruit</div>
-          <div class="infoBox blueNote"><b>Option 3:</b> 2 boiled eggs + apple</div>
-          <div class="infoBox blueNote"><b>Option 4:</b> Roasted chana + curd</div>
-          <div class="infoBox blueNote"><b>Option 5:</b> 2 roti + paneer/soya/tofu</div>
+          <div class="infoBox blueNote"><b>Option 1:</b> Protein + fruit</div>
+          <div class="infoBox blueNote"><b>Option 2:</b> Yogurt/curd + fruit</div>
+          <div class="infoBox blueNote"><b>Option 3:</b> Eggs/tofu/paneer + carbs</div>
+          <div class="infoBox blueNote"><b>Option 4:</b> Protein shake + banana</div>
+          <div class="infoBox blueNote"><b>Option 5:</b> Meal prep box: carbs + protein + vegetables</div>
         </div>
       </div>
 
@@ -774,8 +774,8 @@ Main features:
         <div class="inputGrid">
           <div class="field"><label>Name</label><input id="profileName" placeholder="Your name"></div>
           <div class="field"><label>Weight unit</label><select id="profileUnit"><option value="lb">lb</option><option value="kg">kg</option></select></div>
-          <div class="field"><label>Work / busy days</label><input id="profileWorkDays" placeholder="Sunday to Wednesday"></div>
-          <div class="field"><label>Gym days</label><input id="profileGymDays" placeholder="Thursday, Friday, Saturday"></div>
+          <div class="field"><label>Work / busy days</label><input id="profileWorkDays" placeholder="Example: Sunday to Wednesday"></div>
+          <div class="field"><label>Gym days</label><input id="profileGymDays" placeholder="Example: Thursday, Friday, Saturday"></div>
         </div>
         <div class="field" style="margin-top:9px">
           <label>Main body/fitness goal</label>
@@ -810,7 +810,7 @@ Main features:
         <h3>Reset</h3>
         <div class="row wraprow">
           <button class="btn secondary" id="resetToday">Reset today's quick taps</button>
-          <button class="btn secondary" id="loadBaseline">Load baseline plan</button>
+          <button class="btn secondary" id="loadBaseline">Blank setup</button>
           <button class="btn danger" id="resetAll">Reset all local data</button>
           <button class="btn secondary" onclick="window.print()">Print / Save as PDF</button>
         </div>
@@ -821,7 +821,7 @@ Main features:
   <div class="toast" id="toast">Saved</div>
 
 <script>
-const STORE = 'fitnessDashboard.v9.generic';
+const STORE = 'fitnessDashboard.v10.blank';
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
 
@@ -829,14 +829,14 @@ let state = {};
 try{ state = JSON.parse(localStorage.getItem(STORE) || '{}'); }catch(err){ state = {}; }
 
 const defaultProfile = {
-  name: 'Ranveer',
+  name: '',
   unit: 'lb',
-  workDays: 'Sunday to Wednesday',
-  gymDays: 'Thursday, Friday, Saturday',
-  goal: 'Chest up, belly down, better thighs and glutes shape, lean muscle, and stronger body without getting too bulky.',
-  workContext: 'Warehouse work with high walking/steps and repeated lifting. Work days are Sunday to Wednesday. Gym days are Thursday, Friday, Saturday.',
-  diet: 'Mostly vegetarian. Eggs and chicken optional sometimes. Needs practical meals for 10 AM, 11 AM, and 2:30 PM work breaks.',
-  safety: 'Protect lower-left back. If pain is high, reduce risky movements. Avoid ego lifting.'
+  workDays: '',
+  gymDays: '',
+  goal: '',
+  workContext: '',
+  diet: '',
+  safety: ''
 };
 
 function profile(){
@@ -921,207 +921,13 @@ const defaultWorkoutData = {
 };
 
 const defaultSchedules = {
-  work: [
-    {
-      time:'Morning',
-      title:'Fresh smoothie',
-      text:'300 ml 2% milk + banana + 1 scoop whey + 30g oats + 1 tbsp peanut butter + cinnamon. Optional 1-2 dates.',
-      type:'food'
-    },
-    {
-      time:'10 AM',
-      title:'Quick snack',
-      text:'Banana/apple + small roasted chana OR Greek yogurt OR 2 boiled eggs.',
-      type:'food'
-    },
-    {
-      time:'11 AM break',
-      title:'Main packed meal',
-      text:'3 roti or rice + protein curry + sabji + fresh salad + curd/Greek yogurt separately.',
-      type:'food'
-    },
-    {
-      time:'2:30 PM break',
-      title:'Second meal',
-      text:'Greek yogurt + fruit OR 2 boiled eggs + fruit OR oats + milk + whey OR whey + banana.',
-      type:'food'
-    },
-    {
-      time:'Work shift',
-      title:'Activity',
-      text:'20-30k steps/activity count. No extra cardio needed. Protect lower back while bending and lifting.',
-      type:'work'
-    },
-    {
-      time:'After work',
-      title:'Small only',
-      text:'Tea/coffee + fruit OR whey OR 1 peanut butter toast. Do not make this a heavy meal.',
-      type:'food'
-    },
-    {
-      time:'8:30 PM dinner',
-      title:'Lighter dinner',
-      text:'2-3 roti + sabji + protein: dal, paneer, tofu, soya, eggs, or chicken option. Avoid 4 roti daily.',
-      type:'food'
-    }
-  ],
-  push: [
-    {
-      time:'7:45-8:00 AM',
-      title:'Breakfast',
-      text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.',
-      type:'food'
-    },
-    {
-      time:'10:00 AM',
-      title:'Pre-workout',
-      text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.',
-      type:'food'
-    },
-    {
-      time:'10:45 AM-12:15 PM',
-      title:'Gym: Push day',
-      text:'Chest + shoulders + triceps + core. Start workout mode.',
-      type:'gym',
-      workout:'push'
-    },
-    {
-      time:'12:30 PM',
-      title:'Post-workout',
-      text:'1 scoop whey with water + banana/dates if lunch is not soon.',
-      type:'food'
-    },
-    {
-      time:'1:15-1:45 PM',
-      title:'Big clean lunch',
-      text:'3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.',
-      type:'food'
-    },
-    {
-      time:'4:30 PM',
-      title:'Snack',
-      text:'Greek yogurt + fruit OR 2 boiled eggs + apple OR roasted chana + fruit.',
-      type:'food'
-    },
-    {
-      time:'7:30-8:15 PM',
-      title:'Dinner',
-      text:'2 roti + protein + sabji + small salad. Keep it clean for flat belly.',
-      type:'food'
-    }
-  ],
-  legs: [
-    {
-      time:'7:45-8:00 AM',
-      title:'Breakfast',
-      text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.',
-      type:'food'
-    },
-    {
-      time:'10:00 AM',
-      title:'Pre-workout',
-      text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast. Leg day needs enough fuel.',
-      type:'food'
-    },
-    {
-      time:'10:45 AM-12:15 PM',
-      title:'Gym: Legs/glutes',
-      text:'Thighs + glutes. Back-safe form. Shape over heavy weight. Start workout mode.',
-      type:'gym',
-      workout:'legs'
-    },
-    {
-      time:'12:30 PM',
-      title:'Post-workout',
-      text:'1 scoop whey with water + banana/dates if lunch is not soon.',
-      type:'food'
-    },
-    {
-      time:'1:15-1:45 PM',
-      title:'Big clean lunch',
-      text:'Leg day needs carbs: 3 roti/rice + protein + sabji + salad.',
-      type:'food'
-    },
-    {
-      time:'4:30 PM',
-      title:'Snack',
-      text:'Greek yogurt + fruit OR 2 boiled eggs + apple OR roasted chana + fruit.',
-      type:'food'
-    },
-    {
-      time:'7:30-8:15 PM',
-      title:'Dinner',
-      text:'2 roti + protein + sabji + small salad. Do not skip dinner after leg day.',
-      type:'food'
-    }
-  ],
-  pull: [
-    {
-      time:'7:45-8:00 AM',
-      title:'Breakfast',
-      text:'Smoothie OR 3 eggs + toast/roti + fruit OR oats bowl with whey.',
-      type:'food'
-    },
-    {
-      time:'10:00 AM',
-      title:'Pre-workout',
-      text:'Coffee + banana OR Greek yogurt + banana OR 1 peanut butter toast.',
-      type:'food'
-    },
-    {
-      time:'10:45 AM-12:15 PM',
-      title:'Gym: Pull day',
-      text:'Back + biceps + posture + light glutes. Start workout mode.',
-      type:'gym',
-      workout:'pull'
-    },
-    {
-      time:'12:30 PM',
-      title:'Post-workout',
-      text:'1 scoop whey with water + banana/dates if lunch is not soon.',
-      type:'food'
-    },
-    {
-      time:'1:15-1:45 PM',
-      title:'Big clean lunch',
-      text:'3 roti + paneer/tofu/soya + sabji + salad OR rice + dal/rajma/chana + salad.',
-      type:'food'
-    },
-    {
-      time:'Afternoon',
-      title:'Meal prep reminder',
-      text:'Prep Sunday/Monday meals for fridge and Tuesday/Wednesday meals for freezer.',
-      type:'prep'
-    },
-    {
-      time:'7:30-8:15 PM',
-      title:'Dinner',
-      text:'2 roti + protein + sabji + small salad.',
-      type:'food'
-    }
-  ]
+  work: [],
+  push: [],
+  legs: [],
+  pull: []
 };
 
-const groceries = [
-  'Whey protein',
-  'Eggs',
-  'Greek yogurt / homemade curd',
-  'Paneer / tofu',
-  'Soya chunks',
-  'Dal / chana / rajma',
-  'Chicken optional 1-2 days',
-  'Oats',
-  '2% milk',
-  'Bananas / apples / berries',
-  'Roti atta / rice',
-  'Salad: cucumber, tomato, onion, lettuce',
-  'Sabji vegetables',
-  'Roasted chana',
-  'Peanut butter',
-  'Nuts: almonds/walnuts',
-  'Jeera, ajwain, ginger, cinnamon',
-  'Glass containers + ice pack'
-];
+const groceries = [];
 
 function activePlan(){ return state.nextWeekPlan || null; }
 
@@ -1134,19 +940,44 @@ function workoutData(type){
 function daySchedule(day, key){
   const plan = activePlan();
   if(plan && plan.daily_schedule && Array.isArray(plan.daily_schedule[day])) return plan.daily_schedule[day];
-  return defaultSchedules[key] || defaultSchedules.work;
+  return defaultSchedules[key] || [];
 }
 
 function dayInfo(){
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const day = days[new Date().getDay()];
   const plan = activePlan();
-  if(plan && plan.day_map && plan.day_map[day]) return Object.assign({day, badge:'Plan'}, plan.day_map[day]);
 
-  if(day === 'Thursday') return {day,badge:plan?'Plan':'Push',type:'Gym day',title:day+' - Push day',subtitle:'Chest, shoulders, triceps, core + timed gym meals.',workout:'push',schedule:'push',workoutText:'Push',foodText:'Gym meals'};
-  if(day === 'Friday') return {day,badge:plan?'Plan':'Legs',type:'Gym day',title:day+' - Legs/glutes',subtitle:'Back-safe thighs and glutes + timed gym meals.',workout:'legs',schedule:'legs',workoutText:'Legs',foodText:'Gym meals'};
-  if(day === 'Saturday') return {day,badge:plan?'Plan':'Pull',type:'Gym + prep day',title:day+' - Pull + prep',subtitle:'Back, biceps, posture + meal prep reminder.',workout:'pull',schedule:'pull',workoutText:'Pull',foodText:'Prep'};
-  return {day,badge:plan?'Plan':'Work',type:'Work day',title:day+' - Work day',subtitle:'Timed food plan for work day + high-step activity.',workout:null,schedule:'work',workoutText:'Work steps',foodText:'Work meals'};
+  if(plan && plan.day_map && plan.day_map[day]){
+    return Object.assign({day, badge:'Plan'}, plan.day_map[day]);
+  }
+
+  const planHasDay = plan && plan.daily_schedule && Array.isArray(plan.daily_schedule[day]);
+  if(planHasDay){
+    return {
+      day,
+      badge:'Plan',
+      type:'Planned day',
+      title:day + ' - Plan',
+      subtitle:'Your pasted plan is active.',
+      workout:null,
+      schedule:'custom',
+      workoutText:'Plan',
+      foodText:'Schedule'
+    };
+  }
+
+  return {
+    day,
+    badge:'Setup',
+    type:'No plan yet',
+    title:'Set up your plan',
+    subtitle:'Go to Profile to add your details, then use Export to copy a ChatGPT prompt or paste a plan.',
+    workout:null,
+    schedule:'empty',
+    workoutText:'Setup',
+    foodText:'No plan'
+  };
 }
 
 function iconForType(type){
@@ -1172,6 +1003,27 @@ function renderToday(){
   $('#todayBadge').textContent = info.badge || 'Today';
 
   const items = daySchedule(info.day, info.schedule);
+
+  if(!items.length){
+    $('#todayTimeline').innerHTML = `
+      <div class="timeItem">
+        <div class="dot purple">S</div>
+        <div class="timeCard">
+          <div class="time blueText">Setup</div>
+          <b>No plan loaded yet</b>
+          <p>Add your profile first. Then copy the ChatGPT prompt from Export page or paste a plan JSON from ChatGPT.</p>
+          <div class="inlineBtns">
+            <button class="btn purple smallbtn" data-open-profile="1">Open profile</button>
+            <button class="btn blue smallbtn" data-open-export="1">Open export</button>
+          </div>
+        </div>
+      </div>
+    `;
+    $('[data-open-profile]').addEventListener('click', () => switchTab('profile'));
+    $('[data-open-export]').addEventListener('click', () => switchTab('export'));
+    return;
+  }
+
   $('#todayTimeline').innerHTML = items.map(item => {
     const icon = iconForType(item.type);
     const startBtn = item.type === 'gym'
@@ -1214,8 +1066,16 @@ function mealCardHTML(items){
 }
 
 function renderMealsGuide(){
-  $('#workMealsList').innerHTML = `<div class="timeline">${mealCardHTML(defaultSchedules.work)}</div>`;
-  $('#gymMealsList').innerHTML = `<div class="timeline">${mealCardHTML(defaultSchedules.push)}</div>`;
+  const plan = activePlan();
+  if(plan && plan.daily_schedule){
+    const all = Object.values(plan.daily_schedule).flat();
+    const foods = all.filter(x => x && x.type === 'food');
+    $('#workMealsList').innerHTML = foods.length ? `<div class="timeline">${mealCardHTML(foods.slice(0, 8))}</div>` : '<div class="muted">No food schedule found in pasted plan.</div>';
+    $('#gymMealsList').innerHTML = '<div class="muted">Gym meals will appear in Today based on the pasted plan.</div>';
+  }else{
+    $('#workMealsList').innerHTML = '<div class="muted">Paste a plan to show timed work/busy day meals.</div>';
+    $('#gymMealsList').innerHTML = '<div class="muted">Paste a plan to show timed gym day meals.</div>';
+  }
 }
 
 function renderSimpleList(id, arr, prefix){
@@ -1236,7 +1096,14 @@ function renderLists(){
   renderSimpleList('pushList', workoutData('push'), 'pushRef');
   renderSimpleList('legsList', workoutData('legs'), 'legsRef');
   renderSimpleList('pullList', workoutData('pull'), 'pullRef');
-  renderSimpleList('groceryList', groceries, 'grocery');
+
+  const plan = activePlan();
+  const planGroceries = plan && Array.isArray(plan.grocery_list) ? plan.grocery_list : groceries;
+  if(planGroceries.length){
+    renderSimpleList('groceryList', planGroceries, 'grocery');
+  }else{
+    $('#groceryList').innerHTML = '<div class="muted">No grocery list yet. Paste a ChatGPT plan or add one later.</div>';
+  }
 }
 
 function switchTab(tabId){
@@ -1308,18 +1175,18 @@ function initListChecks(){
 
 function initGroceryTools(){
   $('#selectAllGrocery').addEventListener('click', () => {
-    groceries.forEach((_, i) => state['grocery.'+i] = true);
+    const list = activePlan() && Array.isArray(activePlan().grocery_list) ? activePlan().grocery_list : groceries; list.forEach((_, i) => state['grocery.'+i] = true);
     save();
-    renderSimpleList('groceryList', groceries, 'grocery');
+    renderLists();
     toast('Grocery selected');
   });
   $('#clearGrocery').addEventListener('click', () => {
-    groceries.forEach((_, i) => state['grocery.'+i] = false);
+    const list = activePlan() && Array.isArray(activePlan().grocery_list) ? activePlan().grocery_list : groceries; list.forEach((_, i) => state['grocery.'+i] = false);
     save();
-    renderSimpleList('groceryList', groceries, 'grocery');
+    renderLists();
     toast('Grocery cleared');
   });
-  $('#copyGrocery').addEventListener('click', () => copyText(groceries.map(x => '- ' + x).join('\n')));
+  $('#copyGrocery').addEventListener('click', () => { const list = activePlan() && Array.isArray(activePlan().grocery_list) ? activePlan().grocery_list : groceries; copyText(list.length ? list.map(x => '- ' + x).join('\n') : 'No grocery list yet.'); });
 }
 
 let currentWorkoutType = 'push';
@@ -1819,7 +1686,7 @@ function buildWeeklyData(){
   saveSessionCheckin();
   return {
     app:'Fitness Dashboard',
-    version:'v9-generic',
+    version:'v10-blank',
     exported_at:new Date().toISOString(),
     profile:profile(),
     current_plan:{
@@ -1853,7 +1720,7 @@ IMPORTANT:
 - Use the user's logged weight, reps, effort, pain, skipped exercises, notes, and measurements.
 - If effort was easy and pain low, increase target_weight or target_reps slightly.
 - If effort was hard or pain high, keep same, reduce, or replace exercise.
-- Keep daily schedule compact, but include useful times for meals/work/gym like the current baseline.
+- Keep daily schedule compact, but include useful meal/work/gym times based on the user's profile.
 - Return a short summary, then write "PASTE THIS INTO YOUR APP:".
 - Put the JSON inside one copyable JSON code block.
 - Use valid JSON only: straight double quotes, no curly/smart quotes, no comments, no trailing commas.
@@ -2016,12 +1883,12 @@ function loadBaselinePlan(){
   renderLists();
   renderWorkout();
   updatePlanStatus();
-  toast('Baseline plan loaded');
+  toast('Blank setup loaded');
 }
 
 function initReset(){
   $('#loadBaseline').addEventListener('click', () => {
-    if(confirm('Load the default timed baseline plan and clear pasted plan?')){
+    if(confirm('Clear pasted plan and return to blank public setup?')){
       loadBaselinePlan();
     }
   });
