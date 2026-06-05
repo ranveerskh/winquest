@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Fitness Dashboard v10
+Fitness Dashboard v11
 Generic user version.
 ASCII-clean version: no emojis/smart characters.
 
@@ -370,6 +370,125 @@ Main features:
 
     .promptBox{width:100%;min-height:230px;border:1px solid var(--line);border-radius:15px;padding:10px;background:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;line-height:1.42;white-space:pre-wrap}
 
+    /* v11 compact workout mode */
+    .compactSelect{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:8px;
+      background:#fff;
+      max-width:100%;
+      font-weight:800;
+      font-size:12px;
+    }
+    .workoutCard{padding:10px}
+    .gymTop{
+      align-items:flex-start;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .gymTop h3{margin-bottom:3px}
+    .gymLegend{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.25;
+    }
+    .workoutPlayer.compact{
+      padding:10px;
+      border-radius:16px;
+    }
+    .workoutPlayer.compact .exerciseTitle{
+      font-size:18px;
+      margin:5px 0 2px;
+      line-height:1.08;
+    }
+    .workoutPlayer.compact .exerciseMeta{
+      font-size:12px;
+      line-height:1.2;
+    }
+    .workoutPlayer.compact #exerciseCue{
+      display:none;
+    }
+    .workoutPlayer.compact .targetBox{
+      margin-top:6px;
+      padding:8px;
+      font-size:12px;
+      line-height:1.25;
+    }
+    .workoutPlayer.compact .stepGrid{
+      grid-template-columns:1fr 1fr;
+      gap:7px;
+      margin-top:7px;
+    }
+    .workoutPlayer.compact .stepBox{
+      padding:7px;
+      border-radius:14px;
+    }
+    .workoutPlayer.compact .stepBox label{
+      margin-bottom:4px;
+      font-size:11px;
+    }
+    .workoutPlayer.compact .stepControl{
+      grid-template-columns:34px 1fr 34px;
+      gap:5px;
+    }
+    .workoutPlayer.compact .stepControl button{
+      height:34px;
+      border-radius:11px;
+      font-size:19px;
+    }
+    .workoutPlayer.compact .stepValue{
+      min-height:34px;
+      padding:5px 3px;
+      border-radius:11px;
+    }
+    .workoutPlayer.compact .stepValue input{
+      font-size:16px;
+    }
+    .workoutPlayer.compact .stepMini{
+      margin-top:5px;
+      gap:4px;
+    }
+    .workoutPlayer.compact .chip{
+      padding:4px 6px;
+      font-size:10px;
+    }
+    .workoutPlayer.compact h4{
+      margin:7px 0 5px;
+      font-size:12px;
+    }
+    .workoutPlayer.compact .selectGrid{
+      gap:5px;
+    }
+    .workoutPlayer.compact .selectBtn{
+      min-height:38px;
+      padding:7px 4px;
+      border-radius:12px;
+      font-size:12px;
+      line-height:1.05;
+    }
+    .workoutPlayer.compact .selectBtn small{
+      display:none;
+    }
+    .workoutPlayer.compact details{
+      margin:6px 0;
+      border-radius:12px;
+    }
+    .workoutPlayer.compact summary{
+      padding:8px 10px;
+      font-size:12px;
+    }
+    .workoutNav{
+      grid-template-columns:repeat(4,1fr);
+      gap:6px;
+      margin-top:7px;
+    }
+    .workoutNav .btn{
+      padding:9px 5px;
+      font-size:12px;
+      border-radius:11px;
+    }
+
+
     @media(min-width:760px){
       body{padding-bottom:20px}
       .wrap{padding-top:8px}
@@ -380,8 +499,11 @@ Main features:
     }
 
     @media(max-width:560px){
-      .quickGrid,.three,.selectGrid,.selectGrid.four,.stepGrid{grid-template-columns:1fr}
+      .quickGrid,.three{grid-template-columns:1fr}
       .inputGrid,.two{grid-template-columns:1fr}
+      .selectGrid{grid-template-columns:repeat(3,1fr)}
+      .selectGrid.four{grid-template-columns:repeat(4,1fr)}
+      .stepGrid{grid-template-columns:1fr 1fr}
     }
 
     @media(max-width:420px){
@@ -474,37 +596,35 @@ Main features:
     </section>
 
     <section class="section" id="workout">
-      <div class="card">
-        <div class="row wraprow">
+      <div class="card workoutCard">
+        <div class="row gymTop">
           <div>
             <h3>Gym compact log</h3>
-            <div class="muted">Use plus/minus. Weight and reps stay saved until changed.</div>
+            <div class="gymLegend"><b>Push</b> = chest/shoulders/triceps. <b>Legs</b> = thighs/glutes. <b>Pull</b> = back/biceps/posture.</div>
           </div>
-          <select id="workoutSelect" style="border:1px solid var(--line);border-radius:13px;padding:9px;background:#fff">
-            <option value="today">Today's workout</option>
-            <option value="push">Push</option>
-            <option value="legs">Legs</option>
-            <option value="pull">Pull</option>
+          <select id="workoutSelect" class="compactSelect">
+            <option value="today">Today</option>
+            <option value="push">Push - Chest/Shoulders/Triceps</option>
+            <option value="legs">Legs - Thighs/Glutes</option>
+            <option value="pull">Pull - Back/Biceps/Posture</option>
           </select>
         </div>
 
-        <div class="buttonBar">
-          <button class="btn" id="startTodayWorkout">Start today's workout</button>
-          <button class="btn secondary" id="resetWorkoutToday">Reset workout</button>
-        </div>
+        <button class="hidden" id="startTodayWorkout">Start today's workout</button>
+        <button class="btn secondary smallbtn" id="resetWorkoutToday" style="margin-bottom:8px">Reset workout</button>
 
-        <div class="workoutPlayer" style="margin-top:10px">
+        <div class="workoutPlayer compact">
           <div class="row">
             <span class="badge blue" id="workoutTypeBadge">Workout</span>
             <span class="small" id="exerciseCounter">Exercise 1 of 1</span>
           </div>
 
-          <div style="margin:10px 0">
-            <div class="row">
-              <span class="small">Progress</span>
-              <span class="small" id="workoutPercent">0%</span>
+          <div style="margin:7px 0">
+            <div class="miniProgress"><div id="workoutBar"></div></div>
+            <div class="row" style="margin-top:3px">
+              <span class="tiny">Progress</span>
+              <span class="tiny" id="workoutPercent">0%</span>
             </div>
-            <div class="miniProgress" style="margin-top:6px"><div id="workoutBar"></div></div>
           </div>
 
           <div class="exerciseTitle" id="exerciseName">Loading...</div>
@@ -535,7 +655,7 @@ Main features:
                 <button data-step-reps="1">+</button>
               </div>
               <div class="stepMini">
-                <span class="chip">total/best set</span>
+                <span class="chip">best set</span>
                 <span class="chip">step 1</span>
               </div>
             </div>
@@ -544,11 +664,11 @@ Main features:
           <h4>Effort</h4>
           <div class="selectGrid">
             <button class="selectBtn green" data-effort="easy">Easy<small>increase</small></button>
-            <button class="selectBtn" data-effort="good">Good<small>keep/progress</small></button>
-            <button class="selectBtn yellow" data-effort="hard">Hard<small>same/reduce</small></button>
+            <button class="selectBtn" data-effort="good">Good<small>keep</small></button>
+            <button class="selectBtn yellow" data-effort="hard">Hard<small>reduce</small></button>
           </div>
 
-          <h4>Pain during</h4>
+          <h4>Pain</h4>
           <div class="selectGrid four">
             <button class="selectBtn green" data-pain-during="0">0<small>none</small></button>
             <button class="selectBtn green" data-pain-during="1-2">1-2<small>ok</small></button>
@@ -559,17 +679,17 @@ Main features:
           <details>
             <summary>Notes optional</summary>
             <div class="detailsBody">
-              <div class="field" style="margin-top:9px">
+              <div class="field" style="margin-top:7px">
                 <label>Exercise notes</label>
                 <textarea id="exNotes" placeholder="Machine busy, form issue, pain detail, change next week..."></textarea>
               </div>
             </div>
           </details>
 
-          <div class="buttonBar">
-            <button class="btn secondary" id="prevExercise">Previous</button>
+          <div class="buttonBar workoutNav">
+            <button class="btn secondary" id="prevExercise">Prev</button>
             <button class="btn secondary" id="skipExercise">Skip</button>
-            <button class="btn" id="doneExercise">Save + next</button>
+            <button class="btn" id="doneExercise">Done</button>
             <button class="btn blue" id="nextExercise">Next</button>
           </div>
         </div>
@@ -821,7 +941,7 @@ Main features:
   <div class="toast" id="toast">Saved</div>
 
 <script>
-const STORE = 'fitnessDashboard.v10.blank';
+const STORE = 'fitnessDashboard.v11.compact';
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
 
@@ -1067,15 +1187,60 @@ function mealCardHTML(items){
 
 function renderMealsGuide(){
   const plan = activePlan();
+
   if(plan && plan.daily_schedule){
-    const all = Object.values(plan.daily_schedule).flat();
-    const foods = all.filter(x => x && x.type === 'food');
-    $('#workMealsList').innerHTML = foods.length ? `<div class="timeline">${mealCardHTML(foods.slice(0, 8))}</div>` : '<div class="muted">No food schedule found in pasted plan.</div>';
-    $('#gymMealsList').innerHTML = '<div class="muted">Gym meals will appear in Today based on the pasted plan.</div>';
-  }else{
-    $('#workMealsList').innerHTML = '<div class="muted">Paste a plan to show timed work/busy day meals.</div>';
-    $('#gymMealsList').innerHTML = '<div class="muted">Paste a plan to show timed gym day meals.</div>';
+    const entries = Object.entries(plan.daily_schedule);
+
+    const workFoods = [];
+    const gymFoods = [];
+
+    entries.forEach(([day, items]) => {
+      if(!Array.isArray(items)) return;
+      const hasGym = items.some(x => x && x.type === 'gym');
+      const foods = items
+        .filter(x => x && x.type === 'food')
+        .map(x => Object.assign({}, x, {title: day + ' - ' + x.title}));
+
+      if(hasGym) gymFoods.push(...foods);
+      else workFoods.push(...foods);
+    });
+
+    $('#workMealsList').innerHTML = workFoods.length
+      ? `<div class="timeline">${mealCardHTML(workFoods.slice(0, 12))}</div>`
+      : '<div class="muted">No work/busy day meals found in pasted plan.</div>';
+
+    $('#gymMealsList').innerHTML = gymFoods.length
+      ? `<div class="timeline">${mealCardHTML(gymFoods.slice(0, 14))}</div>`
+      : '<div class="muted">No gym/off-day meals found in pasted plan.</div>';
+
+    return;
   }
+
+  $('#workMealsList').innerHTML = `
+    <div class="timeline">
+      ${mealCardHTML([
+        {time:'Morning', title:'Work/busy day - Breakfast', text:'Protein breakfast or smoothie.', type:'food'},
+        {time:'Mid-morning', title:'Work/busy day - Snack', text:'Fruit plus protein snack.', type:'food'},
+        {time:'Main break', title:'Work/busy day - Packed meal', text:'Carbs + protein + vegetables.', type:'food'},
+        {time:'Second break', title:'Work/busy day - Second meal', text:'Yogurt/curd, eggs/tofu/paneer, oats, or protein shake.', type:'food'},
+        {time:'Dinner', title:'Work/busy day - Light dinner', text:'Protein + vegetables + moderate carbs.', type:'food'}
+      ])}
+    </div>
+  `;
+
+  $('#gymMealsList').innerHTML = `
+    <div class="timeline">
+      ${mealCardHTML([
+        {time:'7:15 AM', title:'Gym/off day - Water', text:'Water. Optional lemon/warm water.', type:'food'},
+        {time:'7:45-8:00 AM', title:'Gym/off day - Breakfast', text:'Smoothie, eggs + toast/roti, or oats bowl.', type:'food'},
+        {time:'10:00 AM', title:'Gym/off day - Pre-workout', text:'Banana + coffee, yogurt + banana, or peanut butter toast.', type:'food'},
+        {time:'12:30 PM', title:'Gym/off day - Post-workout', text:'Protein shake or high-protein meal after workout.', type:'food'},
+        {time:'1:15-1:45 PM', title:'Gym/off day - Lunch', text:'Carbs + protein + salad/vegetables.', type:'food'},
+        {time:'4:30 PM', title:'Gym/off day - Snack', text:'Yogurt + fruit, eggs, roasted chana, paneer/tofu, or whey.', type:'food'},
+        {time:'7:30-8:15 PM', title:'Gym/off day - Dinner', text:'Protein + vegetables + moderate carbs.', type:'food'}
+      ])}
+    </div>
+  `;
 }
 
 function renderSimpleList(id, arr, prefix){
@@ -1283,7 +1448,7 @@ function loadExerciseFields(){
 
   const targetW = getTargetWeight(ex);
   const targetR = getTargetReps(ex);
-  $('#targetBox').textContent = `Target: ${targetW || '-'} ${profile().unit}, reps ${targetR || '-'} | Last saved: ${lastLog ? ((lastLog.weight || '-') + ' ' + profile().unit + ', reps ' + (lastLog.reps || '-')) : 'none yet'}.`;
+  $('#targetBox').innerHTML = `<b>Target:</b> ${esc(targetW || '-')} ${esc(profile().unit)}, reps ${esc(targetR || '-')} | <b>Last:</b> ${lastLog ? esc((lastLog.weight || '-') + ' ' + profile().unit + ', reps ' + (lastLog.reps || '-')) : 'none yet'}${ex && ex.cue ? '<br><span>' + esc(ex.cue) + '</span>' : ''}`;
 }
 
 function saveCurrentExerciseFields(){
@@ -1686,7 +1851,7 @@ function buildWeeklyData(){
   saveSessionCheckin();
   return {
     app:'Fitness Dashboard',
-    version:'v10-blank',
+    version:'v11-compact',
     exported_at:new Date().toISOString(),
     profile:profile(),
     current_plan:{
@@ -1835,6 +2000,7 @@ function initPlanPaste(){
       save();
       updatePlanStatus();
       renderToday();
+      renderMealsGuide();
       renderLists();
       renderWorkout();
       toast('Plan cleared');
