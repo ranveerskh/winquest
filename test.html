@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <!--
-Ranveer Fitness Dashboard v4
+Ranveer Fitness Dashboard v5
 ASCII-clean version: no emojis/smart characters.
 
-Main changes from v3:
-- Removed meal box inventory / ate-one tracking.
-- Back pain moved to Gym page after workout.
-- Improved Gym page with exercise logging.
-- Export data for ChatGPT.
-- Import next-week plan JSON from ChatGPT later.
+Main changes from v4:
+- Removed Edit button.
+- Export/ChatGPT tools are only on the Track/Export page.
+- Gym data entry is easier.
+- Exercise weight/reps/effort/pain auto-save and stay until updated.
+- Last used exercise data pre-fills next time.
+- Export is now a copy-paste ChatGPT prompt, not only JSON file.
+- Next week plan can be pasted into the app as JSON text.
 - localStorage now; Supabase can be added later.
 -->
 <html lang="en">
@@ -298,22 +300,8 @@ Main changes from v3:
     }
     .quickBtn.active span{color:var(--accent2)}
 
-    .painGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .painBtn{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:16px;
-      padding:12px 10px;
-      text-align:center;
-      font-weight:900;
-      color:var(--ink);
-    }
-    .painBtn small{display:block;font-weight:700;color:var(--muted);margin-top:4px}
-    .painBtn.green.active{background:var(--soft);border-color:#b7ead2;color:var(--accent2)}
-    .painBtn.yellow.active{background:var(--soft2);border-color:#fed7aa;color:#7c2d12}
-    .painBtn.red.active{background:var(--softRed);border-color:#fecdd3;color:var(--red)}
-
     .selectGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .selectGrid.four{grid-template-columns:repeat(4,1fr)}
     .selectBtn{
       border:1px solid var(--line);
       background:#fff;
@@ -323,7 +311,11 @@ Main changes from v3:
       font-weight:900;
       color:var(--ink);
     }
+    .selectBtn small{display:block;font-weight:700;color:var(--muted);margin-top:4px}
     .selectBtn.active{background:var(--softBlue);border-color:#bfdbfe;color:var(--blue)}
+    .selectBtn.green.active{background:var(--soft);border-color:#b7ead2;color:var(--accent2)}
+    .selectBtn.yellow.active{background:var(--soft2);border-color:#fed7aa;color:#7c2d12}
+    .selectBtn.red.active{background:var(--softRed);border-color:#fecdd3;color:var(--red)}
 
     .infoBox{
       border-radius:16px;
@@ -408,14 +400,6 @@ Main changes from v3:
     .field textarea{min-height:82px;resize:vertical}
 
     .hidden{display:none!important}
-    [data-edit]{user-select:text}
-    .editOn [data-edit]{
-      outline:2px dashed #68b08f;
-      outline-offset:3px;
-      border-radius:8px;
-    }
-    .editHint{display:none}
-    .editOn .editHint{display:block}
 
     .toast{
       position:fixed;
@@ -443,6 +427,7 @@ Main changes from v3:
     }
     .exerciseTitle{font-size:22px;font-weight:950;letter-spacing:-.4px;margin:8px 0 4px}
     .exerciseMeta{font-size:14px;color:var(--accent2);font-weight:900}
+    .lastBox{margin-top:10px}
     .timerBox{
       border:1px solid var(--line);
       border-radius:18px;
@@ -454,6 +439,19 @@ Main changes from v3:
     .buttonBar{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
     .buttonBar.threeBtns{grid-template-columns:repeat(3,1fr)}
     .buttonBar .btn{padding:12px 10px}
+
+    .promptBox{
+      width:100%;
+      min-height:260px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-size:12px;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
 
     @media(min-width:760px){
       body{padding-bottom:20px}
@@ -476,7 +474,7 @@ Main changes from v3:
     }
 
     @media(max-width:560px){
-      .quickGrid,.painGrid,.three,.selectGrid{grid-template-columns:1fr}
+      .quickGrid,.three,.selectGrid,.selectGrid.four{grid-template-columns:1fr}
       .inputGrid,.two{grid-template-columns:1fr}
       .buttonBar.threeBtns{grid-template-columns:1fr}
     }
@@ -515,18 +513,17 @@ Main changes from v3:
       </div>
 
       <div class="topActions">
-        <button class="btn secondary smallbtn" id="editBtn">Edit</button>
-        <div class="pill">Export ready</div>
+        <div class="pill">Copy prompt ready</div>
       </div>
     </div>
   </header>
 
   <nav class="tabs" aria-label="Plan tabs">
     <button class="tab active" data-tab="today"><b>Today</b><span>Plan</span></button>
-    <button class="tab" data-tab="workout"><b>Gym</b><span>Log</span></button>
+    <button class="tab" data-tab="workout"><b>Gym</b><span>Easy log</span></button>
     <button class="tab" data-tab="meals"><b>Meals</b><span>Guide</span></button>
     <button class="tab" data-tab="prep"><b>Prep</b><span>Grocery</span></button>
-    <button class="tab" data-tab="track"><b>Track</b><span>Export</span></button>
+    <button class="tab" data-tab="track"><b>Export</b><span>ChatGPT</span></button>
     <button class="tab" data-tab="safety"><b>Safe</b><span>Back</span></button>
   </nav>
 
@@ -560,7 +557,7 @@ Main changes from v3:
 
       <div class="card compact">
         <h3>2 quick taps</h3>
-        <div class="muted">Only track the big things. Back pain is logged on Gym page after workout.</div>
+        <div class="muted">Only track the big things. Gym details are logged on the Gym page.</div>
 
         <div class="quickGrid" style="margin-top:12px">
           <button class="quickBtn" data-quick="meals">
@@ -584,7 +581,6 @@ Main changes from v3:
 
       <div class="card compact">
         <h3>Quick notes</h3>
-        <p class="small editHint">Edit mode is ON. Tap editable text and change it. It saves on this phone.</p>
         <div class="field"><textarea id="quickNotes" placeholder="Energy, digestion, work stress, meal notes..."></textarea></div>
       </div>
     </section>
@@ -594,8 +590,8 @@ Main changes from v3:
       <div class="card">
         <div class="row wraprow">
           <div>
-            <h3>Gym session</h3>
-            <div class="muted">Log real weights/reps so next week's plan can be improved.</div>
+            <h3>Gym easy log</h3>
+            <div class="muted">Weight/reps stay saved. Next time, they pre-fill until you change them.</div>
           </div>
           <select id="workoutSelect" style="border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff">
             <option value="today">Today's workout</option>
@@ -605,10 +601,9 @@ Main changes from v3:
           </select>
         </div>
 
-        <div class="buttonBar threeBtns">
+        <div class="buttonBar">
           <button class="btn" id="startTodayWorkout">Start today's workout</button>
           <button class="btn secondary" id="resetWorkoutToday">Reset this workout</button>
-          <button class="btn blue" id="exportChatGPTTop">Export for ChatGPT</button>
         </div>
 
         <div class="workoutPlayer" style="margin-top:12px">
@@ -629,6 +624,8 @@ Main changes from v3:
           <div class="exerciseMeta" id="exerciseSets"></div>
           <p class="muted" id="exerciseCue"></p>
 
+          <div id="lastUsedBox" class="infoBox blueNote lastBox">Last used: none yet.</div>
+
           <div class="inputGrid" style="margin-top:12px">
             <div class="field">
               <label>Weight used</label>
@@ -638,25 +635,37 @@ Main changes from v3:
               <label>Reps done</label>
               <input id="exReps" placeholder="e.g. 12, 10, 9">
             </div>
-            <div class="field">
-              <label>Difficulty 1-10</label>
-              <input id="exRpe" type="number" min="1" max="10" step="1" placeholder="7">
-            </div>
-            <div class="field">
-              <label>Pain during 0-10</label>
-              <input id="exPain" type="number" min="0" max="10" step="1" placeholder="0">
-            </div>
           </div>
 
-          <div class="field" style="margin-top:10px">
-            <label>Exercise notes</label>
-            <textarea id="exNotes" placeholder="Easy, hard, back felt tight, increase next week, machine busy..."></textarea>
+          <h4>Effort</h4>
+          <div class="selectGrid">
+            <button class="selectBtn green" data-effort="easy">Easy<small>increase soon</small></button>
+            <button class="selectBtn" data-effort="good">Good<small>keep/progress</small></button>
+            <button class="selectBtn yellow" data-effort="hard">Hard<small>same next time</small></button>
           </div>
+
+          <h4>Pain during exercise</h4>
+          <div class="selectGrid four">
+            <button class="selectBtn green" data-pain-during="0">0<small>none</small></button>
+            <button class="selectBtn green" data-pain-during="1-2">1-2<small>normal</small></button>
+            <button class="selectBtn yellow" data-pain-during="3-4">3-4<small>careful</small></button>
+            <button class="selectBtn red" data-pain-during="5+">5+<small>stop</small></button>
+          </div>
+
+          <details>
+            <summary>Exercise notes optional</summary>
+            <div class="detailsBody">
+              <div class="field" style="margin-top:10px">
+                <label>Notes</label>
+                <textarea id="exNotes" placeholder="Easy, hard, back tight, increase next week, machine busy..."></textarea>
+              </div>
+            </div>
+          </details>
 
           <div class="buttonBar">
             <button class="btn secondary" id="prevExercise">Previous</button>
             <button class="btn secondary" id="skipExercise">Skip</button>
-            <button class="btn" id="doneExercise">Save + done</button>
+            <button class="btn" id="doneExercise">Save + next</button>
             <button class="btn blue" id="nextExercise">Next</button>
           </div>
         </div>
@@ -680,13 +689,14 @@ Main changes from v3:
 
       <div class="card">
         <h3>After workout check-in</h3>
-        <div class="muted">Do this after the workout. This is the back pain data I need for next week's plan.</div>
+        <div class="muted">Do this after the workout. This is the back pain data needed for next week's plan.</div>
 
         <h4>Back pain after workout</h4>
-        <div class="painGrid">
-          <button class="painBtn green" data-after-pain="green">0-2<small>Normal</small></button>
-          <button class="painBtn yellow" data-after-pain="yellow">3-4<small>Careful</small></button>
-          <button class="painBtn red" data-after-pain="red">5+<small>Bad</small></button>
+        <div class="selectGrid four">
+          <button class="selectBtn green" data-after-pain="0">0<small>none</small></button>
+          <button class="selectBtn green" data-after-pain="1-2">1-2<small>normal</small></button>
+          <button class="selectBtn yellow" data-after-pain="3-4">3-4<small>careful</small></button>
+          <button class="selectBtn red" data-after-pain="5+">5+<small>bad</small></button>
         </div>
         <div id="afterPainAdvice" class="infoBox greenNote" style="margin-top:12px">Select back pain level after workout.</div>
 
@@ -699,7 +709,7 @@ Main changes from v3:
 
         <div class="inputGrid" style="margin-top:12px">
           <div class="field">
-            <label>Overall workout difficulty 1-10</label>
+            <label>Overall difficulty 1-10</label>
             <input id="sessionDifficulty" type="number" min="1" max="10" step="1" placeholder="7">
           </div>
           <div class="field">
@@ -708,10 +718,15 @@ Main changes from v3:
           </div>
         </div>
 
-        <div class="field" style="margin-top:10px">
-          <label>Workout notes for ChatGPT</label>
-          <textarea id="sessionNotes" placeholder="What felt good, what hurt, what machines were busy, what to change next week..."></textarea>
-        </div>
+        <details>
+          <summary>Workout notes optional</summary>
+          <div class="detailsBody">
+            <div class="field" style="margin-top:10px">
+              <label>Notes for next week</label>
+              <textarea id="sessionNotes" placeholder="What felt good, what hurt, what machines were busy, what to change next week..."></textarea>
+            </div>
+          </div>
+        </details>
 
         <button class="btn full" id="saveSessionCheckin" style="margin-top:12px">Save workout check-in</button>
       </div>
@@ -868,13 +883,13 @@ Main changes from v3:
       </div>
     </section>
 
-    <!-- TRACK + EXPORT PAGE -->
+    <!-- EXPORT PAGE -->
     <section class="section" id="track">
       <div class="card">
         <div class="row">
           <div>
             <h3>Body goal</h3>
-            <div class="muted" data-edit data-save="bodyGoal">Chest up, belly down, thighs and glutes shaped. Good-looking body, not bulky.</div>
+            <div class="muted">Chest up, belly down, thighs and glutes shaped. Good-looking body, not bulky.</div>
           </div>
           <span class="badge purple">Goal</span>
         </div>
@@ -909,46 +924,35 @@ Main changes from v3:
           <textarea id="mNotes" placeholder="Energy, digestion, strength, photos taken..."></textarea>
         </div>
 
-        <div class="row wraprow" style="margin-top:12px">
-          <button class="btn" id="saveMeasure">Save measurement</button>
-          <button class="btn secondary" id="exportBackup">Export backup</button>
-          <button class="btn secondary" id="importBackupBtn">Import backup</button>
-          <input type="file" id="importBackupFile" accept="application/json" class="hidden">
-        </div>
+        <button class="btn full" id="saveMeasure" style="margin-top:12px">Save measurement</button>
       </div>
 
       <div class="card">
-        <h3>Export for ChatGPT</h3>
+        <h3>Copy prompt for ChatGPT</h3>
         <div class="infoBox blueNote">
-          Use this at the end of the week. Send the exported JSON file to ChatGPT and ask: "Make my next week plan based on this data."
+          Press Generate, then Copy. Paste it in ChatGPT. It already explains everything and asks for a pasteable next-week plan.
         </div>
+
         <div class="buttonBar">
-          <button class="btn blue" id="exportChatGPT">Export data for ChatGPT</button>
-          <button class="btn secondary" id="copyChatGPTSummary">Copy summary text</button>
+          <button class="btn blue" id="generatePrompt">Generate prompt</button>
+          <button class="btn" id="copyPrompt">Copy prompt</button>
         </div>
+
+        <textarea id="chatGPTPrompt" class="promptBox" placeholder="Your prompt will appear here..."></textarea>
       </div>
 
       <div class="card">
-        <h3>Import next week plan</h3>
-        <div id="planStatus" class="infoBox purpleNote">No imported next-week plan yet.</div>
-        <div class="buttonBar">
-          <button class="btn purple" id="importPlanBtn">Import plan JSON</button>
-          <button class="btn secondary" id="downloadSamplePlan">Sample plan format</button>
-          <button class="btn danger" id="clearImportedPlan">Clear imported plan</button>
-          <input type="file" id="importPlanFile" accept="application/json" class="hidden">
+        <h3>Paste next-week plan from ChatGPT</h3>
+        <div id="planStatus" class="infoBox purpleNote">No pasted next-week plan yet.</div>
+        <div class="field" style="margin-top:12px">
+          <label>Paste plan JSON here</label>
+          <textarea id="planPaste" class="promptBox" placeholder="Paste the JSON plan ChatGPT gives you here..."></textarea>
         </div>
-      </div>
-
-      <div class="card">
-        <h3>Body goal direction</h3>
-        <table>
-          <tr><th>Area</th><th>Now</th><th>First target</th></tr>
-          <tr><td>Waist</td><td>34</td><td>32.5-33</td></tr>
-          <tr><td>Chest</td><td>36-38</td><td>38-39+</td></tr>
-          <tr><td>Hip/glutes</td><td>37.5</td><td>38-39 shaped</td></tr>
-          <tr><td>Thigh</td><td>21</td><td>21.5-22 shaped</td></tr>
-          <tr><td>Biceps</td><td>11-13</td><td>13.5-14</td></tr>
-        </table>
+        <div class="buttonBar">
+          <button class="btn purple" id="applyPastedPlan">Apply pasted plan</button>
+          <button class="btn secondary" id="copyPlanFormat">Copy plan format</button>
+          <button class="btn danger" id="clearImportedPlan">Clear pasted plan</button>
+        </div>
       </div>
 
       <div class="card">
@@ -957,6 +961,16 @@ Main changes from v3:
           <button class="btn danger smallbtn" id="clearMeasurements">Clear</button>
         </div>
         <div id="measureHistory" class="muted">No measurements saved yet.</div>
+      </div>
+
+      <div class="card">
+        <h3>Backup tools</h3>
+        <div class="muted">Use these only if you want to move the app data to another phone/browser.</div>
+        <div class="buttonBar">
+          <button class="btn secondary" id="exportBackup">Download backup</button>
+          <button class="btn secondary" id="importBackupBtn">Import backup</button>
+          <input type="file" id="importBackupFile" accept="application/json" class="hidden">
+        </div>
       </div>
     </section>
 
@@ -996,13 +1010,6 @@ Main changes from v3:
       </div>
 
       <div class="card">
-        <h3>Supabase later</h3>
-        <div class="infoBox blueNote">
-          This version uses localStorage only. Later you can connect Supabase tables for daily_logs, measurements, workout_sessions, exercise_logs, grocery_items, and imported_plans.
-        </div>
-      </div>
-
-      <div class="card">
         <h3>Settings</h3>
         <div class="row wraprow">
           <button class="btn secondary" id="resetToday">Reset today's quick taps</button>
@@ -1021,12 +1028,13 @@ Supabase later idea:
 - daily_logs: user_id, log_date, meals_done, activity_done, notes
 - measurements: user_id, measure_date, weight, waist, chest, hip, thigh, biceps, pain, notes
 - workout_sessions: user_id, session_date, workout_type, current_index, session_checkin
-- exercise_logs: session_id, exercise_index, exercise_name, weight, reps, rpe, pain, notes, done, skipped
+- exercise_logs: session_id, exercise_index, exercise_name, weight, reps, effort, pain, notes, done, skipped
+- last_exercise_defaults: user_id, exercise_key, weight, reps, effort, pain, notes
 - grocery_items: user_id, item_name, checked, sort_order
 - imported_plans: user_id, start_date, end_date, plan_json
 */
 
-const STORE = 'ranveerFitnessDashboard.v4';
+const STORE = 'ranveerFitnessDashboard.v5';
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
 
@@ -1076,6 +1084,21 @@ function downloadJSON(obj, filename){
   a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    toast('Copied');
+  }catch(err){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');toast('Copied');}
+    catch(e){alert(text);}
+    document.body.removeChild(ta);
+  }
 }
 
 const defaultWorkoutData = {
@@ -1260,7 +1283,7 @@ function renderToday(){
   $('#todaySubtitle').textContent = info.subtitle;
   $('#todayTypePill').textContent = info.type;
   $('#todayWorkoutPill').textContent = info.workoutText;
-  $('#todayFoodPill').textContent = plan ? 'Imported plan' : info.foodText;
+  $('#todayFoodPill').textContent = plan ? 'Pasted plan' : info.foodText;
   $('#todayBadge').textContent = info.badge;
 
   const items = daySchedule(info.day, info.schedule);
@@ -1329,11 +1352,10 @@ function renderSimpleList(id, arr, prefix){
   arr.forEach((item, i) => {
     const txt = typeof item === 'string' ? item : `${item.name} - ${item.sets}`;
     const key = `${prefix}.${i}`;
-    const savedLabel = state['label.'+key] || txt;
 
     const div = document.createElement('div');
     div.className = 'check' + (state[key] ? ' done' : '');
-    div.innerHTML = `<input type="checkbox" ${state[key] ? 'checked' : ''} data-listkey="${esc(key)}"><label data-edit data-save="label.${esc(key)}">${esc(savedLabel)}</label>`;
+    div.innerHTML = `<input type="checkbox" ${state[key] ? 'checked' : ''} data-listkey="${esc(key)}"><label>${esc(txt)}</label>`;
     box.appendChild(div);
   });
 }
@@ -1344,32 +1366,6 @@ function renderLists(){
   renderSimpleList('legsList', workoutData('legs'), 'legsRef');
   renderSimpleList('pullList', workoutData('pull'), 'pullRef');
   renderSimpleList('groceryList', groceries, 'grocery');
-}
-
-function initEditable(){
-  $$('[data-edit]').forEach(el => {
-    el.setAttribute('contenteditable','false');
-  });
-
-  $$('[data-save]').forEach(el => {
-    const key = el.dataset.save;
-    if(state[key]) el.textContent = state[key];
-
-    el.addEventListener('blur', () => {
-      if(!document.body.classList.contains('editOn')) return;
-      state[key] = el.textContent.trim();
-      save();
-      toast('Saved');
-    });
-  });
-
-  $('#editBtn').addEventListener('click', () => {
-    const on = !document.body.classList.contains('editOn');
-    document.body.classList.toggle('editOn', on);
-    $$('[data-edit]').forEach(el => el.setAttribute('contenteditable', on ? 'true' : 'false'));
-    $('#editBtn').textContent = on ? 'Done' : 'Edit';
-    toast(on ? 'Edit mode on' : 'Edit mode off');
-  });
 }
 
 function switchTab(tabId){
@@ -1450,7 +1446,6 @@ function initGroceryTools(){
     groceries.forEach((_, i) => state['grocery.'+i] = true);
     save();
     renderSimpleList('groceryList', groceries, 'grocery');
-    initEditable();
     toast('Grocery selected');
   });
 
@@ -1458,18 +1453,12 @@ function initGroceryTools(){
     groceries.forEach((_, i) => state['grocery.'+i] = false);
     save();
     renderSimpleList('groceryList', groceries, 'grocery');
-    initEditable();
     toast('Grocery cleared');
   });
 
-  $('#copyGrocery').addEventListener('click', async () => {
+  $('#copyGrocery').addEventListener('click', () => {
     const text = groceries.map(x => '- ' + x).join('\n');
-    try{
-      await navigator.clipboard.writeText(text);
-      toast('Grocery list copied');
-    }catch(err){
-      alert(text);
-    }
+    copyText(text);
   });
 }
 
@@ -1504,6 +1493,34 @@ function workoutLabel(type){
   return 'Workout';
 }
 
+function exerciseKey(type, exerciseName){
+  return `${type}__${exerciseName}`.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
+
+function getCurrentExercise(){
+  const type = currentWorkoutType;
+  const list = workoutData(type);
+  const session = getWorkoutSession(type);
+  return list[session.index] || list[0];
+}
+
+function getCurrentExerciseKey(){
+  const ex = getCurrentExercise();
+  return exerciseKey(currentWorkoutType, ex ? ex.name : 'exercise');
+}
+
+function setActiveButtons(selector, value){
+  $$(selector).forEach(btn => {
+    const attr = Object.keys(btn.dataset)[0];
+    btn.classList.toggle('active', btn.dataset[attr] === value);
+  });
+}
+
+function getActiveButtonValue(selector, dataName){
+  const active = $$(selector).find(btn => btn.classList.contains('active'));
+  return active ? active.dataset[dataName] : '';
+}
+
 function saveCurrentExerciseFields(){
   const type = currentWorkoutType;
   const session = getWorkoutSession(type);
@@ -1511,17 +1528,36 @@ function saveCurrentExerciseFields(){
   const list = workoutData(type);
   const current = list[idx];
 
-  session.exercise_logs = session.exercise_logs || {};
-  session.exercise_logs[idx] = {
+  const effort = getActiveButtonValue('.selectBtn[data-effort]', 'effort');
+  const painDuring = getActiveButtonValue('.selectBtn[data-pain-during]', 'painDuring');
+
+  const log = {
     exercise_index: idx,
     exercise_name: current ? current.name : '',
     planned_sets: current ? current.sets : '',
     weight: $('#exWeight').value.trim(),
     reps: $('#exReps').value.trim(),
-    difficulty: $('#exRpe').value.trim(),
-    pain_during: $('#exPain').value.trim(),
-    notes: $('#exNotes').value.trim()
+    effort: effort,
+    pain_during: painDuring,
+    notes: $('#exNotes').value.trim(),
+    updated_at: new Date().toISOString()
   };
+
+  session.exercise_logs = session.exercise_logs || {};
+  session.exercise_logs[idx] = log;
+
+  state.lastExerciseData = state.lastExerciseData || {};
+  state.lastExerciseData[getCurrentExerciseKey()] = {
+    weight: log.weight,
+    reps: log.reps,
+    effort: log.effort,
+    pain_during: log.pain_during,
+    notes: log.notes,
+    exercise_name: log.exercise_name,
+    workout_type: type,
+    updated_at: log.updated_at
+  };
+
   save();
 }
 
@@ -1529,13 +1565,28 @@ function loadExerciseFields(){
   const type = currentWorkoutType;
   const session = getWorkoutSession(type);
   const idx = session.index;
-  const log = (session.exercise_logs && session.exercise_logs[idx]) || {};
+  const currentKey = getCurrentExerciseKey();
+
+  const todayLog = (session.exercise_logs && session.exercise_logs[idx]) || null;
+  const lastLog = state.lastExerciseData && state.lastExerciseData[currentKey] ? state.lastExerciseData[currentKey] : null;
+
+  const log = todayLog || lastLog || {};
 
   $('#exWeight').value = log.weight || '';
   $('#exReps').value = log.reps || '';
-  $('#exRpe').value = log.difficulty || '';
-  $('#exPain').value = log.pain_during || '';
-  $('#exNotes').value = log.notes || '';
+  $('#exNotes').value = todayLog ? (todayLog.notes || '') : '';
+
+  setActiveButtons('.selectBtn[data-effort]', log.effort || '');
+  setActiveButtons('.selectBtn[data-pain-during]', log.pain_during || '');
+
+  const lastBox = $('#lastUsedBox');
+  if(lastLog){
+    lastBox.className = 'infoBox blueNote lastBox';
+    lastBox.textContent = `Last saved for this exercise: Weight ${lastLog.weight || '-'}, reps ${lastLog.reps || '-'}, effort ${lastLog.effort || '-'}, pain ${lastLog.pain_during || '-'}.`;
+  }else{
+    lastBox.className = 'infoBox blueNote lastBox';
+    lastBox.textContent = 'Last used: none yet. After you save once, this exercise will pre-fill next time.';
+  }
 }
 
 function renderWorkout(){
@@ -1599,7 +1650,7 @@ function initWorkout(){
   $('#resetWorkoutToday').addEventListener('click', () => {
     const type = getWorkoutChoice();
     const key = workoutSessionKey(type);
-    if(confirm('Reset this workout session?')){
+    if(confirm('Reset this workout session? Last saved exercise weights will stay.')){
       if(state.workouts) delete state.workouts[key];
       save();
       renderWorkout();
@@ -1621,7 +1672,7 @@ function initWorkout(){
 
     if(session.index < list.length - 1){
       session.index++;
-      toast('Exercise saved');
+      toast('Saved, next exercise');
     }else{
       toast('Workout complete');
       const log = getTodayLog();
@@ -1650,9 +1701,17 @@ function initWorkout(){
     renderWorkout();
   });
 
-  ['exWeight','exReps','exRpe','exPain','exNotes'].forEach(id => {
-    $('#'+id).addEventListener('input', () => {
+  ['exWeight','exReps','exNotes'].forEach(id => {
+    $('#'+id).addEventListener('input', saveCurrentExerciseFields);
+  });
+
+  $$('.selectBtn[data-effort], .selectBtn[data-pain-during]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.effort !== undefined ? '.selectBtn[data-effort]' : '.selectBtn[data-pain-during]';
+      $$(group).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       saveCurrentExerciseFields();
+      toast('Saved');
     });
   });
 
@@ -1729,24 +1788,23 @@ function loadSessionCheckin(){
   $('#sessionPump').value = c.pump || '';
   $('#sessionNotes').value = c.notes || '';
 
-  $$('.selectBtn[data-energy]').forEach(btn => btn.classList.toggle('active', btn.dataset.energy === c.energy));
+  setActiveButtons('.selectBtn[data-energy]', c.energy || '');
+  setActiveButtons('.selectBtn[data-after-pain]', c.back_pain_after || '');
 }
 
 function renderAfterPain(){
   const session = getWorkoutSession(currentWorkoutType);
   const level = session.checkin ? session.checkin.back_pain_after : '';
 
-  $$('.painBtn[data-after-pain]').forEach(btn => btn.classList.toggle('active', btn.dataset.afterPain === level));
-
   const box = $('#afterPainAdvice');
 
-  if(level === 'green'){
+  if(level === '0' || level === '1-2'){
     box.className = 'infoBox greenNote';
     box.textContent = 'Good. Next week can progress slowly if form was clean.';
-  }else if(level === 'yellow'){
+  }else if(level === '3-4'){
     box.className = 'infoBox yellowNote';
     box.textContent = 'Careful. Next week should reduce risky movements or keep weight same.';
-  }else if(level === 'red'){
+  }else if(level === '5+'){
     box.className = 'infoBox redNote';
     box.textContent = 'Important. Next week plan should avoid heavy leg press, squat, deadlift, and hard hip thrust until pain settles.';
   }else{
@@ -1766,12 +1824,13 @@ function saveSessionCheckin(){
 }
 
 function initSessionCheckin(){
-  $$('.painBtn[data-after-pain]').forEach(btn => {
+  $$('.selectBtn[data-after-pain]').forEach(btn => {
     btn.addEventListener('click', () => {
       const session = getWorkoutSession(currentWorkoutType);
       session.checkin = session.checkin || {};
       session.checkin.back_pain_after = btn.dataset.afterPain;
       save();
+      setActiveButtons('.selectBtn[data-after-pain]', btn.dataset.afterPain);
       renderAfterPain();
       toast('Back pain saved');
     });
@@ -1783,7 +1842,7 @@ function initSessionCheckin(){
       session.checkin = session.checkin || {};
       session.checkin.energy = btn.dataset.energy;
       save();
-      loadSessionCheckin();
+      setActiveButtons('.selectBtn[data-energy]', btn.dataset.energy);
       toast('Energy saved');
     });
   });
@@ -1892,19 +1951,20 @@ function renderHistory(){
   `).join('');
 }
 
-function buildChatGPTExport(){
+function buildWeeklyData(){
   saveCurrentExerciseFields();
   saveSessionCheckin();
 
   return {
     app: 'Ranveer Fitness Dashboard',
-    version: 'v4',
+    version: 'v5',
     exported_at: new Date().toISOString(),
     user_profile: {
-      goal: state.bodyGoal || 'Chest up, belly down, thighs and glutes shaped. Good-looking body, not bulky.',
+      goal: 'Chest up, belly down, thighs and glutes shaped. Good-looking body, not bulky.',
       work_days: 'Sunday to Wednesday',
       gym_days: 'Thursday, Friday, Saturday',
       work_context: 'Warehouse work with high steps and repeated lifting. Lower-left back can flare after bending or standing after sitting.',
+      diet_style: 'Mostly vegetarian. Eggs and chicken optional sometimes.',
       current_measurements_known: {
         weight_kg_range: '68-72',
         waist_in: '34',
@@ -1918,8 +1978,8 @@ function buildChatGPTExport(){
       today_info: dayInfo(),
       default_schedules: defaultSchedules,
       default_workouts: defaultWorkoutData,
-      imported_plan_active: !!state.nextWeekPlan,
-      imported_plan: state.nextWeekPlan || null
+      pasted_plan_active: !!state.nextWeekPlan,
+      pasted_plan: state.nextWeekPlan || null
     },
     user_data: {
       daily_logs: state.daily || {},
@@ -1927,63 +1987,10 @@ function buildChatGPTExport(){
       prep_status: state.prepQuick || {},
       grocery_checked: groceries.map((item, i) => ({item, checked: !!state['grocery.'+i]})),
       measurements: state.measurements || [],
-      workout_sessions: state.workouts || {}
-    },
-    request_for_chatgpt: {
-      task: 'Analyze this week and create an importable next-week plan JSON for the app.',
-      priorities: [
-        'Keep daily use simple.',
-        'Improve chest, flat belly look, thighs, and glutes shape.',
-        'Do not make body too bulky.',
-        'Protect lower-left back.',
-        'Adjust exercises based on logged pain, difficulty, weight, reps, skipped exercises, and notes.'
-      ],
-      required_import_format: samplePlanObject()
+      workout_sessions: state.workouts || {},
+      last_exercise_data: state.lastExerciseData || {}
     }
   };
-}
-
-function makeSummaryText(){
-  const exportData = buildChatGPTExport();
-  const sessions = exportData.user_data.workout_sessions;
-  const measurements = exportData.user_data.measurements;
-  const daily = exportData.user_data.daily_logs;
-
-  return [
-    'Ranveer fitness weekly data for next-week plan',
-    '',
-    'Goal: ' + exportData.user_profile.goal,
-    'Work days: Sunday to Wednesday. Gym days: Thursday, Friday, Saturday.',
-    'Back note: lower-left back can flare after bending or standing after sitting.',
-    '',
-    'Measurements saved: ' + measurements.length,
-    'Workout sessions logged: ' + Object.keys(sessions).length,
-    'Daily logs saved: ' + Object.keys(daily).length,
-    '',
-    'Please analyze the attached/exported JSON and make an importable next-week plan JSON for this app.',
-    'Use the required_import_format inside the JSON.'
-  ].join('\n');
-}
-
-function exportForChatGPT(){
-  const data = buildChatGPTExport();
-  downloadJSON(data, 'ranveer-weekly-data-for-chatgpt.json');
-  toast('ChatGPT export ready');
-}
-
-function initExportTools(){
-  $('#exportChatGPT').addEventListener('click', exportForChatGPT);
-  $('#exportChatGPTTop').addEventListener('click', exportForChatGPT);
-
-  $('#copyChatGPTSummary').addEventListener('click', async () => {
-    const text = makeSummaryText();
-    try{
-      await navigator.clipboard.writeText(text);
-      toast('Summary copied');
-    }catch(err){
-      alert(text);
-    }
-  });
 }
 
 function samplePlanObject(){
@@ -1992,17 +1999,23 @@ function samplePlanObject(){
       title: 'Ranveer Next Week Plan',
       start_date: 'YYYY-MM-DD',
       end_date: 'YYYY-MM-DD',
-      notes: 'Short explanation of changes for next week.',
+      notes: 'Short explanation of what changed and why.',
       daily_schedule: {
         Sunday: [
           {time:'Morning', title:'Fresh smoothie', text:'Plan text here', type:'food'},
-          {time:'Work shift', title:'Work activity', text:'Plan text here', type:'work'}
+          {time:'10 AM', title:'Quick snack', text:'Plan text here', type:'food'},
+          {time:'11 AM break', title:'Main packed meal', text:'Plan text here', type:'food'},
+          {time:'2:30 PM break', title:'Second meal', text:'Plan text here', type:'food'},
+          {time:'Work shift', title:'Activity', text:'Plan text here', type:'work'},
+          {time:'8:30 PM dinner', title:'Dinner', text:'Plan text here', type:'food'}
         ],
         Monday: [],
         Tuesday: [],
         Wednesday: [],
         Thursday: [
-          {time:'10:45 AM-12:15 PM', title:'Gym: Chest day', text:'Start workout mode.', type:'gym', workout:'push'}
+          {time:'7:45-8:00 AM', title:'Breakfast', text:'Plan text here', type:'food'},
+          {time:'10:45 AM-12:15 PM', title:'Gym: Chest day', text:'Start workout mode.', type:'gym', workout:'push'},
+          {time:'12:30 PM', title:'Post-workout', text:'Plan text here', type:'food'}
         ],
         Friday: [
           {time:'10:45 AM-12:15 PM', title:'Gym: Thighs + glutes', text:'Start workout mode.', type:'gym', workout:'legs'}
@@ -2026,37 +2039,111 @@ function samplePlanObject(){
   };
 }
 
+function buildChatGPTPrompt(){
+  const weeklyData = buildWeeklyData();
+  const sampleFormat = samplePlanObject();
+
+  return `You are helping me update my fitness plan inside my HTML fitness dashboard.
+
+IMPORTANT:
+- Do not ask me to explain my schedule again.
+- Use the weekly data below.
+- My goal is: chest up, belly down, better thighs and glutes shape.
+- I do not want to get too bulky.
+- I do not need visible abs.
+- Protect my lower-left back. If pain is high, reduce risky movements.
+- My work days are Sunday to Wednesday.
+- My gym days are Thursday, Friday, Saturday.
+- I do warehouse work with high walking/steps and repeated lifting.
+- Keep the app simple for daily use.
+
+Your task:
+1. Analyze my weekly data.
+2. Tell me briefly what to change next week.
+3. Then give me ONLY ONE pasteable JSON object for my app.
+4. The JSON must follow the exact format shown under REQUIRED_PLAN_FORMAT.
+5. The JSON must include:
+   - daily_schedule for Sunday to Saturday
+   - workouts.push for Thursday chest day
+   - workouts.legs for Friday thighs/glutes day
+   - workouts.pull for Saturday back/biceps/posture day
+6. Keep exercises back-safe.
+7. Use logged weights/reps/effort/pain to decide whether to increase, keep same, reduce, or replace exercises.
+8. Keep meal plan practical for my work breaks.
+
+REQUIRED_PLAN_FORMAT:
+${JSON.stringify(sampleFormat, null, 2)}
+
+MY_WEEKLY_DATA:
+${JSON.stringify(weeklyData, null, 2)}
+
+When you answer, first write a short summary under "Next week changes".
+Then write "PASTE THIS INTO YOUR APP:" and provide only the JSON object.`;
+}
+
+function initPromptTools(){
+  $('#generatePrompt').addEventListener('click', () => {
+    $('#chatGPTPrompt').value = buildChatGPTPrompt();
+    toast('Prompt generated');
+  });
+
+  $('#copyPrompt').addEventListener('click', () => {
+    if(!$('#chatGPTPrompt').value.trim()){
+      $('#chatGPTPrompt').value = buildChatGPTPrompt();
+    }
+    copyText($('#chatGPTPrompt').value);
+  });
+
+  $('#copyPlanFormat').addEventListener('click', () => {
+    copyText(JSON.stringify(samplePlanObject(), null, 2));
+  });
+}
+
+function extractJSONFromText(text){
+  let t = text.trim();
+
+  const codeBlock = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if(codeBlock){
+    t = codeBlock[1].trim();
+  }else{
+    const start = t.indexOf('{');
+    const end = t.lastIndexOf('}');
+    if(start !== -1 && end !== -1 && end > start){
+      t = t.slice(start, end + 1);
+    }
+  }
+
+  return JSON.parse(t);
+}
+
 function updatePlanStatus(){
   const box = $('#planStatus');
   const plan = activePlan();
 
   if(!plan){
     box.className = 'infoBox purpleNote';
-    box.textContent = 'No imported next-week plan yet.';
+    box.textContent = 'No pasted next-week plan yet.';
     return;
   }
 
   box.className = 'infoBox greenNote';
-  box.textContent = `${plan.title || 'Imported plan'} is active. ${plan.start_date || ''} ${plan.end_date ? 'to ' + plan.end_date : ''}`;
+  box.textContent = `${plan.title || 'Pasted plan'} is active. ${plan.start_date || ''} ${plan.end_date ? 'to ' + plan.end_date : ''}`;
 }
 
-function initPlanImport(){
-  $('#downloadSamplePlan').addEventListener('click', () => {
-    downloadJSON(samplePlanObject(), 'sample-next-week-plan-format.json');
-  });
-
-  $('#importPlanBtn').addEventListener('click', () => $('#importPlanFile').click());
-
-  $('#importPlanFile').addEventListener('change', async e => {
-    const file = e.target.files[0];
-    if(!file) return;
+function initPlanPaste(){
+  $('#applyPastedPlan').addEventListener('click', () => {
+    const text = $('#planPaste').value.trim();
+    if(!text){
+      alert('Paste the plan JSON first.');
+      return;
+    }
 
     try{
-      const data = JSON.parse(await file.text());
+      const data = extractJSONFromText(text);
       const plan = data.next_week_plan || data.plan || data;
 
       if(!plan || typeof plan !== 'object'){
-        alert('Plan file not valid.');
+        alert('Plan not valid.');
         return;
       }
 
@@ -2066,21 +2153,21 @@ function initPlanImport(){
       renderToday();
       renderLists();
       renderWorkout();
-      toast('Next week plan imported');
+      toast('Plan applied');
     }catch(err){
-      alert('Plan file not valid JSON.');
+      alert('Could not read the pasted plan. Make sure ChatGPT gave valid JSON.');
     }
   });
 
   $('#clearImportedPlan').addEventListener('click', () => {
-    if(confirm('Clear imported next-week plan?')){
+    if(confirm('Clear pasted next-week plan?')){
       delete state.nextWeekPlan;
       save();
       updatePlanStatus();
       renderToday();
       renderLists();
       renderWorkout();
-      toast('Imported plan cleared');
+      toast('Pasted plan cleared');
     }
   });
 
@@ -2099,7 +2186,7 @@ function initReset(){
   });
 
   $('#resetAll').addEventListener('click', () => {
-    if(confirm('Reset all saved edits, checks, notes, workouts, plans, and measurements on this phone?')){
+    if(confirm('Reset all saved data on this phone?')){
       localStorage.removeItem(STORE);
       location.reload();
     }
@@ -2110,7 +2197,6 @@ function boot(){
   renderToday();
   renderMealsGuide();
   renderLists();
-  initEditable();
   initTabs();
   initQuickButtons();
   initPrepQuick();
@@ -2121,8 +2207,8 @@ function boot(){
   initSessionCheckin();
   initNotes();
   initMeasurements();
-  initExportTools();
-  initPlanImport();
+  initPromptTools();
+  initPlanPaste();
   initReset();
 }
 
