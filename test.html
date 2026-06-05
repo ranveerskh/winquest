@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Fitness Dashboard v7
+Fitness Dashboard v8
 Generic user version.
 ASCII-clean version: no emojis/smart characters.
 
@@ -820,7 +820,7 @@ Main features:
   <div class="toast" id="toast">Saved</div>
 
 <script>
-const STORE = 'fitnessDashboard.v7.generic';
+const STORE = 'fitnessDashboard.v8.generic';
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
 
@@ -1661,7 +1661,7 @@ function buildWeeklyData(){
   saveSessionCheckin();
   return {
     app:'Fitness Dashboard',
-    version:'v7-generic',
+    version:'v8-generic',
     exported_at:new Date().toISOString(),
     profile:profile(),
     current_plan:{
@@ -1697,7 +1697,7 @@ IMPORTANT:
 - If effort was hard or pain high, keep same, reduce, or replace exercise.
 - Keep daily schedule compact.
 - Return a short summary, then write "PASTE THIS INTO YOUR APP:".
-- Put the JSON inside one copyable ```json code block.
+- Put the JSON inside one copyable JSON code block.
 - Use valid JSON only: straight double quotes, no curly/smart quotes, no comments, no trailing commas.
 - The user should be able to copy the JSON block and paste it directly into the app.
 
